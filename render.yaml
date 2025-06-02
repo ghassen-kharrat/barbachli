@@ -4,6 +4,7 @@ services:
     env: node
     buildCommand: npm install
     startCommand: node server.js
+    healthCheckPath: /api
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,7 +14,9 @@ services:
         value: 12345
         # Remplacez par votre propre secret JWT en production
       - key: DATABASE_URL
-        value: postgresql://postgres:Gaston.07730218@db.iptgkvofawoqvykmkcrk.supabase.co:5432/postgres
-        # Remplacez par l'URL de votre base de données Supabase
+        value: postgres://postgres.iptgkvofawoqvykmkcrk:Gaston.07730218@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
+        # Connection pooler URL for better compatibility with IPv4
+      - key: PGSSLMODE
+        value: "no-verify"
       - key: REACT_APP_API_URL
-        value: https://iptgkvofawoqvykmkcrk.supabase.co
+        value: https://barbachli-api.onrender.com/api 

@@ -28,17 +28,47 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // PostgreSQL Connection
+const getSslConfig = () => {
+  const sslMode = process.env.PGSSLMODE;
+  if (sslMode === "no-verify") {
+    return { rejectUnauthorized: false };
+  }
+  if (sslMode === "disable" || sslMode === "false") {
+    return false;
+  }
+  return { rejectUnauthorized: false }; // Default to accepting self-signed certs
+};
+
 const pool = new Pool(
   process.env.DATABASE_URL 
-    ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+    ? { 
+        connectionString: process.env.DATABASE_URL, 
+        ssl: getSslConfig()
+      }
     : {
-  user: 'postgres',
-  password: 'root',
-  host: 'localhost',
-  port: 5432,
-  database: 'ecommerce'
+        user: 'postgres',
+        password: 'root',
+        host: 'localhost',
+        port: 5432,
+        database: 'ecommerce'
       }
 );
+
+// Test database connection
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('❌ Database connection error:', err);
+    console.error('Connection details:', {
+      usingEnvUrl: !!process.env.DATABASE_URL,
+      sslMode: process.env.PGSSLMODE || 'default',
+      host: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : 'localhost'
+    });
+    console.error('The application requires a PostgreSQL database connection to function.');
+    process.exit(1);
+  } else {
+    console.log('✅ Database connected successfully at:', res.rows[0].now);
+  }
+});
 
 // Admin orders handler function
 const handleAdminOrders = async (req, res) => {
@@ -179,25 +209,21 @@ const handleAdminOrders = async (req, res) => {
   }
 };
 
-// Test database connection
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('❌ Database connection error:', err.message);
-    console.error('The application requires a PostgreSQL database connection to function.');
-    process.exit(1);
-  } else {
-    console.log('✅ Database connected successfully at:', res.rows[0].now);
-  }
-});
-
 // Initialize database with schema and seed data
 const initializeDatabase = async () => {
   try {
     console.log('🔄 Initializing database...');
     
-    // Test PostgreSQL connection
-    await pool.query('SELECT 1');
-    console.log('✅ PostgreSQL connection successful');
+    // Test PostgreSQL connection with more detailed error handling
+    try {
+      await pool.query('SELECT 1');
+      console.log('✅ PostgreSQL connection successful');
+    } catch (connectionError) {
+      console.error('❌ Database connection error:', connectionError);
+      console.error('Connection string used:', process.env.DATABASE_URL ? 'Using DATABASE_URL from environment' : 'Using local database config');
+      console.error('The application requires a PostgreSQL database connection to function.');
+      process.exit(1);
+    }
     
     // Create tables if not exist
     const schemaSQL = fs.readFileSync(path.join(__dirname, 'database', 'schema.sql'), 'utf8');
