@@ -3,7 +3,7 @@ services:
     name: barbachli-api
     env: node
     buildCommand: npm install
-    startCommand: node server-supabase.js
+    startCommand: node index.js
     healthCheckPath: /api
     envVars:
       - key: NODE_ENV
