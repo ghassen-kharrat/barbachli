@@ -39,10 +39,21 @@ const getSslConfig = () => {
   return { rejectUnauthorized: false }; // Default to accepting self-signed certs
 };
 
+// Detect if we're running on Render
+const isRender = process.env.RENDER === 'true';
+
+// Set up database connection - use pooler on Render to avoid IPv6 issues
+let connectionString = process.env.DATABASE_URL;
+if (isRender && connectionString && connectionString.includes('db.iptgkvofawoqvykmkcrk.supabase.co')) {
+  // Replace direct connection with pooler connection for IPv4 compatibility
+  connectionString = 'postgres://postgres.iptgkvofawoqvykmkcrk:Gaston.07730218@aws-0-eu-central-1.pooler.supabase.com:6543/postgres';
+  console.log('Running on Render: Using connection pooler for IPv4 compatibility');
+}
+
 const pool = new Pool(
-  process.env.DATABASE_URL 
+  connectionString 
     ? { 
-        connectionString: process.env.DATABASE_URL, 
+        connectionString: connectionString, 
         ssl: getSslConfig()
       }
     : {
@@ -59,10 +70,19 @@ pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('❌ Database connection error:', err);
     console.error('Connection details:', {
-      usingEnvUrl: !!process.env.DATABASE_URL,
+      usingEnvUrl: !!connectionString,
       sslMode: process.env.PGSSLMODE || 'default',
-      host: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : 'localhost'
+      host: connectionString ? new URL(connectionString).hostname : 'localhost',
+      isRender: isRender
     });
+    
+    // If we're on Render and the connection failed, try with the pooler
+    if (isRender && !connectionString.includes('pooler.supabase.com')) {
+      console.log('Attempting to connect using pooler connection instead...');
+      process.env.DATABASE_URL = 'postgres://postgres.iptgkvofawoqvykmkcrk:Gaston.07730218@aws-0-eu-central-1.pooler.supabase.com:6543/postgres';
+      console.log('Please restart the application to use the updated connection string.');
+    }
+    
     console.error('The application requires a PostgreSQL database connection to function.');
     process.exit(1);
   } else {

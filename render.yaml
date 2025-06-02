@@ -18,5 +18,7 @@ services:
         # Connection pooler URL for better compatibility with IPv4
       - key: PGSSLMODE
         value: "no-verify"
+      - key: RENDER
+        value: "true"
       - key: REACT_APP_API_URL
         value: https://barbachli-api.onrender.com/api 
