@@ -16,4 +16,4 @@ services:
         value: postgresql://postgres:Gaston.07730218@db.iptgkvofawoqvykmkcrk.supabase.co:5432/postgres
         # Remplacez par l'URL de votre base de données Supabase
       - key: REACT_APP_API_URL
-        value: https://barbachli-api.onrender.com/api 
+        value: https://iptgkvofawoqvykmkcrk.supabase.co
