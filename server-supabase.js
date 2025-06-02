@@ -14,7 +14,16 @@ dotenv.config();
 
 // Create Express application
 const app = express();
-const PORT = process.env.PORT || 5001;
+
+// Get port from command line arguments or environment variables
+const args = process.argv.slice(2);
+let customPort;
+args.forEach(arg => {
+  if (arg.startsWith('--port=')) {
+    customPort = parseInt(arg.split('=')[1]);
+  }
+});
+const PORT = customPort || process.env.PORT || 5001;
 
 // Middlewares
 app.use(cors({
