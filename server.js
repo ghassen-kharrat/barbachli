@@ -42,45 +42,62 @@ const getSslConfig = () => {
 // Detect if we're running on Render
 const isRender = process.env.RENDER === 'true';
 
-// Set up database connection - use pooler on Render to avoid IPv6 issues
-let connectionString = process.env.DATABASE_URL;
-if (isRender && connectionString && connectionString.includes('db.iptgkvofawoqvykmkcrk.supabase.co')) {
-  // Replace direct connection with pooler connection for IPv4 compatibility
-  connectionString = 'postgres://postgres.iptgkvofawoqvykmkcrk:Gaston.07730218@aws-0-eu-central-1.pooler.supabase.com:6543/postgres';
-  console.log('Running on Render: Using connection pooler for IPv4 compatibility');
+// Define our connection options
+let dbConfig;
+
+// Use proper Supabase connection format
+if (process.env.DATABASE_URL) {
+  // Use connection string from environment
+  console.log('Using DATABASE_URL from environment');
+  dbConfig = { 
+    connectionString: process.env.DATABASE_URL,
+    ssl: getSslConfig(),
+    // Disable prepared statements for transaction pooler
+    prepare: false
+  };
+} else {
+  // Local development
+  console.log('Using local database config');
+  dbConfig = {
+    user: 'postgres',
+    password: 'root',
+    host: 'localhost',
+    port: 5432,
+    database: 'ecommerce'
+  };
 }
 
-const pool = new Pool(
-  connectionString 
-    ? { 
-        connectionString: connectionString, 
-        ssl: getSslConfig()
-      }
-    : {
-        user: 'postgres',
-        password: 'root',
-        host: 'localhost',
-        port: 5432,
-        database: 'ecommerce'
-      }
-);
+// Log connection details (but not password)
+console.log('Database connection details:', {
+  host: dbConfig.host || (dbConfig.connectionString ? new URL(dbConfig.connectionString).hostname : 'unknown'),
+  port: dbConfig.port || (dbConfig.connectionString ? new URL(dbConfig.connectionString).port : 'unknown'),
+  user: dbConfig.user || 'from connection string',
+  database: dbConfig.database || (dbConfig.connectionString ? new URL(dbConfig.connectionString).pathname.substring(1) : 'unknown'),
+  ssl: dbConfig.ssl ? 'enabled' : 'disabled',
+  preparedStatements: dbConfig.prepare === false ? 'disabled' : 'enabled',
+  isRender: isRender
+});
 
-// Test database connection
+// Create a connection pool
+const pool = new Pool(dbConfig);
+
+// Test database connection with additional error handling
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('❌ Database connection error:', err);
-    console.error('Connection details:', {
-      usingEnvUrl: !!connectionString,
-      sslMode: process.env.PGSSLMODE || 'default',
-      host: connectionString ? new URL(connectionString).hostname : 'localhost',
-      isRender: isRender
-    });
     
-    // If we're on Render and the connection failed, try with the pooler
-    if (isRender && !connectionString.includes('pooler.supabase.com')) {
-      console.log('Attempting to connect using pooler connection instead...');
-      process.env.DATABASE_URL = 'postgres://postgres.iptgkvofawoqvykmkcrk:Gaston.07730218@aws-0-eu-central-1.pooler.supabase.com:6543/postgres';
-      console.log('Please restart the application to use the updated connection string.');
+    // Log more details about the error for debugging
+    console.error('Error type:', err.constructor.name);
+    console.error('Error code:', err.code);
+    console.error('Error message:', err.message);
+    
+    // Suggest possible solutions based on error type
+    if (err.code === 'XX000' && err.message.includes('Tenant or user not found')) {
+      console.error('\nPossible issue: The project ID or username format is incorrect.');
+      console.error('Please verify the project ID and credentials in Supabase dashboard.');
+    } else if (err.code === 'ENOTFOUND') {
+      console.error('\nPossible issue: The database hostname could not be resolved.');
+      console.error('Please check your network connectivity and DNS configuration.');
     }
     
     console.error('The application requires a PostgreSQL database connection to function.');

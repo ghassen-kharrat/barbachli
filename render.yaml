@@ -3,7 +3,7 @@ services:
     name: barbachli-api
     env: node
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: node server-supabase.js
     healthCheckPath: /api
     envVars:
       - key: NODE_ENV
@@ -13,11 +13,10 @@ services:
       - key: JWT_SECRET
         value: 12345
         # Remplacez par votre propre secret JWT en production
-      - key: DATABASE_URL
-        value: postgres://postgres.iptgkvofawoqvykmkcrk:Gaston.07730218@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
-        # Connection pooler URL for better compatibility with IPv4
-      - key: PGSSLMODE
-        value: "no-verify"
+      - key: SUPABASE_URL
+        value: https://iptgkvofawoqvykmkcrk.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdGdrdm9mYXdvcXZ5a21rY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjkxMTMsImV4cCI6MjA2NDQ0NTExM30.oUsFpKGgeddXRU5lbaeaufBZ2wV7rnl1a0h2YEfC9b8
       - key: RENDER
         value: "true"
       - key: REACT_APP_API_URL
