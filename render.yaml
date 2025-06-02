@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: barbachli-api
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: JWT_SECRET
+        value: 12345
+        # Remplacez par votre propre secret JWT en production
+      - key: DATABASE_URL
+        value: postgresql://postgres:Gaston.07730218@db.iptgkvofawoqvykmkcrk.supabase.co:5432/postgres
+        # Remplacez par l'URL de votre base de données Supabase
+      - key: REACT_APP_API_URL
+        value: https://barbachli-api.onrender.com/api 

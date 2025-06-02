@@ -1,0 +1,24 @@
+Lines with usePostgres that need to be fixed:
+
+1. Line 816: if (usePostgres) {
+2. Line 884: if (usePostgres) {
+3. Line 927: if (usePostgres) {
+4. Line 972: if (usePostgres) {
+5. Line 1055: if (usePostgres) {
+6. Line 1287: if (usePostgres) {
+7. Line 1401: if (usePostgres) {
+8. Line 1556: if (usePostgres) {
+9. Line 1685: if (usePostgres) {
+10. Line 1817: if (usePostgres) {
+11. Line 1904: if (usePostgres) {
+12. Line 1965: if (usePostgres) {
+13. Line 2027: if (usePostgres) {
+14. Line 2148: if (usePostgres) {
+15. Line 2210: if (usePostgres) {
+16. Line 2304: if (usePostgres) {
+17. Line 2483: if (usePostgres) {
+
+For each location:
+1. Remove if (usePostgres) { ... } else { ... } blocks
+2. Keep only the PostgreSQL code path
+3. Remove any mockDb references 

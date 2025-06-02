@@ -1,0 +1,71 @@
+/* Print-specific styles for invoice */
+@media print {
+  /* Hide everything except the invoice when printing */
+  body * {
+    visibility: hidden;
+  }
+  
+  .invoice-print, .invoice-print * {
+    visibility: visible;
+  }
+  
+  .invoice-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  /* Hide buttons and navigation elements */
+  button, nav, header, footer, .no-print {
+    display: none !important;
+  }
+  
+  /* Page settings */
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+  
+  /* Ensure tables break properly */
+  table { page-break-inside: auto; }
+  tr { page-break-inside: avoid; page-break-after: auto; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+}
+
+/* Hide the invoice in normal view */
+.invoice-print {
+  display: none;
+}
+
+/* Show the invoice only when printing */
+@media print {
+  .invoice-print {
+    display: block;
+  }
+}
+
+/* RTL support for Arabic language */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-reverse {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+}
+
+.rtl-flex-reverse {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.rtl table th,
+.rtl table td {
+  text-align: right;
+} 

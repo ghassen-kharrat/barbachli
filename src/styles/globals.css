@@ -1,0 +1,49 @@
+/* RTL Support for Arabic Language */
+body.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-reverse {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+}
+
+.rtl nav a, 
+.rtl nav button {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+.rtl .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+.rtl .product-card .wishlist-button {
+  right: auto;
+  left: 10px;
+}
+
+.rtl .product-card .badge {
+  left: auto;
+  right: 10px;
+}
+
+/* Adjust table text alignment for RTL */
+.rtl table th,
+.rtl table td {
+  text-align: right;
+}
+
+/* Correctly position icons in RTL mode */
+.rtl .icon-start {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.rtl .icon-end {
+  margin-left: 0;
+  margin-right: 0.5rem;
+} 
