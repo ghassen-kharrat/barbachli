@@ -28,6 +28,14 @@ function isSnakeCaseData(data: any): boolean {
   return data && (data.first_name !== undefined || data.last_name !== undefined);
 }
 
+// Validate password match
+function validatePasswords(data: any): boolean {
+  // If there's no confirmPassword field, we can't validate
+  if (!data.confirmPassword) return true;
+  
+  return data.password === data.confirmPassword;
+}
+
 // Convert our frontend snake_case fields to match backend expectations
 function convertRegistrationData(data: RegisterData | any) {
   // If data is already in snake_case format, use it directly
@@ -83,6 +91,11 @@ const authApi = {
     try {
       console.log('Registering user with data:', { ...data, password: '******' });
       
+      // Pre-validate passwords before sending to backend
+      if (!isSnakeCaseData(data) && !validatePasswords(data)) {
+        throw new Error('Les mots de passe ne correspondent pas');
+      }
+      
       // Convert data to match backend expectations if needed
       const adaptedData = convertRegistrationData(data);
       console.log('Adapted registration data:', { ...adaptedData, password: '******' });
@@ -110,6 +123,17 @@ const authApi = {
       } catch (proxyError) {
         console.error('Vercel proxy registration failed, trying direct API:', proxyError);
         
+        // Check if this is a password mismatch error
+        if (axios.isAxiosError(proxyError) && proxyError.response?.data) {
+          const errorData = proxyError.response.data;
+          if (errorData.message?.includes('mot de passe') || 
+              errorData.error?.includes('mot de passe') ||
+              errorData.message?.includes('password') || 
+              errorData.error?.includes('password')) {
+            throw new Error('Les mots de passe ne correspondent pas');
+          }
+        }
+        
         // If Vercel proxy fails, try direct API
         console.log('Trying direct API call to:', directApiClient.defaults.baseURL + '/auth/register');
         const directResponse = await directApiClient.post('/auth/register', adaptedData);
@@ -134,12 +158,17 @@ const authApi = {
         // Try to extract error message from backend
         const backendMessage = error.response.data?.message || error.response.data?.error;
         if (backendMessage) {
-          errorMessage = `Registration failed: ${backendMessage}`;
+          errorMessage = `${backendMessage}`;
         }
         
         // Check for password mismatch errors
-        if (error.response.data?.error && error.response.data.error.includes('password')) {
-          errorMessage = 'The passwords do not match.';
+        if ((error.response.data?.error && 
+             (error.response.data.error.includes('password') || 
+              error.response.data.error.includes('mot de passe'))) ||
+            (error.response.data?.message && 
+             (error.response.data.message.includes('password') || 
+              error.response.data.message.includes('mot de passe')))) {
+          errorMessage = 'Les mots de passe ne correspondent pas';
         }
       }
       

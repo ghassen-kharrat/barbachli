@@ -42,6 +42,21 @@ function validateRequest(body) {
     };
   }
   
+  // If we already have snake_case format and there's no confirmPassword,
+  // we can't validate here, so assume it's already validated
+  if (isSnakeCaseData(body) && body.confirmPassword === undefined) {
+    console.log('Cannot validate passwords in snake_case format without confirmPassword');
+    return { valid: true };
+  }
+  
+  // Validate password length
+  if (body.password && body.password.length < 6) {
+    return {
+      valid: false,
+      error: "Le mot de passe doit contenir au moins 6 caractères"
+    };
+  }
+  
   return { valid: true };
 }
 
@@ -137,7 +152,12 @@ module.exports = async (req, res) => {
       });
     } catch (requestError) {
       console.error('Error during request to backend:', requestError.message);
-      console.error('Error details:', requestError.response?.data || 'No response data');
+      
+      // Log the full error response for debugging
+      if (requestError.response) {
+        console.error('Error status:', requestError.response.status);
+        console.error('Error details:', JSON.stringify(requestError.response.data, null, 2));
+      }
       
       // If the backend is slow or returns a 5xx error, we'll use mockData for testing
       if (requestError.code === 'ECONNABORTED' || 
@@ -150,8 +170,12 @@ module.exports = async (req, res) => {
       if (requestError.response) {
         // Special handling for password errors
         if (requestError.response.data && 
-            (requestError.response.data.message?.includes('mot de passe') || 
-             requestError.response.data.error?.includes('mot de passe'))) {
+            ((requestError.response.data.message && 
+              (requestError.response.data.message.includes('mot de passe') || 
+               requestError.response.data.message.includes('password'))) || 
+             (requestError.response.data.error && 
+              (requestError.response.data.error.includes('mot de passe') || 
+               requestError.response.data.error.includes('password'))))) {
           return res.status(400).json({
             status: 'error',
             message: 'Les mots de passe ne correspondent pas',

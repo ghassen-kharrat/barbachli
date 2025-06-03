@@ -110,6 +110,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const { mutate: register, isPending: isLoading, error } = useRegister();
   const [passwordMismatch, setPasswordMismatch] = useState(false);
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
   
   const formik = useFormik({
     initialValues: {
@@ -122,15 +123,17 @@ const RegisterPage = () => {
     },
     validationSchema,
     onSubmit: (values) => {
-      // Check if passwords match
+      // Clear any previous errors
+      setPasswordMismatch(false);
+      setRegistrationError(null);
+      
+      // Double-check if passwords match (both client and form validation)
       if (values.password !== values.confirmPassword) {
         setPasswordMismatch(true);
         return;
       }
       
-      setPasswordMismatch(false);
-      
-      // Only send the required fields to the backend
+      // Only send the required fields to the backend in snake_case format
       const registrationData = {
         first_name: values.firstName,
         last_name: values.lastName,
@@ -144,6 +147,20 @@ const RegisterPage = () => {
       register(registrationData, {
         onSuccess: () => {
           navigate('/login?registered=true');
+        },
+        onError: (error) => {
+          if (error instanceof Error) {
+            // Display specific error message
+            setRegistrationError(error.message);
+            
+            // If error mentions password, highlight the password mismatch
+            if (error.message.toLowerCase().includes('mot de passe') || 
+                error.message.toLowerCase().includes('password')) {
+              setPasswordMismatch(true);
+            }
+          } else {
+            setRegistrationError('Une erreur est survenue lors de l\'inscription');
+          }
         }
       });
     }
@@ -227,6 +244,7 @@ const RegisterPage = () => {
               onChange={(e) => {
                 formik.handleChange(e);
                 if (passwordMismatch) setPasswordMismatch(false);
+                if (registrationError) setRegistrationError(null);
               }}
               onBlur={formik.handleBlur}
             />
@@ -246,6 +264,7 @@ const RegisterPage = () => {
               onChange={(e) => {
                 formik.handleChange(e);
                 if (passwordMismatch) setPasswordMismatch(false);
+                if (registrationError) setRegistrationError(null);
               }}
               onBlur={formik.handleBlur}
             />
@@ -258,7 +277,11 @@ const RegisterPage = () => {
             <ErrorText>Les mots de passe ne correspondent pas</ErrorText>
           )}
           
-          {error && (
+          {registrationError && (
+            <ErrorText>{registrationError}</ErrorText>
+          )}
+          
+          {error && !registrationError && (
             <ErrorText>
               {error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'inscription'}
             </ErrorText>

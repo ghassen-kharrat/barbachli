@@ -10,16 +10,23 @@ import {
 // Base URL for product endpoints
 const baseUrl = '/products';
 
+// Function to convert camelCase to snake_case for query parameters
+function convertToSnakeCase(key: string): string {
+  return key.replace(/([A-Z])/g, '_$1').toLowerCase();
+}
+
 // API service for products
 const productsApi = {
   // Get product list with pagination and filters
   getList: async (filters: ProductFilters = {}): Promise<ProductsListData> => {
     const params = new URLSearchParams();
     
-    // Add filters to query parameters
+    // Add filters to query parameters with snake_case conversion
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined) {
-        params.append(key, value.toString());
+        // Convert camelCase keys to snake_case (e.g., discountPrice -> discount_price)
+        const snakeCaseKey = convertToSnakeCase(key);
+        params.append(snakeCaseKey, value.toString());
       }
     });
     
@@ -50,10 +57,12 @@ const productsApi = {
   getByCategory: async (category: string, filters: Omit<ProductFilters, 'category'> = {}): Promise<ProductsListData> => {
     const params = new URLSearchParams({ category });
     
-    // Add filters to query parameters
+    // Add filters to query parameters with snake_case conversion
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined) {
-        params.append(key, value.toString());
+        // Convert camelCase keys to snake_case
+        const snakeCaseKey = convertToSnakeCase(key);
+        params.append(snakeCaseKey, value.toString());
       }
     });
     
@@ -64,10 +73,12 @@ const productsApi = {
   search: async (query: string, filters: Omit<ProductFilters, 'search'> = {}): Promise<ProductsListData> => {
     const params = new URLSearchParams({ search: query });
     
-    // Add filters to query parameters
+    // Add filters to query parameters with snake_case conversion
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined) {
-        params.append(key, value.toString());
+        // Convert camelCase keys to snake_case
+        const snakeCaseKey = convertToSnakeCase(key);
+        params.append(snakeCaseKey, value.toString());
       }
     });
     
