@@ -13,7 +13,7 @@ const reviewsApi = {
       console.log('Reviews API response:', response);
       
       // Ensure the response has the expected structure
-      if (response && response.success === true) {
+      if (response) {
         // Make sure stats.averageRating is a number
         if (response.stats && response.stats.averageRating) {
           response.stats.averageRating = Number(response.stats.averageRating);
@@ -74,10 +74,10 @@ const reviewsApi = {
   },
   
   // Create a new review
-  createReview: async (productId: number, reviewData: ReviewInput): Promise<{ success: boolean; data: ReviewData; message: string }> => {
+  createReview: async (productId: number, reviewData: ReviewInput): Promise<ReviewData> => {
     try {
       const response = await axiosClient.post(`/products/${productId}/reviews`, reviewData);
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error creating review:', error);
       throw error;
@@ -85,10 +85,10 @@ const reviewsApi = {
   },
   
   // Update an existing review
-  updateReview: async (reviewId: number, reviewData: ReviewInput): Promise<{ success: boolean; data: ReviewData; message: string }> => {
+  updateReview: async (reviewId: number, reviewData: ReviewInput): Promise<ReviewData> => {
     try {
       const response = await axiosClient.put(`/reviews/${reviewId}`, reviewData);
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error updating review:', error);
       throw error;
@@ -96,10 +96,9 @@ const reviewsApi = {
   },
   
   // Delete a review
-  deleteReview: async (reviewId: number): Promise<{ success: boolean; message: string }> => {
+  deleteReview: async (reviewId: number): Promise<void> => {
     try {
-      const response = await axiosClient.delete(`/reviews/${reviewId}`);
-      return response.data;
+      await axiosClient.delete(`/reviews/${reviewId}`);
     } catch (error) {
       console.error('Error deleting review:', error);
       throw error;
@@ -115,7 +114,7 @@ const reviewsApi = {
   } = {}): Promise<AdminReviewsListData> => {
     try {
       const response = await axiosClient.get('/admin/reviews', { params });
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error fetching admin reviews:', error);
       throw error;
@@ -123,10 +122,9 @@ const reviewsApi = {
   },
   
   // Admin: Approve or reject a review
-  approveReview: async (reviewId: number, approved: boolean): Promise<{ success: boolean; message: string }> => {
+  approveReview: async (reviewId: number, approved: boolean): Promise<void> => {
     try {
-      const response = await axiosClient.patch(`/admin/reviews/${reviewId}/approve`, { approved });
-      return response.data;
+      await axiosClient.patch(`/admin/reviews/${reviewId}/approve`, { approved });
     } catch (error) {
       console.error('Error updating review approval:', error);
       throw error;
