@@ -4,7 +4,7 @@ import { CategoriesListData, CategoryData, ResponseData } from './types';
 
 // Base URL for category endpoints
 const baseUrl = '/categories';
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 // Types for category data
 export interface CategoryData {

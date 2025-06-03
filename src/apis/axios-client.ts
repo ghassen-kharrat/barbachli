@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 
-// Use port 5001 explicitly
-const API_BASE_URL = 'http://localhost:5001/api';
+// Use environment variable for API URL with fallback to localhost
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 // Création d'un client Axios avec configuration par défaut
 const axiosClient: AxiosInstance = axios.create({

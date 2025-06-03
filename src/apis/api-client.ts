@@ -15,7 +15,7 @@ const apiClient = axios.create({
 // Intercepteur pour ajouter le token JWT à chaque requête
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -35,7 +35,7 @@ apiClient.interceptors.response.use(
     // Gérer les erreurs 401 (non autorisé)
     if (error.response && error.response.status === 401) {
       // Rediriger vers la page de connexion ou rafraîchir le token
-      localStorage.removeItem('token');
+      localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
       
       // Si l'utilisateur n'est pas déjà sur la page de connexion, rediriger

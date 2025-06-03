@@ -28,7 +28,7 @@ const PORT = customPort || process.env.PORT || 5001;
 // Middlewares
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://barbachli.vercel.app', 'https://barbachli-ecommerce.vercel.app'] 
+    ? ['https://barbachli.vercel.app', 'https://barbachli-ecommerce.vercel.app', 'https://barbachli-site.vercel.app'] 
     : 'http://localhost:3000',
   credentials: true
 }));

@@ -11,6 +11,9 @@ import {
 } from './types';
 import axios from 'axios';
 
+// Get API URL from environment
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+
 // Helper function to ensure admin is logged in
 const ensureAdminLogin = async () => {
   try {
@@ -19,7 +22,7 @@ const ensureAdminLogin = async () => {
     if (token) {
       // We have a token, check if it's valid and for an admin
       try {
-        const response = await axios.get('http://localhost:5001/api/auth/check', {
+        const response = await axios.get(`${API_BASE_URL}/auth/check`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -38,7 +41,7 @@ const ensureAdminLogin = async () => {
     
     // Login as admin
     console.log('Attempting admin login');
-    const loginResponse = await axios.post('http://localhost:5001/api/auth/login', {
+    const loginResponse = await axios.post(`${API_BASE_URL}/auth/login`, {
       email: 'admin@example.com',
       password: 'admin123'
     });
