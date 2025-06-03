@@ -12,6 +12,7 @@ export interface CategoryData {
   slug: string;
   description?: string;
   productCount?: number;
+  parentId?: number;
   createdAt: string;
 }
 
