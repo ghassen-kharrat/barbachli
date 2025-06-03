@@ -197,6 +197,15 @@ const PaymentTitle = styled.h3`
   }
 `;
 
+// Helper function to safely get address fields
+const getAddressField = (address: string | { street: string; city: string; zipCode: string; country: string } | undefined, field: 'street' | 'city' | 'zipCode' | 'country', fallback: string = ''): string => {
+  if (!address) return fallback;
+  
+  if (typeof address === 'string') return address;
+  
+  return address[field] || fallback;
+};
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('fr-FR', {
@@ -226,6 +235,12 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, companyInfo }) => {
   const taxRate = 0.19;
   const taxAmount = subtotal * taxRate;
   
+  // Extract address info safely
+  const streetAddress = getAddressField(order.shippingAddress, 'street', order.shippingAddress as string || '');
+  const city = getAddressField(order.shippingAddress, 'city', order.shippingCity || '');
+  const zipCode = getAddressField(order.shippingAddress, 'zipCode', order.shippingZipCode || '');
+  const country = getAddressField(order.shippingAddress, 'country', order.shippingCountry || t('default_country'));
+  
   return (
     <InvoiceContainer>
       <InvoiceHeader>
@@ -249,9 +264,9 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, companyInfo }) => {
           <InvoiceMetaTitle>{t('bill_to')}</InvoiceMetaTitle>
           <InvoiceMetaContent>
             <strong>{order.customer?.firstName} {order.customer?.lastName}</strong><br />
-            {order.shippingAddress?.street || order.shippingAddress || ''}<br />
-            {order.shippingAddress?.city || order.shippingCity || ''}, {order.shippingAddress?.zipCode || order.shippingZipCode || ''}<br />
-            {order.shippingAddress?.country || order.shippingCountry || t('default_country')}<br />
+            {streetAddress}<br />
+            {city}, {zipCode}<br />
+            {country}<br />
             {t('phone')}: {order.customer?.phone || order.phoneNumber || t('not_provided')}<br />
             {t('email')}: {order.customer?.email || t('not_provided')}
           </InvoiceMetaContent>
