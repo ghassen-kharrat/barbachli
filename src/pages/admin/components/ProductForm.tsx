@@ -392,7 +392,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
     
     // For demo purposes, we'll use file URLs directly
     // In a real application, you would upload these to a server
-    const newImages = files.map(file => URL.createObjectURL(file as unknown as Blob));
+    const newImages = files.map(file => URL.createObjectURL(file as Blob));
     
     setFormData({
       ...formData,
@@ -403,28 +403,37 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
   // Fonction de validation
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
+    const isEditMode = !!product;
     
-    if (!formData.name.trim()) {
-      newErrors.name = 'Le nom du produit est requis';
+    if (!formData.name) {
+      newErrors.name = 'Le nom du produit est obligatoire';
     }
     
-    if (!formData.description.trim()) {
-      newErrors.description = 'La description est requise';
+    if (!formData.description) {
+      newErrors.description = 'La description est obligatoire';
     }
     
-    if (formData.price <= 0) {
-      newErrors.price = 'Le prix doit être supérieur à 0';
+    if (!formData.price) {
+      newErrors.price = 'Le prix est obligatoire';
+    } else if (isNaN(parseFloat(String(formData.price))) || parseFloat(String(formData.price)) <= 0) {
+      newErrors.price = 'Le prix doit être un nombre supérieur à 0';
     }
     
-    if (formData.stock < 0) {
-      newErrors.stock = 'Le stock ne peut pas être négatif';
+    if (formData.discountPrice && (isNaN(parseFloat(String(formData.discountPrice))) || parseFloat(String(formData.discountPrice)) <= 0)) {
+      newErrors.discountPrice = 'Le prix réduit doit être un nombre supérieur à 0';
     }
     
     if (!formData.category) {
-      newErrors.category = 'Veuillez sélectionner une catégorie';
+      newErrors.category = 'La catégorie est obligatoire';
     }
     
-    if (formData.images.length === 0) {
+    if (!formData.stock) {
+      newErrors.stock = 'Le stock est obligatoire';
+    } else if (isNaN(parseInt(String(formData.stock))) || parseInt(String(formData.stock)) < 0) {
+      newErrors.stock = 'Le stock doit être un nombre entier positif';
+    }
+    
+    if (!isEditMode && formData.images.length === 0) {
       newErrors.images = 'Au moins une image est requise';
     }
     
