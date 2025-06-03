@@ -47,6 +47,7 @@ export interface RegisterData {
 export interface UpdateProfileData {
   firstName?: string;
   lastName?: string;
+  email?: string;
   phone?: string;
   address?: string;
   city?: string;

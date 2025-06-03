@@ -23,6 +23,17 @@ const directApiClient = axios.create({
   withCredentials: false
 });
 
+// Convert our frontend snake_case fields to match backend expectations
+function convertRegistrationData(data: RegisterData) {
+  return {
+    first_name: data.firstName,
+    last_name: data.lastName,
+    email: data.email,
+    password: data.password,
+    phone: data.phone
+  };
+}
+
 // Service API pour l'authentification
 const authApi = {
   // Connexion utilisateur
@@ -58,10 +69,14 @@ const authApi = {
     try {
       console.log('Registering user with data:', { ...data, password: '******' });
       
+      // Convert data to match backend expectations
+      const adaptedData = convertRegistrationData(data);
+      console.log('Adapted registration data:', { ...adaptedData, password: '******' });
+      
       // First try the Vercel API proxy
       try {
         console.log('Trying Vercel API proxy...');
-        const response = await axios.post('/api/auth/register', data, {
+        const response = await axios.post('/api/auth/register', adaptedData, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -82,7 +97,7 @@ const authApi = {
         console.error('Vercel proxy registration failed, trying direct API:', proxyError);
         
         // If Vercel proxy fails, try direct API
-        const directResponse = await directApiClient.post('/auth/register', data);
+        const directResponse = await directApiClient.post('/auth/register', adaptedData);
         
         // Stocker le token dans le localStorage
         if (directResponse.data && directResponse.data.token) {
@@ -120,7 +135,15 @@ const authApi = {
   
   // Mettre à jour le profil utilisateur
   updateProfile: async (data: UpdateProfileData): Promise<UserResponseData> => {
-    return directApiClient.put('/auth/profile', data, {
+    // Convert data to match backend expectations
+    const adaptedData = {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      phone: data.phone
+    };
+    
+    return directApiClient.put('/auth/profile', adaptedData, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       }

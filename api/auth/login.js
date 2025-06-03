@@ -2,6 +2,20 @@
 const axios = require('axios');
 const mockData = require('../mockData');
 
+// Helper function to convert field names if needed
+function adaptRequestBody(body) {
+  // If the request already uses snake_case, no need to convert
+  if (body.first_name) {
+    return body;
+  }
+  
+  // Convert camelCase to snake_case for login
+  return {
+    email: body.email,
+    password: body.password
+  };
+}
+
 module.exports = async (req, res) => {
   console.log('Login endpoint called');
   console.log('Request method:', req.method);
@@ -58,9 +72,13 @@ module.exports = async (req, res) => {
     
     console.log(`Sending request to: ${url}`);
     
+    // Adapt request body to backend expectations
+    const adaptedBody = adaptRequestBody(req.body);
+    console.log('Adapted request body:', { ...adaptedBody, password: '******' });
+    
     // Forward login request to backend with increased timeout
     try {
-      const response = await axios.post(url, req.body, {
+      const response = await axios.post(url, adaptedBody, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
