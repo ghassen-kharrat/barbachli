@@ -906,7 +906,7 @@ const OrderDetailPage = () => {
       {/* Hidden invoice for printing */}
       {order && (
         <div className="invoice-print" ref={printRef}>
-          <InvoicePrint order={order} companyInfo={COMPANY_INFO} />
+          <InvoicePrint order={order as any} companyInfo={COMPANY_INFO} />
         </div>
       )}
     </AdminLayout>

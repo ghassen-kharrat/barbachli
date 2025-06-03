@@ -748,18 +748,18 @@ const UsersPage = () => {
     return (
       <ActionMenu>
         <ActionButton onClick={handleToggleDropdown}>
-          <FileIcons.FiMoreVertical />
+          {React.createElement(FileIcons.FiMoreVertical)}
         </ActionButton>
         
         {showDropdown && (
           <ActionMenuDropdown>
             <ActionMenuItem onClick={(e) => handleSelectAction('status', e)}>
-              <FileIcons.FiToggleRight />
+              {React.createElement(FileIcons.FiToggleRight)}
               {user.isActive ? 'Désactiver' : 'Activer'}
             </ActionMenuItem>
             {user.role !== 'admin' && (
               <ActionMenuItem className="danger" onClick={(e) => handleSelectAction('delete', e)}>
-                <FileIcons.FiTrash2 />
+                {React.createElement(FileIcons.FiTrash2)}
                 Supprimer
               </ActionMenuItem>
             )}
@@ -793,13 +793,13 @@ const UsersPage = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <SearchIcon>
-                  <FileIcons.FiSearch />
+                  {React.createElement(FileIcons.FiSearch)}
                 </SearchIcon>
               </form>
             </SearchContainer>
             
             <CreateButton onClick={handleOpenCreateModal}>
-              <FileIcons.FiPlus />
+              {React.createElement(FileIcons.FiPlus)}
               Nouvel utilisateur
             </CreateButton>
           </div>

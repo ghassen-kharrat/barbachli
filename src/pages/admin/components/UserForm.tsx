@@ -4,7 +4,7 @@ import { CreateUserData } from '../../../features/admin/services/types';
 
 interface UserFormProps {
   onSubmit: (data: CreateUserData) => void;
-  initialData?: Partial<CreateUserData>;
+  initialData?: Partial<CreateUserData & { id?: number }>;
   isLoading: boolean;
   onCancel: () => void;
 }

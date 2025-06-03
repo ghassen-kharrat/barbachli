@@ -4,6 +4,7 @@ import { ProductData, ProductDataMutation } from '../../../features/products/ser
 import { FaImage, FaTimes, FaUpload } from 'react-icons/fa';
 import { useCategories } from '../../../features/products/hooks/use-categories-query';
 import axios from 'axios';
+import React from 'react';
 
 interface ProductFormProps {
   product?: ProductData;
@@ -303,8 +304,8 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
   const [formData, setFormData] = useState<ProductDataMutation>({
     name: product?.name || '',
     description: product?.description || '',
-    price: product?.price || 0,
-    discountPrice: product?.discountPrice || null,
+    price: typeof product?.price === 'string' ? parseFloat(product.price) || 0 : product?.price || 0,
+    discountPrice: product?.discountPrice ? (typeof product.discountPrice === 'string' ? parseFloat(product.discountPrice) || null : product.discountPrice) : null,
     stock: product?.stock || 0,
     category: product?.category || '',
     images: product?.images || []
@@ -542,7 +543,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
             <ImagePreviewWrapper key={index}>
               <ImagePreview src={image} alt={`Product ${index}`} />
               <RemoveImageButton onClick={() => removeImage(index)}>
-                <FaTimes size={12} />
+                {React.createElement(FaTimes, { size: 12 })}
               </RemoveImageButton>
             </ImagePreviewWrapper>
           ))}
@@ -550,7 +551,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
           <label htmlFor="imageUpload">
             <ImagePlaceholder>
               <UploadIcon>
-                <FaUpload />
+                {React.createElement(FaUpload)}
               </UploadIcon>
               <div>Ajouter une image</div>
               <FileInput
