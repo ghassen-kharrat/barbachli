@@ -196,7 +196,7 @@ const FlashSales: React.FC<FlashSalesProps> = ({ products, endTime }) => {
     <div>
       <FlashSalesContainer>
         <FlashIcon>
-          <FaIcons.FaBolt />
+          <span>{React.createElement(FaIcons.FaBolt)}</span>
           {t('flash_sales')}
         </FlashIcon>
         
@@ -212,7 +212,7 @@ const FlashSales: React.FC<FlashSalesProps> = ({ products, endTime }) => {
         </CountdownContainer>
         
         <ViewMoreLink to="/products?sale=flash">
-          {t('view_more')} <FaIcons.FaArrowRight />
+          {t('view_more')} <span>{React.createElement(FaIcons.FaArrowRight)}</span>
         </ViewMoreLink>
       </FlashSalesContainer>
       
