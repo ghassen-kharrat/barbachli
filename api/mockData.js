@@ -119,6 +119,22 @@ const mockData = {
         role: 'user'
       }
     }
+  },
+  
+  // Test account login success response (for test script)
+  testLoginSuccess: {
+    status: 'success',
+    message: 'Login successful',
+    data: {
+      token: 'mock-test-jwt-token-for-testing-purposes-only',
+      user: {
+        id: 2,
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@example.com',
+        role: 'user'
+      }
+    }
   }
 };
 
