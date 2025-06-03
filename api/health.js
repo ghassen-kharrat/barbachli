@@ -1,4 +1,6 @@
 // Health check endpoint
+const axios = require('axios');
+
 module.exports = async (req, res) => {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -16,9 +18,18 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Check backend API health
-    const response = await fetch('https://barbachli-api.onrender.com/api/health');
-    const backendStatus = response.ok ? 'online' : 'offline';
+    // Check backend API health with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
+    const response = await axios.get('https://barbachli-api.onrender.com/api/health', {
+      signal: controller.signal,
+      timeout: 3000
+    });
+    
+    clearTimeout(timeoutId);
+    
+    const backendStatus = response.status === 200 ? 'online' : 'offline';
     
     res.status(200).json({
       status: 'ok',
@@ -30,7 +41,7 @@ module.exports = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Health check error:', error);
+    console.error('Health check error:', error.message);
     res.status(200).json({
       status: 'ok',
       message: 'API proxy is healthy, but backend is unreachable',

@@ -1,5 +1,6 @@
 // Carousel endpoint
 const axios = require('axios');
+const mockData = require('./mockData');
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -18,40 +19,22 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Get carousel data from backend
+    // Get carousel data from backend with timeout
     const response = await axios.get('https://barbachli-api.onrender.com/api/carousel', {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      timeout: 5000 // 5 second timeout
     });
     
     // Return the carousel data
     res.status(200).json(response.data);
   } catch (error) {
-    console.error('Carousel proxy error:', error);
+    console.error('Carousel proxy error:', error.message);
     
     // If the backend is down, return mock data
-    res.status(200).json({
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          title: 'Nouveaux produits',
-          subtitle: 'Découvrez notre nouvelle collection',
-          buttonText: 'Acheter maintenant',
-          buttonLink: '/products',
-          imageUrl: 'https://via.placeholder.com/1200x400?text=Nouveaux+produits'
-        },
-        {
-          id: 2,
-          title: 'Offres spéciales',
-          subtitle: 'Jusqu\'à 50% de réduction',
-          buttonText: 'Voir les offres',
-          buttonLink: '/products?hasDiscount=true',
-          imageUrl: 'https://via.placeholder.com/1200x400?text=Offres+speciales'
-        }
-      ]
-    });
+    console.log('Returning mock carousel data');
+    res.status(200).json(mockData.carousel);
   }
 }; 

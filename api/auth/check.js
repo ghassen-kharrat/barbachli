@@ -1,5 +1,6 @@
 // Auth check endpoint
 const axios = require('axios');
+const mockData = require('../mockData');
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -17,24 +18,39 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Extract authorization header
+  // If no authorization header is present, return 401
   const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'No authorization token provided'
+    });
+  }
 
   try {
-    // Forward auth check request to backend
+    // Forward auth check request to backend with timeout
     const response = await axios.get('https://barbachli-api.onrender.com/api/auth/check', {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': authHeader
-      }
+      },
+      timeout: 5000 // 5 second timeout
     });
     
     // Return the response from the backend
-    res.status(response.status).json(response.data);
+    res.status(200).json({
+      status: 'success',
+      data: response.data
+    });
   } catch (error) {
-    console.error('Auth check proxy error:', error.response?.data || error.message);
+    console.error('Auth check proxy error:', error.message);
     
+    // If it's a network error, return mock user data
+    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.message.includes('Network Error')) {
+      console.log('Returning mock user data');
+      return res.status(200).json(mockData.user);
+    }
     
     // Forward the error from the backend
     if (error.response) {

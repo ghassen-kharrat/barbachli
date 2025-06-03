@@ -1,5 +1,6 @@
 // Categories endpoint
 const axios = require('axios');
+const mockData = require('./mockData');
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -18,32 +19,22 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Get categories from backend
+    // Get categories from backend with timeout
     const response = await axios.get('https://barbachli-api.onrender.com/api/categories', {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      timeout: 5000 // 5 second timeout
     });
     
     // Return the categories
     res.status(200).json(response.data);
   } catch (error) {
-    console.error('Categories proxy error:', error);
+    console.error('Categories proxy error:', error.message);
     
     // If the backend is down, return mock data
-    res.status(200).json({
-      status: 'success',
-      data: [
-        { id: 1, name: 'Électronique', parentId: null },
-        { id: 2, name: 'Vêtements', parentId: null },
-        { id: 3, name: 'Maison', parentId: null },
-        { id: 4, name: 'Smartphones', parentId: 1 },
-        { id: 5, name: 'Ordinateurs', parentId: 1 },
-        { id: 6, name: 'Hommes', parentId: 2 },
-        { id: 7, name: 'Femmes', parentId: 2 },
-        { id: 8, name: 'Décoration', parentId: 3 }
-      ]
-    });
+    console.log('Returning mock categories data');
+    res.status(200).json(mockData.categories);
   }
 }; 

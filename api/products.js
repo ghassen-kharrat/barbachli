@@ -1,5 +1,6 @@
 // Products endpoint
 const axios = require('axios');
+const mockData = require('./mockData');
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -39,55 +40,24 @@ module.exports = async (req, res) => {
       queryString = `?${queryString}`;
     }
     
-    // Get products from backend
+    console.log(`Fetching products with query: ${queryString}`);
+    
+    // Get products from backend with timeout
     const response = await axios.get(`https://barbachli-api.onrender.com/api/products${queryString}`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      timeout: 5000 // 5 second timeout
     });
     
     // Return the products
     res.status(200).json(response.data);
   } catch (error) {
-    console.error('Products proxy error:', error);
+    console.error('Products proxy error:', error.message);
     
     // If the backend is down, return mock data
-    res.status(200).json({
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          name: 'Smartphone XYZ',
-          description: 'Un smartphone de dernière génération',
-          price: 999.99,
-          discountPrice: 899.99,
-          category: 'Smartphones',
-          stock: 10,
-          images: [
-            'https://via.placeholder.com/300x300?text=Smartphone+XYZ'
-          ],
-          rating: 4.5
-        },
-        {
-          id: 2,
-          name: 'Laptop ABC',
-          description: 'Un ordinateur portable puissant',
-          price: 1299.99,
-          discountPrice: null,
-          category: 'Ordinateurs',
-          stock: 5,
-          images: [
-            'https://via.placeholder.com/300x300?text=Laptop+ABC'
-          ],
-          rating: 4.2
-        }
-      ],
-      pagination: {
-        currentPage: 1,
-        totalPages: 1,
-        totalItems: 2
-      }
-    });
+    console.log('Returning mock products data');
+    res.status(200).json(mockData.products);
   }
 }; 
