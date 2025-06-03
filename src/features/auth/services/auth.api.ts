@@ -126,10 +126,15 @@ const authApi = {
         // Check if this is a password mismatch error
         if (axios.isAxiosError(proxyError) && proxyError.response?.data) {
           const errorData = proxyError.response.data;
-          if (errorData.message?.includes('mot de passe') || 
-              errorData.error?.includes('mot de passe') ||
-              errorData.message?.includes('password') || 
-              errorData.error?.includes('password')) {
+          
+          // Safely check for string inclusion
+          const hasPasswordError = 
+            (typeof errorData.message === 'string' && 
+             (errorData.message.includes('mot de passe') || errorData.message.includes('password'))) ||
+            (typeof errorData.error === 'string' && 
+             (errorData.error.includes('mot de passe') || errorData.error.includes('password')));
+          
+          if (hasPasswordError) {
             throw new Error('Les mots de passe ne correspondent pas');
           }
         }
@@ -157,17 +162,19 @@ const authApi = {
       if (axios.isAxiosError(error) && error.response) {
         // Try to extract error message from backend
         const backendMessage = error.response.data?.message || error.response.data?.error;
-        if (backendMessage) {
-          errorMessage = `${backendMessage}`;
+        if (backendMessage && typeof backendMessage === 'string') {
+          errorMessage = backendMessage;
         }
         
-        // Check for password mismatch errors
-        if ((error.response.data?.error && 
-             (error.response.data.error.includes('password') || 
-              error.response.data.error.includes('mot de passe'))) ||
-            (error.response.data?.message && 
-             (error.response.data.message.includes('password') || 
-              error.response.data.message.includes('mot de passe')))) {
+        // Check for password mismatch errors - safely check string type
+        const responseData = error.response.data || {};
+        const hasPasswordError = 
+          (typeof responseData.error === 'string' && 
+           (responseData.error.includes('password') || responseData.error.includes('mot de passe'))) ||
+          (typeof responseData.message === 'string' && 
+           (responseData.message.includes('password') || responseData.message.includes('mot de passe')));
+        
+        if (hasPasswordError) {
           errorMessage = 'Les mots de passe ne correspondent pas';
         }
       }

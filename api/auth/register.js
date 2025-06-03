@@ -169,23 +169,33 @@ module.exports = async (req, res) => {
       // For other errors, return the error response
       if (requestError.response) {
         // Special handling for password errors
-        if (requestError.response.data && 
-            ((requestError.response.data.message && 
-              (requestError.response.data.message.includes('mot de passe') || 
-               requestError.response.data.message.includes('password'))) || 
-             (requestError.response.data.error && 
-              (requestError.response.data.error.includes('mot de passe') || 
-               requestError.response.data.error.includes('password'))))) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Les mots de passe ne correspondent pas',
-            error: 'PASSWORD_MISMATCH'
-          });
+        if (requestError.response.data) {
+          const responseData = requestError.response.data;
+          
+          // Safely check for password-related error messages
+          const hasPasswordError = 
+            (typeof responseData.message === 'string' && 
+             (responseData.message.includes('mot de passe') || 
+              responseData.message.includes('password'))) ||
+            (typeof responseData.error === 'string' && 
+             (responseData.error.includes('mot de passe') || 
+              responseData.error.includes('password')));
+          
+          if (hasPasswordError) {
+            return res.status(400).json({
+              status: 'error',
+              message: 'Les mots de passe ne correspondent pas',
+              error: 'PASSWORD_MISMATCH'
+            });
+          }
         }
         
+        // Return the original error if not password-related
         return res.status(requestError.response.status).json({
           status: 'error',
-          message: requestError.response.data?.message || 'Registration failed',
+          message: typeof requestError.response.data?.message === 'string' 
+            ? requestError.response.data.message 
+            : 'Registration failed',
           error: requestError.response.data
         });
       } else {
