@@ -1,12 +1,10 @@
 // Configuration file for the application
 const config = {
-  // API URL - use our local proxy in production, direct in development
-  apiUrl: process.env.REACT_APP_API_URL || 
-          (process.env.NODE_ENV === 'production' ? '/api/proxy' : 'http://localhost:5001/api'),
+  // API URL - prioritize hardcoded backend URL for reliability
+  apiUrl: 'https://barbachli-1.onrender.com/api',
   
   // Image base URL
-  imageBaseUrl: process.env.REACT_APP_IMAGE_URL || 
-               (process.env.NODE_ENV === 'production' ? 'https://barbachli-1.onrender.com/images' : 'http://localhost:5001/images'),
+  imageBaseUrl: 'https://barbachli-1.onrender.com/images',
   
   // Supabase configuration - these will be used by the frontend for direct Supabase client operations if needed
   supabase: {
@@ -21,10 +19,10 @@ const config = {
     useDirectSupabase: false, // Set to true if you want to use Supabase client directly in the frontend
   },
   
-  // Backend URLs for reference
-  backend: {
-    baseUrl: 'https://barbachli-1.onrender.com',
-    apiUrl: 'https://barbachli-1.onrender.com/api'
+  // API timeouts
+  timeouts: {
+    default: 30000, // 30 seconds
+    auth: 40000,    // 40 seconds for auth operations
   }
 };
 
