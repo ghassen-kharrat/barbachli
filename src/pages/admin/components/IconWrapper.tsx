@@ -5,17 +5,23 @@ import { IconBaseProps } from 'react-icons';
 
 // Create a global helper function to render icons safely
 export const renderIcon = (iconName: string, props: IconBaseProps = {}) => {
-  // Check if icon exists in ReactIcons
-  const IconComponent = ReactIcons[iconName as keyof typeof ReactIcons] || 
-                        FiIcons[iconName as keyof typeof FiIcons];
-                        
-  if (IconComponent) {
-    return React.createElement(IconComponent, props);
+  try {
+    // Check if icon exists in ReactIcons
+    const IconComponent = 
+      ReactIcons[iconName as keyof typeof ReactIcons] || 
+      FiIcons[iconName as keyof typeof FiIcons];
+    
+    if (!IconComponent) {
+      console.warn(`Icon ${iconName} not found`);
+      return <span>Icon</span>;
+    }
+    
+    // Use JSX syntax instead of createElement to avoid TypeScript errors
+    return <span>{React.createElement(IconComponent as any, props)}</span>;
+  } catch (error) {
+    console.error(`Error rendering icon ${iconName}:`, error);
+    return <span>Icon</span>;
   }
-  
-  // Fallback if icon not found
-  console.warn(`Icon ${iconName} not found`);
-  return <span>Icon</span>;
 };
 
 // Create a wrapper component to safely render any icon from react-icons
