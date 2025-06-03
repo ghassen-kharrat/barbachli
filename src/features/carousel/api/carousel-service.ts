@@ -6,7 +6,7 @@ export const getCarouselSlides = async (): Promise<CarouselSlide[]> => {
   try {
     const response = await axiosClient.get('/carousel');
     if (response && Array.isArray(response)) {
-      return response as CarouselSlide[];
+      return response as unknown as CarouselSlide[];
     }
     throw new Error('Failed to fetch carousel slides');
   } catch (error) {
@@ -19,7 +19,7 @@ export const getCarouselSlideById = async (id: number): Promise<CarouselSlide> =
   try {
     const response = await axiosClient.get(`/carousel/${id}`);
     if (response) {
-      return response as CarouselSlide;
+      return response as unknown as CarouselSlide;
     }
     throw new Error('Failed to fetch carousel slide');
   } catch (error) {
@@ -40,7 +40,7 @@ export const createCarouselSlide = async (slideData: CarouselSlideFormData): Pro
     const response = await axiosClient.post('/carousel', slideData);
     
     if (response) {
-      return response as CarouselSlide;
+      return response as unknown as CarouselSlide;
     }
     throw new Error('Failed to create carousel slide');
   } catch (error) {
@@ -62,7 +62,7 @@ export const updateCarouselSlide = async (id: number, slideData: CarouselSlideFo
     const response = await axiosClient.put(`/carousel/${id}`, slideData);
     
     if (response) {
-      return response as CarouselSlide;
+      return response as unknown as CarouselSlide;
     }
     throw new Error('Failed to update carousel slide');
   } catch (error) {

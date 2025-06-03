@@ -44,7 +44,7 @@ const reviewsApi = {
           }
         }
         
-        return response as ReviewsListData;
+        return response as unknown as ReviewsListData;
       } else {
         console.error('Unexpected API response structure:', response);
         // Return a properly structured response even if the API returns something unexpected
@@ -77,7 +77,7 @@ const reviewsApi = {
   createReview: async (productId: number, reviewData: ReviewInput): Promise<ReviewData> => {
     try {
       const response = await axiosClient.post(`/products/${productId}/reviews`, reviewData);
-      return response as ReviewData;
+      return response as unknown as ReviewData;
     } catch (error) {
       console.error('Error creating review:', error);
       throw error;
@@ -88,7 +88,7 @@ const reviewsApi = {
   updateReview: async (reviewId: number, reviewData: ReviewInput): Promise<ReviewData> => {
     try {
       const response = await axiosClient.put(`/reviews/${reviewId}`, reviewData);
-      return response as ReviewData;
+      return response as unknown as ReviewData;
     } catch (error) {
       console.error('Error updating review:', error);
       throw error;
@@ -114,7 +114,7 @@ const reviewsApi = {
   } = {}): Promise<AdminReviewsListData> => {
     try {
       const response = await axiosClient.get('/admin/reviews', { params });
-      return response as AdminReviewsListData;
+      return response as unknown as AdminReviewsListData;
     } catch (error) {
       console.error('Error fetching admin reviews:', error);
       throw error;
