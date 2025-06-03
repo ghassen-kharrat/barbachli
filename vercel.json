@@ -1,22 +1,35 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/node",
-      "config": {
-        "buildCommand": "npm run build:vercel",
-        "outputDirectory": "build",
-        "env": {
-          "TSC_COMPILE_ON_ERROR": "true"
-        }
-      }
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "framework": "create-react-app",
   "env": {
     "TSC_COMPILE_ON_ERROR": "true"
   },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://barbachli-api.onrender.com/api/$1" }
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://barbachli-api.onrender.com/api/$1"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/logo192.png",
+      "dest": "/logo192.png"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 } 
