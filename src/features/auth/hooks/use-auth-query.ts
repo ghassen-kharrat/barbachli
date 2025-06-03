@@ -15,8 +15,6 @@ export const useAuthCheck = () => {
     queryKey: AUTH_QUERY_KEYS.check(),
     queryFn: () => authApi.checkAuth(),
     retry: false,
-    // Ne pas afficher les erreurs 401 (utilisateur non connecté)
-    useErrorBoundary: false,
     // Ajouter du staleTime pour éviter les requêtes trop fréquentes
     staleTime: 60 * 1000, // 1 minute
     // Désactiver le refetch automatique en arrière-plan pour éviter des boucles infinies
@@ -40,8 +38,6 @@ export const useUserProfile = () => {
   return useQuery({
     queryKey: AUTH_QUERY_KEYS.profile(),
     queryFn: () => authApi.getProfile(),
-    // Ne pas afficher les erreurs 401 (utilisateur non connecté)
-    useErrorBoundary: false,
     // Ajouter du staleTime pour éviter les requêtes trop fréquentes
     staleTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: false,
