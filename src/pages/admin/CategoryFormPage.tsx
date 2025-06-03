@@ -341,7 +341,7 @@ const CategoryFormPage = () => {
           toast.error('Erreur lors de la création de la catégorie');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving category:', error);
       
       // Enhanced error handling

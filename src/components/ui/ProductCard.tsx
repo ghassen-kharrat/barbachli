@@ -383,9 +383,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
           >
             {isAddingToCart ? (
               <>
-                {React.createElement(FaIcons.FaSpinner, { 
-                  style: { animation: 'spin 1s linear infinite' } 
-                })}
+                <span className="icon-spinner" style={{ animation: 'spin 1s linear infinite' }}>
+                  <FaIcons.FaSpinner />
+                </span>
                 {t('in_progress')}
               </>
             ) : (
