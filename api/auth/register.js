@@ -5,7 +5,6 @@ const mockData = require('../mockData');
 module.exports = async (req, res) => {
   console.log('Register endpoint called');
   console.log('Request method:', req.method);
-  console.log('Request headers:', JSON.stringify(req.headers, null, 2));
   
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -35,9 +34,11 @@ module.exports = async (req, res) => {
   if (!req.body) {
     console.error('Request body is undefined');
     
-    // If no request body, return mock success for testing
-    console.log('No request body, returning mock success response');
-    return res.status(200).json(mockData.registerSuccess);
+    // Return an error response
+    return res.status(400).json({
+      status: 'error',
+      message: 'Request body is missing'
+    });
   }
 
   // Log the request body for debugging (without password)
@@ -53,14 +54,17 @@ module.exports = async (req, res) => {
     
     // Use environment variable for backend URL if available, otherwise use hardcoded URL
     const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+    const url = `${backendBaseUrl}/api/auth/register`;
+    
+    console.log(`Sending request to: ${url}`);
     
     // Forward registration request to backend with timeout
-    const response = await axios.post(`${backendBaseUrl}/api/auth/register`, req.body, {
+    const response = await axios.post(url, req.body, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      timeout: 8000 // 8 second timeout
+      timeout: 15000 // 15 second timeout
     });
     
     // Return the response from the backend
@@ -73,31 +77,43 @@ module.exports = async (req, res) => {
     });
   } catch (error) {
     console.error('Registration proxy error:', error.message);
+    console.error('Full error:', error);
     
-    // If it's a network error, return mock success response
-    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.message.includes('Network Error')) {
-      console.log('Network error detected, returning mock success response');
+    // Use mock data for development testing - REMOVE IN PRODUCTION
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode: returning mock success response');
       return res.status(200).json(mockData.registerSuccess);
     }
     
-    // Forward the error from the backend with detailed logging
+    // In production, handle errors properly
     if (error.response) {
+      // The request was made and the server responded with a status code
       console.error('Backend returned error:', error.response.status);
       console.error('Error data:', JSON.stringify(error.response.data, null, 2));
       
-      // If we get a 500 error from the backend, return mock success for testing
-      if (error.response.status === 500) {
-        console.log('Backend 500 error, returning mock success response');
-        return res.status(200).json(mockData.registerSuccess);
-      }
+      return res.status(error.response.status).json({
+        status: 'error',
+        message: error.response.data?.message || 'Registration failed',
+        error: error.response.data
+      });
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received from backend');
       
-      res.status(error.response.status).json(error.response.data);
+      return res.status(503).json({
+        status: 'error',
+        message: 'The authentication service is currently unavailable. Please try again later.',
+        error: 'SERVICE_UNAVAILABLE'
+      });
     } else {
-      console.error('Unknown error during registration:', error);
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error during request setup:', error.message);
       
-      // For unknown errors, return mock success for testing
-      console.log('Unknown error, returning mock success response');
-      return res.status(200).json(mockData.registerSuccess);
+      return res.status(500).json({
+        status: 'error',
+        message: 'An unexpected error occurred during registration',
+        error: error.message
+      });
     }
   }
 }; 
