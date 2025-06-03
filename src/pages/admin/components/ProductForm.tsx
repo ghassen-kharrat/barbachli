@@ -393,8 +393,9 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
     // For demo purposes, we'll use file URLs directly
     // In a real application, you would upload these to a server
     const newImages = files.map(file => {
-      // Use double type assertion to ensure TypeScript treats this as a Blob
-      return URL.createObjectURL(file as unknown as Blob);
+      // Use explicit type assertion for File object to Blob
+      const blob: Blob = file as any;
+      return URL.createObjectURL(blob);
     });
     
     setFormData({
