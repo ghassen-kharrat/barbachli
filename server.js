@@ -109,7 +109,7 @@ app.get('/api/products', async (req, res) => {
     if (hasDiscount === 'true') {
       query = query.not('discount_price', 'is', null);
     }
-    
+
     // Calculate pagination
     const pageNum = Math.max(1, parseInt(page));
     const limitNum = Math.max(1, Math.min(50, parseInt(limit)));
@@ -266,7 +266,7 @@ app.post('/api/auth/login', async (req, res) => {
     
     if (userError || !userData) {
       return res.status(401).json({
-        success: false,
+      success: false,
         message: 'Utilisateur non trouvé'
       });
     }
@@ -302,7 +302,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, confirmPassword, phone, address, city, zipCode } = req.body;
-    
+
     // Check if passwords match
     if (password !== confirmPassword) {
       return res.status(400).json({
@@ -316,7 +316,7 @@ app.post('/api/auth/register', async (req, res) => {
       email,
       password,
       options: {
-        data: {
+      data: {
           first_name: firstName,
           last_name: lastName
         }
@@ -351,8 +351,8 @@ app.post('/api/auth/register', async (req, res) => {
     
     if (userError) {
       console.error('Error creating user record:', userError);
-      return res.status(500).json({
-        success: false,
+    return res.status(500).json({
+      success: false,
         message: 'Erreur lors de la création de l\'utilisateur'
       });
     }
@@ -378,11 +378,11 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`
+  app.listen(PORT, () => {
+    console.log(`
 🚀 Server running on port ${PORT}
 ✨ Mode: ${process.env.NODE_ENV || 'development'} (Supabase)
 🔗 API URL: http://localhost:${PORT}/api
 ⌛ Time: ${new Date().toLocaleString()}
-  `);
+    `);
 }); 
