@@ -21,12 +21,22 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Ensure we have a request body
+  if (!req.body) {
+    console.error('Request body is undefined');
+    return res.status(400).json({
+      status: 'error',
+      message: 'Missing request body',
+      error: 'BAD_REQUEST'
+    });
+  }
+
   // Log the request body for debugging (without password)
-  if (req.body) {
+  try {
     const { password, ...safeBody } = req.body;
     console.log('Register request body:', { ...safeBody, password: '******' });
-  } else {
-    console.log('Register request body is empty or undefined');
+  } catch (e) {
+    console.error('Error parsing request body:', e.message);
   }
 
   try {

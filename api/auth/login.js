@@ -21,9 +21,23 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Ensure we have a request body
+  if (!req.body) {
+    console.error('Login request body is undefined');
+    return res.status(400).json({
+      status: 'error',
+      message: 'Missing request body',
+      error: 'BAD_REQUEST'
+    });
+  }
+
   // Log the request body for debugging (without password)
-  const { password, ...safeBody } = req.body;
-  console.log('Login request body:', { ...safeBody, password: '******' });
+  try {
+    const { password, ...safeBody } = req.body;
+    console.log('Login request body:', { ...safeBody, password: '******' });
+  } catch (e) {
+    console.error('Error parsing login request body:', e.message);
+  }
 
   try {
     // Forward login request to backend with timeout
@@ -36,6 +50,7 @@ module.exports = async (req, res) => {
     });
     
     // Return the response from the backend
+    console.log('Login successful:', response.status);
     res.status(200).json({
       status: 'success',
       data: response.data
@@ -52,10 +67,12 @@ module.exports = async (req, res) => {
       });
     }
     
-    // Forward the error from the backend
+    // Forward the error from the backend with detailed logging
     if (error.response) {
+      console.error('Backend returned login error:', error.response.status, error.response.data);
       res.status(error.response.status).json(error.response.data);
     } else {
+      console.error('Unknown error during login:', error);
       res.status(500).json({ 
         status: 'error',
         message: 'Login failed. Please try again later.',
