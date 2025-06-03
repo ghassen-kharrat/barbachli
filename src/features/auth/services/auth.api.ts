@@ -1,4 +1,5 @@
 import axiosClient from '../../../apis/axios-client';
+import axios from 'axios';
 import { 
   AuthResponseData, 
   ChangePasswordData, 
@@ -10,6 +11,10 @@ import {
 
 // URL de base pour les endpoints d'authentification
 const baseUrl = '/auth';
+
+// Determine if we're in production environment (Vercel)
+const isProduction = window.location.hostname.includes('vercel.app') || 
+                    window.location.hostname.includes('barbachli.vercel.app');
 
 // Service API pour l'authentification
 const authApi = {
@@ -36,18 +41,34 @@ const authApi = {
   // Enregistrement d'un nouvel utilisateur
   register: async (data: RegisterData): Promise<AuthResponseData> => {
     try {
-      const response = await axiosClient.post(`${baseUrl}/register`, data);
+      // In production, use our local API proxy
+      let response;
+      if (isProduction) {
+        // Use the direct proxy URL
+        console.log('Using direct proxy for registration');
+        response = await axios.post('/api/auth/register', data, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      } else {
+        // In development, use the axiosClient
+        console.log('Using axiosClient for registration');
+        response = await axiosClient.post(`${baseUrl}/register`, data);
+      }
       
       // Stocker le token dans le localStorage
-      if (response.data.token) {
-        localStorage.setItem('auth_token', response.data.token);
+      if (response.data && response.data.data && response.data.data.token) {
+        localStorage.setItem('auth_token', response.data.data.token);
       }
       
       return {
         success: true,
-        data: response.data
+        data: response.data.data || response.data
       };
     } catch (error) {
+      console.error('Registration error:', error);
       throw error;
     }
   },
@@ -76,9 +97,27 @@ const authApi = {
     return axiosClient.put(`${baseUrl}/password`, data);
   },
   
-  // Vérifier si l'utilisateur est connecté
+  // Vérifier le statut d'authentification
   checkAuth: async (): Promise<UserResponseData> => {
-    return axiosClient.get(`${baseUrl}/check`);
+    if (isProduction) {
+      // In production, use direct proxy
+      try {
+        const response = await axios.get('/api/auth/check', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        });
+        return response.data.data || response.data;
+      } catch (error) {
+        console.error('Auth check error:', error);
+        throw error;
+      }
+    } else {
+      // In development, use axiosClient
+      return axiosClient.get(`${baseUrl}/check`);
+    }
   }
 };
 

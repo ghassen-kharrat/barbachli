@@ -1,8 +1,14 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import config from '../config';
 
-// Use config for API URL with fallback to localhost
-const API_BASE_URL = config.apiUrl || 'http://localhost:5001/api';
+// Hardcode the API URL to use the local proxy in production
+// This ensures we always use the API proxy routes in Vercel
+const API_BASE_URL = window.location.hostname.includes('vercel.app') || 
+                    window.location.hostname.includes('barbachli.vercel.app') ? 
+                    '/api' : 
+                    (config.apiUrl || 'http://localhost:5001/api');
+
+console.log('Using API base URL:', API_BASE_URL);
 
 // Create Axios client with default configuration
 const axiosClient: AxiosInstance = axios.create({
