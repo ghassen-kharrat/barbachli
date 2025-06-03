@@ -1,7 +1,8 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import config from '../config';
 
-// Use environment variable for API URL with fallback to localhost
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+// Use config for API URL with fallback to localhost
+const API_BASE_URL = config.apiUrl || 'http://localhost:5001/api';
 
 // Création d'un client Axios avec configuration par défaut
 const axiosClient: AxiosInstance = axios.create({
@@ -9,6 +10,8 @@ const axiosClient: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Add withCredentials to handle CORS properly
+  withCredentials: false,
 });
 
 // Intercepteur pour les requêtes

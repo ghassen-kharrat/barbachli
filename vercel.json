@@ -7,30 +7,27 @@
     "TSC_COMPILE_ON_ERROR": "true",
     "CI": "false"
   },
-  "routes": [
+  "headers": [
     {
-      "src": "/api/(.*)",
-      "dest": "https://barbachli-api.onrender.com/api/$1"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/manifest.json"
-    },
-    {
-      "src": "/logo192.png",
-      "dest": "/logo192.png"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" }
+      ]
     }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/api/health", "dest": "/api/health.js" },
+    { "src": "/api/categories", "dest": "/api/categories.js" },
+    { "src": "/api/products", "dest": "/api/products.js" },
+    { "src": "/api/carousel", "dest": "/api/carousel.js" },
+    { "src": "/api/auth/register", "dest": "/api/auth/register.js" },
+    { "src": "/api/auth/login", "dest": "/api/auth/login.js" },
+    { "src": "/api/auth/check", "dest": "/api/auth/check.js" },
+    { "src": "/api/(.*)", "dest": "/api/proxy.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 } 
