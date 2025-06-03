@@ -10,13 +10,13 @@ import { IconBaseProps } from 'react-icons';
 
 // Create proper React component wrappers for icons
 const BiIcons = {
-  BiCategory: (props: IconBaseProps = {}) => <span><BiCategory {...props} /></span>
+  BiCategory: (props: IconBaseProps = {}) => React.createElement('span', {}, React.createElement(BiCategory, props))
 };
 
 // Additional icon wrappers for direct use in this component
 const ChevronIcons = {
-  FaChevronUp: ({ size }: { size?: number }) => <FaChevronUp size={size} />,
-  FaChevronDown: ({ size }: { size?: number }) => <FaChevronDown size={size} />
+  FaChevronUp: ({ size }: { size?: number }) => React.createElement(FaChevronUp, { size }),
+  FaChevronDown: ({ size }: { size?: number }) => React.createElement(FaChevronDown, { size })
 };
 
 // Types
@@ -229,7 +229,8 @@ const CategorySidebar: React.FC = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5001/api/categories');
+        const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        const response = await axios.get(`${API_URL}/categories`);
         if (response.data && response.data.success) {
           setCategories(response.data.data);
         } else {
