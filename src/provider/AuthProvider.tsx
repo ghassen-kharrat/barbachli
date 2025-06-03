@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuthCheck } from '../features/auth/hooks/use-auth-query';
 import { toast } from 'react-toastify';
+import { UserResponseData } from '../features/auth/services/types';
 
 interface User {
   id: number;
@@ -38,8 +39,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   
   useEffect(() => {
     // Update auth state when query completes
-    if (data && data.data) {
-      setUser(data.data);
+    if (data && (data as UserResponseData).data) {
+      setUser((data as UserResponseData).data);
     } else {
       setUser(null);
     }
