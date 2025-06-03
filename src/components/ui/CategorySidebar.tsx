@@ -8,15 +8,27 @@ import { useLanguage } from '../../provider/LanguageProvider';
 import { FaIcons } from '../../pages/admin/components/Icons';
 import { IconBaseProps } from 'react-icons';
 
-// Create proper React component wrappers for icons
-const BiIcons = {
-  BiCategory: (props: IconBaseProps = {}) => React.createElement('span', {}, React.createElement(BiCategory, props))
+// Create explicit React functional components for icons
+const BiCategoryIcon: React.FC<IconBaseProps> = (props) => {
+  return <BiCategory {...props} />;
 };
 
-// Additional icon wrappers for direct use in this component
+const FaChevronUpIcon: React.FC<{size?: number}> = ({size}) => {
+  return <FaChevronUp size={size} />;
+};
+
+const FaChevronDownIcon: React.FC<{size?: number}> = ({size}) => {
+  return <FaChevronDown size={size} />;
+};
+
+// Wrapper objects for consistent usage
+const BiIcons = {
+  BiCategory: BiCategoryIcon
+};
+
 const ChevronIcons = {
-  FaChevronUp: ({ size }: { size?: number }) => React.createElement(FaChevronUp, { size }),
-  FaChevronDown: ({ size }: { size?: number }) => React.createElement(FaChevronDown, { size })
+  FaChevronUp: FaChevronUpIcon,
+  FaChevronDown: FaChevronDownIcon
 };
 
 // Types
