@@ -257,8 +257,8 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, companyInfo }) => {
   
   // Assign order reference/number
   const orderNumber = order.reference || order.orderNumber || `#${order.id}`;
-  const customerName = `${order.customer?.firstName || order.firstName || ''} ${order.customer?.lastName || order.lastName || ''}`;
-  const customerEmail = order.customer?.email || order.email || '';
+  const customerName = `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`;
+  const customerEmail = order.customer?.email || '';
   const customerPhone = order.customer?.phone || order.phoneNumber || '';
   const shippingAddress = order.shippingAddress?.street || order.shippingAddress || '';
   const shippingCity = order.shippingAddress?.city || order.shippingCity || '';
@@ -329,7 +329,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, companyInfo }) => {
         <InvoiceSection>
           <SectionTitle>{t('client')}</SectionTitle>
           <TextBold>
-            {order.customer?.firstName || order.firstName || ''} {order.customer?.lastName || order.lastName || ''}
+            {order.customer?.firstName || ''} {order.customer?.lastName || ''}
           </TextBold>
           <Text>
             {order.shippingAddress?.street || order.shippingAddress || ''}

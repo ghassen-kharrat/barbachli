@@ -667,7 +667,7 @@ const OrderDetailPage = () => {
                     </InfoIcon>
                     <InfoContent>
                       <InfoLabel>{t('name')}</InfoLabel>
-                      <InfoValue>{order.customer?.firstName || order.firstName || ''} {order.customer?.lastName || order.lastName || ''}</InfoValue>
+                      <InfoValue>{order.customer?.firstName || ''} {order.customer?.lastName || ''}</InfoValue>
                     </InfoContent>
                   </InfoRow>
                   <InfoRow className={language === 'ar' ? 'rtl-reverse' : ''}>
@@ -700,7 +700,7 @@ const OrderDetailPage = () => {
                     </InfoIcon>
                     <InfoContent>
                       <InfoLabel>{t('email')}</InfoLabel>
-                      <InfoValue>{order.customer?.email || order.email || t('not_provided')}</InfoValue>
+                      <InfoValue>{order.customer?.email || t('not_provided')}</InfoValue>
                     </InfoContent>
                   </InfoRow>
                 </ShippingInfo>

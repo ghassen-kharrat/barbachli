@@ -94,17 +94,23 @@ export const useOrderDetail = (orderId: number) => {
         console.log('Order details response:', response);
         
         // If the response doesn't have the expected structure, transform it
-        if (response && response.data && !response.data.items) {
+        if (response && response.data) {
+          // Extract customer data from response
+          const customerFirstName = response.data.customer?.firstName || '';
+          const customerLastName = response.data.customer?.lastName || '';
+          const customerEmail = response.data.customer?.email || '';
+          const customerPhone = response.data.customer?.phone || response.data.phoneNumber || '';
+          
           // Handle different API response structures
           const transformedData = {
             ...response.data,
             // Add any missing fields with defaults
             items: response.data.items || [],
-            customer: response.data.customer || {
-              firstName: response.data.firstName || '',
-              lastName: response.data.lastName || '',
-              email: response.data.email || '',
-              phone: response.data.phoneNumber || ''
+            customer: {
+              firstName: customerFirstName,
+              lastName: customerLastName,
+              email: customerEmail,
+              phone: customerPhone
             },
             shippingAddress: response.data.shippingAddress || {
               street: response.data.shippingAddress || '',

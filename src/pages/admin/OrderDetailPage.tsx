@@ -688,12 +688,12 @@ const OrderDetailPage = () => {
                     <InfoItem>
                       <InfoLabel>{t('name')}</InfoLabel>
                       <InfoValue>
-                        {order.customer?.firstName || order.firstName || ''} {order.customer?.lastName || order.lastName || ''}
+                        {order.customer?.firstName || ''} {order.customer?.lastName || ''}
                       </InfoValue>
                     </InfoItem>
                     <InfoItem>
                       <InfoLabel>{t('email')}</InfoLabel>
-                      <InfoValue>{order.customer?.email || order.email || t('not_provided')}</InfoValue>
+                      <InfoValue>{order.customer?.email || t('not_provided')}</InfoValue>
                     </InfoItem>
                     <InfoItem>
                       <InfoLabel>{t('phone_label')}</InfoLabel>
