@@ -18,16 +18,15 @@
       ]
     }
   ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/api/health", "dest": "/api/health.js" },
-    { "src": "/api/categories", "dest": "/api/categories.js" },
-    { "src": "/api/products", "dest": "/api/products.js" },
-    { "src": "/api/carousel", "dest": "/api/carousel.js" },
-    { "src": "/api/auth/register", "dest": "/api/auth/register.js" },
-    { "src": "/api/auth/login", "dest": "/api/auth/login.js" },
-    { "src": "/api/auth/check", "dest": "/api/auth/check.js" },
-    { "src": "/api/(.*)", "dest": "/api/proxy.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/health", "destination": "/api/health.js" },
+    { "source": "/api/categories", "destination": "/api/categories.js" },
+    { "source": "/api/products", "destination": "/api/products.js" },
+    { "source": "/api/carousel", "destination": "/api/carousel.js" },
+    { "source": "/api/auth/register", "destination": "/api/auth/register.js" },
+    { "source": "/api/auth/login", "destination": "/api/auth/login.js" },
+    { "source": "/api/auth/check", "destination": "/api/auth/check.js" },
+    { "source": "/api/(.*)", "destination": "/api/proxy.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 } 
