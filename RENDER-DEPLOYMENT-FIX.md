@@ -40,7 +40,7 @@ services:
       - key: DATABASE_URL
         value: postgres://postgres:Gaston.07730218@db.iptgkvofawoqvykmkcrk.supabase.co:5432/postgres
       - key: REACT_APP_API_URL
-        value: https://barbachli-api.onrender.com/api
+        value: https://barbachli-1.onrender.com/api
 ```
 
 Key changes:

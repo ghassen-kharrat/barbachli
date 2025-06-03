@@ -28,8 +28,11 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Use environment variable for backend URL if available, otherwise use hardcoded URL
+    const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+    
     // Forward auth check request to backend with timeout
-    const response = await axios.get('https://barbachli-api.onrender.com/api/auth/check', {
+    const response = await axios.get(`${backendBaseUrl}/api/auth/check`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

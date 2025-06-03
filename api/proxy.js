@@ -24,7 +24,10 @@ module.exports = async (req, res) => {
 
   // Get the path from the request
   const path = req.url.replace(/^\/api/, '');
-  const backendUrl = `https://barbachli-api.onrender.com/api${path}`;
+  
+  // Use environment variable for backend URL if available, otherwise use hardcoded URL
+  const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+  const backendUrl = `${backendBaseUrl}/api${path}`;
   
   console.log(`Proxying request to: ${backendUrl}`);
   console.log(`Method: ${req.method}`);
@@ -47,20 +50,20 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Forward the request to the backend
+    // Forward the request to the backend with increased timeout
     const response = await axios({
       method: req.method,
       url: backendUrl,
       headers: {
         ...req.headers,
-        host: 'barbachli-api.onrender.com',
-        origin: 'https://barbachli-api.onrender.com',
+        host: new URL(backendBaseUrl).host,
+        origin: backendBaseUrl,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         ...(req.headers.authorization && { 'Authorization': req.headers.authorization })
       },
       data: req.body,
-      timeout: 8000, // 8 second timeout
+      timeout: 15000, // 15 second timeout
       validateStatus: () => true // Don't throw on any status code
     });
     

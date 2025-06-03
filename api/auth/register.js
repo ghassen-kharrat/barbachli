@@ -51,8 +51,11 @@ module.exports = async (req, res) => {
   try {
     console.log('Forwarding registration request to backend...');
     
+    // Use environment variable for backend URL if available, otherwise use hardcoded URL
+    const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+    
     // Forward registration request to backend with timeout
-    const response = await axios.post('https://barbachli-api.onrender.com/api/auth/register', req.body, {
+    const response = await axios.post(`${backendBaseUrl}/api/auth/register`, req.body, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'

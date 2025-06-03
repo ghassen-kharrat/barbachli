@@ -42,8 +42,11 @@ module.exports = async (req, res) => {
     
     console.log(`Fetching products with query: ${queryString}`);
     
+    // Use environment variable for backend URL if available, otherwise use hardcoded URL
+    const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+    
     // Get products from backend with timeout
-    const response = await axios.get(`https://barbachli-api.onrender.com/api/products${queryString}`, {
+    const response = await axios.get(`${backendBaseUrl}/api/products${queryString}`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'

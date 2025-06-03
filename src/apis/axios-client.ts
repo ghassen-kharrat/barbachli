@@ -4,42 +4,32 @@ import config from '../config';
 // Use config for API URL with fallback to localhost
 const API_BASE_URL = config.apiUrl || 'http://localhost:5001/api';
 
-// Création d'un client Axios avec configuration par défaut
+// Create Axios client with default configuration
 const axiosClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
-  // Add withCredentials to handle CORS properly
+  // Set consistent CORS handling
   withCredentials: false,
   // Add timeout to prevent hanging requests
-  timeout: 10000,
+  timeout: 15000,
 });
 
-// Intercepteur pour les requêtes
+// Request interceptor
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Récupérer le token d'authentification du localStorage
+    // Get auth token from localStorage
     const token = localStorage.getItem('auth_token');
     
-    // Debug: log detailed request information
-    console.log(`Request to ${config.url}:`, {
+    // Debug: log request information
+    console.log(`Request to ${config.baseURL}${config.url}:`, {
       method: config.method,
-      headers: config.headers,
       hasData: !!config.data,
-      dataKeys: config.data ? Object.keys(config.data) : [],
     });
     
-    if (config.url?.includes('/carousel') && config.data) {
-      console.log('Carousel request data preview:', {
-        title: config.data.title,
-        hasImage: !!config.data.image,
-        imageType: typeof config.data.image,
-        imageLength: typeof config.data.image === 'string' ? config.data.image.length : 'N/A'
-      });
-    }
-    
-    // Si le token existe, l'ajouter aux en-têtes
+    // Add token to headers if it exists
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -51,17 +41,14 @@ axiosClient.interceptors.request.use(
   }
 );
 
-// Intercepteur pour les réponses
+// Response interceptor
 axiosClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // Debug the response structure
-    console.log('Axios response interceptor:', response.data);
-    
-    // Return the response data directly without modification
+    // Return the response data directly
     return response.data;
   },
   (error: AxiosError) => {
-    console.log('API Error:', error.message);
+    console.error('API Error:', error.message);
     
     // Handle network errors
     if (error.message.includes('Network Error') || 
@@ -70,25 +57,9 @@ axiosClient.interceptors.response.use(
         error.code === 'ENOTFOUND' ||
         !error.response) {
       
-      console.log('Network error detected, using fallback data');
+      console.error('Network error detected');
       
-      // For auth check, return mock user data
-      if (error.config?.url?.includes('/auth/check')) {
-        return Promise.resolve({
-          status: 'success',
-          data: {
-            user: {
-              id: 1,
-              firstName: 'Guest',
-              lastName: 'User',
-              email: 'guest@example.com',
-              role: 'user'
-            }
-          }
-        });
-      }
-      
-      // Return generic error for other endpoints
+      // Return generic error
       return Promise.reject({
         response: {
           status: 503,
@@ -100,13 +71,12 @@ axiosClient.interceptors.response.use(
       });
     }
     
-    // Gérer les erreurs d'authentification (401)
+    // Handle authentication errors (401)
     if (error.response && error.response.status === 401) {
-      // Effacer le token
+      // Clear token
       localStorage.removeItem('auth_token');
       
-      // Ne rediriger vers la page de connexion que si on n'est pas déjà sur la page login
-      // Cela évite les redirections infinies
+      // Only redirect if not already on login page
       const currentPath = window.location.pathname;
       if (currentPath !== '/login' && currentPath !== '/register') {
         window.location.href = '/login';
