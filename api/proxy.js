@@ -2,6 +2,10 @@
 const axios = require('axios');
 
 module.exports = async (req, res) => {
+  console.log('API proxy called');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+  
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,6 +17,7 @@ module.exports = async (req, res) => {
 
   // Handle OPTIONS request for preflight
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS preflight request');
     res.status(200).end();
     return;
   }
@@ -23,6 +28,23 @@ module.exports = async (req, res) => {
   
   console.log(`Proxying request to: ${backendUrl}`);
   console.log(`Method: ${req.method}`);
+  
+  // Debug request body
+  if (req.body) {
+    try {
+      // If it's a login or register request, hide the password
+      if (path.includes('/auth/login') || path.includes('/auth/register')) {
+        const { password, ...safeBody } = req.body;
+        console.log('Request body:', { ...safeBody, password: '******' });
+      } else {
+        console.log('Request body:', req.body);
+      }
+    } catch (e) {
+      console.error('Error parsing request body:', e.message);
+    }
+  } else {
+    console.log('No request body or body is empty');
+  }
 
   try {
     // Forward the request to the backend
@@ -52,6 +74,7 @@ module.exports = async (req, res) => {
     
     // If it's a network error, return a more user-friendly response
     if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.message.includes('Network Error')) {
+      console.log('Network error detected, returning service unavailable');
       return res.status(503).json({
         status: 'error',
         message: 'API service temporarily unavailable. Please try again later.',
@@ -61,8 +84,11 @@ module.exports = async (req, res) => {
     
     // Forward any other error
     if (error.response) {
+      console.error('Backend returned error:', error.response.status);
+      console.error('Error data:', JSON.stringify(error.response.data, null, 2));
       res.status(error.response.status).json(error.response.data);
     } else {
+      console.error('Unknown error during API request:', error);
       res.status(500).json({ 
         status: 'error',
         message: 'API request failed. Please try again later.',
