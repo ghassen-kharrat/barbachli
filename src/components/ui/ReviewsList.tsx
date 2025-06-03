@@ -270,6 +270,15 @@ const EmptyMessage = styled.div`
   }
 `;
 
+const EmptyStateIcon = styled.div`
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--light-text);
+  opacity: 0.6;
+  display: flex;
+  justify-content: center;
+`;
+
 const Pagination = styled.div`
   display: flex;
   justify-content: center;
