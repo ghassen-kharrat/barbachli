@@ -1,6 +1,11 @@
 // Registration endpoint
 const axios = require('axios');
-const mockData = require('../mockData');
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase client
+const supabaseUrl = 'https://iptgkvofawoqvykmkcrk.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdGdrdm9mYXdvcXZ5a21rY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjkxMTMsImV4cCI6MjA2NDQ0NTExM30.oUsFpKGgeddXRU5lbaeaufBZ2wV7rnl1a0h2YEfC9b8';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 module.exports = async (req, res) => {
   console.log('Register endpoint called');
@@ -41,71 +46,85 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Log the request body for debugging (without password)
-  try {
-    const { password, ...safeBody } = req.body;
-    console.log('Register request body:', { ...safeBody, password: '******' });
-  } catch (e) {
-    console.error('Error parsing request body:', e.message);
+  // Extract registration data
+  const { email, password, firstName, lastName, phone } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Email and password are required'
+    });
   }
 
   try {
-    console.log('Forwarding registration request to backend...');
+    console.log('Registering user with Supabase...');
     
-    // Always use a direct backend URL that is confirmed working
-    const backendBaseUrl = 'https://barbachli-1.onrender.com';
-    const url = `${backendBaseUrl}/api/auth/register`;
-    
-    console.log(`Sending request to: ${url}`);
-    
-    // Forward registration request to backend with timeout
-    const response = await axios.post(url, req.body, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      timeout: 20000 // 20 second timeout
+    // Register the user with Supabase
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone
+        }
+      }
     });
     
-    // Return the response from the backend
-    console.log('Registration successful:', response.status);
-    console.log('Response data:', JSON.stringify(response.data, null, 2));
-    
-    res.status(200).json({
-      status: 'success',
-      data: response.data
-    });
-  } catch (error) {
-    console.error('Registration proxy error:', error.message);
-    
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      console.error('Backend returned error:', error.response.status);
-      console.error('Error data:', JSON.stringify(error.response.data, null, 2));
-      
-      return res.status(error.response.status).json({
+    if (authError) {
+      console.error('Supabase auth error:', authError);
+      return res.status(400).json({
         status: 'error',
-        message: error.response.data?.message || 'Registration failed',
-        error: error.response.data
-      });
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('No response received from backend');
-      
-      return res.status(503).json({
-        status: 'error',
-        message: 'The authentication service is currently unavailable. Please try again later.',
-        error: 'SERVICE_UNAVAILABLE'
-      });
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('Error during request setup:', error.message);
-      
-      return res.status(500).json({
-        status: 'error',
-        message: 'An unexpected error occurred during registration',
-        error: error.message
+        message: authError.message || 'Registration failed',
+        error: authError
       });
     }
+    
+    console.log('User registered successfully with Supabase');
+    
+    // Add user to the profiles table
+    if (authData.user) {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          { 
+            user_id: authData.user.id,
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone,
+            email: email
+          }
+        ]);
+      
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+      } else {
+        console.log('User profile created successfully');
+      }
+    }
+    
+    // Return success response with auth data
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        user: {
+          id: authData.user.id,
+          email: authData.user.email,
+          firstName: firstName,
+          lastName: lastName,
+          phone: phone
+        },
+        token: authData.session.access_token
+      }
+    });
+  } catch (error) {
+    console.error('Registration error:', error.message);
+    
+    return res.status(500).json({
+      status: 'error',
+      message: 'An unexpected error occurred during registration',
+      error: error.message
+    });
   }
 }; 

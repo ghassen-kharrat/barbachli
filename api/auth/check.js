@@ -1,6 +1,10 @@
 // Auth check endpoint
-const axios = require('axios');
-const mockData = require('../mockData');
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase client
+const supabaseUrl = 'https://iptgkvofawoqvykmkcrk.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdGdrdm9mYXdvcXZ5a21rY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjkxMTMsImV4cCI6MjA2NDQ0NTExM30.oUsFpKGgeddXRU5lbaeaufBZ2wV7rnl1a0h2YEfC9b8';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 module.exports = async (req, res) => {
   console.log('Auth check endpoint called');
@@ -32,53 +36,67 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('Forwarding auth check request to backend...');
+    console.log('Validating session with Supabase...');
     
-    // Always use a direct backend URL that is confirmed working
-    const backendBaseUrl = 'https://barbachli-1.onrender.com';
-    const url = `${backendBaseUrl}/api/auth/check`;
+    // Extract token from authorization header
+    const token = authHeader.replace('Bearer ', '');
     
-    console.log(`Sending request to: ${url}`);
-    
-    // Forward auth check request to backend with timeout
-    const response = await axios.get(url, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': authHeader
-      },
-      timeout: 10000 // 10 second timeout
+    // Set the session directly in Supabase
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: ''  // We don't have refresh tokens in this implementation
     });
     
-    // Return the response from the backend
-    console.log('Auth check successful');
-    res.status(200).json({
-      status: 'success',
-      data: response.data
-    });
-  } catch (error) {
-    console.error('Auth check proxy error:', error.message);
-    
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      console.error('Backend returned error:', error.response.status);
-      return res.status(error.response.status).json(error.response.data);
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('No response received from backend');
-      return res.status(503).json({
+    if (sessionError) {
+      console.error('Session validation error:', sessionError);
+      return res.status(401).json({
         status: 'error',
-        message: 'The authentication service is currently unavailable.',
-        error: 'SERVICE_UNAVAILABLE'
-      });
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('Error during request setup:', error.message);
-      return res.status(500).json({
-        status: 'error',
-        message: 'An unexpected error occurred',
-        error: error.message
+        message: 'Invalid or expired token',
+        error: sessionError
       });
     }
+    
+    if (!sessionData.user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+    
+    // Get user profile data from Supabase
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', sessionData.user.id)
+      .single();
+    
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+    }
+    
+    // Combine auth data with profile data
+    const userData = {
+      id: sessionData.user.id,
+      email: sessionData.user.email,
+      firstName: profileData?.first_name || sessionData.user.user_metadata?.first_name,
+      lastName: profileData?.last_name || sessionData.user.user_metadata?.last_name,
+      phone: profileData?.phone || sessionData.user.user_metadata?.phone,
+      role: profileData?.role || 'user',
+      token: token
+    };
+    
+    console.log('Auth check successful');
+    return res.status(200).json({
+      status: 'success',
+      data: userData
+    });
+  } catch (error) {
+    console.error('Auth check error:', error.message);
+    
+    return res.status(500).json({
+      status: 'error',
+      message: 'An unexpected error occurred during authentication check',
+      error: error.message
+    });
   }
 }; 

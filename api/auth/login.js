@@ -1,6 +1,10 @@
 // Login endpoint
-const axios = require('axios');
-const mockData = require('../mockData');
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase client
+const supabaseUrl = 'https://iptgkvofawoqvykmkcrk.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdGdrdm9mYXdvcXZ5a21rY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjkxMTMsImV4cCI6MjA2NDQ0NTExM30.oUsFpKGgeddXRU5lbaeaufBZ2wV7rnl1a0h2YEfC9b8';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 module.exports = async (req, res) => {
   console.log('Login endpoint called');
@@ -33,70 +37,83 @@ module.exports = async (req, res) => {
   // Ensure we have a request body
   if (!req.body) {
     console.error('Login request body is undefined');
-    
-    // If no request body, return mock success for testing
-    console.log('No request body, returning mock success response');
-    return res.status(200).json(mockData.loginSuccess);
+    return res.status(400).json({
+      status: 'error',
+      message: 'Request body is missing'
+    });
   }
 
-  // Log the request body for debugging (without password)
-  try {
-    const { password, ...safeBody } = req.body;
-    console.log('Login request body:', { ...safeBody, password: '******' });
-  } catch (e) {
-    console.error('Error parsing login request body:', e.message);
+  // Extract login credentials
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Email and password are required'
+    });
   }
 
   try {
-    console.log('Forwarding login request to backend...');
+    console.log('Authenticating with Supabase...');
     
-    // Use environment variable for backend URL if available, otherwise use hardcoded URL
-    const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
-    
-    // Forward login request to backend with timeout
-    const response = await axios.post(`${backendBaseUrl}/api/auth/login`, req.body, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      timeout: 8000 // 8 second timeout
+    // Sign in with email and password
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password
     });
     
-    // Return the response from the backend
-    console.log('Login successful:', response.status);
-    console.log('Response data:', JSON.stringify(response.data, null, 2));
+    if (authError) {
+      console.error('Supabase auth error:', authError);
+      return res.status(401).json({
+        status: 'error',
+        message: authError.message || 'Invalid email or password',
+        error: authError
+      });
+    }
     
-    res.status(200).json({
+    if (!authData.user || !authData.session) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Authentication failed'
+      });
+    }
+    
+    console.log('Authentication successful');
+    
+    // Get user profile data from Supabase
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', authData.user.id)
+      .single();
+    
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+    }
+    
+    // Combine auth data with profile data
+    const userData = {
+      id: authData.user.id,
+      email: authData.user.email,
+      firstName: profileData?.first_name || authData.user.user_metadata?.first_name,
+      lastName: profileData?.last_name || authData.user.user_metadata?.last_name,
+      phone: profileData?.phone || authData.user.user_metadata?.phone,
+      role: profileData?.role || 'user',
+      token: authData.session.access_token
+    };
+    
+    // Return success response
+    return res.status(200).json({
       status: 'success',
-      data: response.data
+      data: userData
     });
   } catch (error) {
-    console.error('Login proxy error:', error.message);
+    console.error('Login error:', error.message);
     
-    // If it's a network error, return mock success response
-    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.message.includes('Network Error')) {
-      console.log('Network error detected, returning mock success response');
-      return res.status(200).json(mockData.loginSuccess);
-    }
-    
-    // Forward the error from the backend with detailed logging
-    if (error.response) {
-      console.error('Backend returned login error:', error.response.status);
-      console.error('Error data:', JSON.stringify(error.response.data, null, 2));
-      
-      // If we get a 500 error from the backend, return mock success for testing
-      if (error.response.status === 500) {
-        console.log('Backend 500 error, returning mock success response');
-        return res.status(200).json(mockData.loginSuccess);
-      }
-      
-      res.status(error.response.status).json(error.response.data);
-    } else {
-      console.error('Unknown error during login:', error);
-      
-      // For unknown errors, return mock success for testing
-      console.log('Unknown error, returning mock success response');
-      return res.status(200).json(mockData.loginSuccess);
-    }
+    return res.status(500).json({
+      status: 'error',
+      message: 'An unexpected error occurred during login',
+      error: error.message
+    });
   }
 }; 
