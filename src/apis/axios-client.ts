@@ -1,12 +1,8 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import config from '../config';
 
-// Hardcode the API URL to use the local proxy in production
-// This ensures we always use the API proxy routes in Vercel
-const API_BASE_URL = window.location.hostname.includes('vercel.app') || 
-                    window.location.hostname.includes('barbachli.vercel.app') ? 
-                    '/api' : 
-                    (config.apiUrl || 'http://localhost:5001/api');
+// Use the configured API URL
+const API_BASE_URL = config.apiUrl || 'https://barbachli-1.onrender.com/api';
 
 console.log('Using API base URL:', API_BASE_URL);
 

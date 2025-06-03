@@ -24,7 +24,7 @@ const authApi = {
       const response = await axiosClient.post(`${baseUrl}/login`, data);
       
       // Stocker le token dans le localStorage
-      if (response.data.token) {
+      if (response.data && response.data.token) {
         localStorage.setItem('auth_token', response.data.token);
       }
       
@@ -41,22 +41,13 @@ const authApi = {
   // Enregistrement d'un nouvel utilisateur
   register: async (data: RegisterData): Promise<AuthResponseData> => {
     try {
-      // In production, use our local API proxy
-      let response;
-      if (isProduction) {
-        // Use the direct proxy URL
-        console.log('Using direct proxy for registration');
-        response = await axios.post('/api/auth/register', data, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-      } else {
-        // In development, use the axiosClient
-        console.log('Using axiosClient for registration');
-        response = await axiosClient.post(`${baseUrl}/register`, data);
-      }
+      // Use the API proxy for registration
+      const response = await axios.post('/api/auth/register', data, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
       
       // Stocker le token dans le localStorage
       if (response.data && response.data.data && response.data.data.token) {
@@ -99,24 +90,18 @@ const authApi = {
   
   // Vérifier le statut d'authentification
   checkAuth: async (): Promise<UserResponseData> => {
-    if (isProduction) {
-      // In production, use direct proxy
-      try {
-        const response = await axios.get('/api/auth/check', {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        });
-        return response.data.data || response.data;
-      } catch (error) {
-        console.error('Auth check error:', error);
-        throw error;
-      }
-    } else {
-      // In development, use axiosClient
-      return axiosClient.get(`${baseUrl}/check`);
+    try {
+      const response = await axios.get('/api/auth/check', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error('Auth check error:', error);
+      throw error;
     }
   }
 };

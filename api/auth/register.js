@@ -2,9 +2,6 @@
 const axios = require('axios');
 const mockData = require('../mockData');
 
-// Flag to enable offline mode when backend is unavailable
-const ENABLE_OFFLINE_MODE = true;
-
 module.exports = async (req, res) => {
   console.log('Register endpoint called');
   console.log('Request method:', req.method);
@@ -52,34 +49,11 @@ module.exports = async (req, res) => {
     console.error('Error parsing request body:', e.message);
   }
 
-  // In offline mode, just return a successful response
-  if (ENABLE_OFFLINE_MODE) {
-    console.log('OFFLINE MODE: Returning mock successful registration');
-    
-    // Create a user object from the request data
-    const { firstName, lastName, email } = req.body;
-    
-    // Return a successful registration response
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        token: 'mock_token_' + Math.random().toString(36).substring(2, 15),
-        user: {
-          id: Math.floor(Math.random() * 1000),
-          firstName: firstName || 'Test',
-          lastName: lastName || 'User',
-          email: email || 'test@example.com',
-          role: 'user'
-        }
-      }
-    });
-  }
-
   try {
     console.log('Forwarding registration request to backend...');
     
-    // Use environment variable for backend URL if available, otherwise use hardcoded URL
-    const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+    // Always use a direct backend URL that is confirmed working
+    const backendBaseUrl = 'https://barbachli-1.onrender.com';
     const url = `${backendBaseUrl}/api/auth/register`;
     
     console.log(`Sending request to: ${url}`);
@@ -90,7 +64,7 @@ module.exports = async (req, res) => {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      timeout: 15000 // 15 second timeout
+      timeout: 20000 // 20 second timeout
     });
     
     // Return the response from the backend
@@ -103,27 +77,35 @@ module.exports = async (req, res) => {
     });
   } catch (error) {
     console.error('Registration proxy error:', error.message);
-    console.error('Full error:', error);
     
-    // Use mock data since the backend is unavailable
-    console.log('Backend unavailable: returning mock success response');
-    
-    // Create a user object from the request data
-    const { firstName, lastName, email } = req.body;
-    
-    // Return a successful registration response
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        token: 'mock_token_' + Math.random().toString(36).substring(2, 15),
-        user: {
-          id: Math.floor(Math.random() * 1000),
-          firstName: firstName || 'Test',
-          lastName: lastName || 'User',
-          email: email || 'test@example.com',
-          role: 'user'
-        }
-      }
-    });
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      console.error('Backend returned error:', error.response.status);
+      console.error('Error data:', JSON.stringify(error.response.data, null, 2));
+      
+      return res.status(error.response.status).json({
+        status: 'error',
+        message: error.response.data?.message || 'Registration failed',
+        error: error.response.data
+      });
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received from backend');
+      
+      return res.status(503).json({
+        status: 'error',
+        message: 'The authentication service is currently unavailable. Please try again later.',
+        error: 'SERVICE_UNAVAILABLE'
+      });
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error during request setup:', error.message);
+      
+      return res.status(500).json({
+        status: 'error',
+        message: 'An unexpected error occurred during registration',
+        error: error.message
+      });
+    }
   }
 }; 

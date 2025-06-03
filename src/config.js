@@ -1,12 +1,12 @@
 // Configuration file for the application
 const config = {
-  // API URL - prioritize environment variable, then use relative URL in production, full URL in development
+  // API URL - always use the direct backend URL for production
   apiUrl: process.env.REACT_APP_API_URL || 
-          (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5001/api'),
+          (process.env.NODE_ENV === 'production' ? 'https://barbachli-1.onrender.com/api' : 'http://localhost:5001/api'),
   
   // Image base URL
   imageBaseUrl: process.env.REACT_APP_IMAGE_URL || 
-               (process.env.NODE_ENV === 'production' ? '/images' : 'http://localhost:5001/images'),
+               (process.env.NODE_ENV === 'production' ? 'https://barbachli-1.onrender.com/images' : 'http://localhost:5001/images'),
   
   // Supabase configuration - these will be used by the frontend for direct Supabase client operations if needed
   supabase: {
