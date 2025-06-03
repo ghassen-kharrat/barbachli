@@ -35,6 +35,7 @@ module.exports = async (req, res) => {
   } catch (error) {
     console.error('Auth check proxy error:', error.response?.data || error.message);
     
+    
     // Forward the error from the backend
     if (error.response) {
       res.status(error.response.status).json(error.response.data);
