@@ -41,17 +41,29 @@ function convertRegistrationData(data: RegisterData | any) {
   // If data is already in snake_case format, use it directly
   if (isSnakeCaseData(data)) {
     console.log('Data is already in snake_case format');
+    
+    // If the data is already in snake_case, we might still need to add confirm_password
+    // because the backend seems to require it
+    if (!data.confirm_password && data.password) {
+      return {
+        ...data,
+        confirm_password: data.password // Add matching confirm_password
+      };
+    }
+    
     return data;
   }
   
   // Ensure we don't send confirmPassword to the backend
   const { confirmPassword, ...safeData } = data as any;
   
+  // Return data with both password and confirm_password to satisfy backend validation
   return {
     first_name: safeData.firstName,
     last_name: safeData.lastName,
     email: safeData.email,
     password: safeData.password,
+    confirm_password: safeData.password, // Add matching confirm_password
     phone: safeData.phone || ''
   };
 }

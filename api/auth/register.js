@@ -12,9 +12,18 @@ function adaptRequestBody(body) {
   // Make sure we remove any confirmPassword field that might be present
   const { confirmPassword, ...cleanBody } = body;
   
-  // If the request already uses snake_case, no need to convert
+  // If the request already uses snake_case, make sure it has confirm_password
   if (isSnakeCaseData(cleanBody)) {
     console.log('Request body is already in snake_case format');
+    
+    // Ensure confirm_password exists and matches password
+    if (!cleanBody.confirm_password && cleanBody.password) {
+      return {
+        ...cleanBody,
+        confirm_password: cleanBody.password
+      };
+    }
+    
     return cleanBody;
   }
   
@@ -24,6 +33,7 @@ function adaptRequestBody(body) {
     last_name: cleanBody.lastName || cleanBody.last_name,
     email: cleanBody.email,
     password: cleanBody.password,
+    confirm_password: cleanBody.password, // Always include matching confirm_password
     phone: cleanBody.phone,
     // Include other fields if needed
     address: cleanBody.address,
@@ -34,7 +44,7 @@ function adaptRequestBody(body) {
 
 // Validate password before sending to backend
 function validateRequest(body) {
-  // Check if confirmPassword exists and is different from password
+  // If confirmPassword exists, make sure it matches password
   if (body.confirmPassword !== undefined && body.confirmPassword !== body.password) {
     return {
       valid: false,
@@ -42,11 +52,17 @@ function validateRequest(body) {
     };
   }
   
-  // If we already have snake_case format and there's no confirmPassword,
-  // we can't validate here, so assume it's already validated
-  if (isSnakeCaseData(body) && body.confirmPassword === undefined) {
-    console.log('Cannot validate passwords in snake_case format without confirmPassword');
-    return { valid: true };
+  // If we're using snake_case format already, ensure confirm_password matches password
+  if (isSnakeCaseData(body)) {
+    // If confirm_password is missing but needed for the backend, we'll add it in adaptRequestBody
+    
+    // If confirm_password exists but doesn't match password, it's invalid
+    if (body.confirm_password !== undefined && body.confirm_password !== body.password) {
+      return {
+        valid: false,
+        error: "Les mots de passe ne correspondent pas"
+      };
+    }
   }
   
   // Validate password length
