@@ -206,7 +206,7 @@ const CategoryFormPage = () => {
     description: ''
   });
   
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(isEditMode);
   
@@ -217,8 +217,8 @@ const CategoryFormPage = () => {
       
       categoriesApi.getById(categoryId)
         .then(response => {
-          if (response.data && response.data.success) {
-            const category = response.data.data;
+          if (response.data) {
+            const category = response.data;
             setFormData({
               name: category.name || '',
               slug: category.slug || '',
@@ -256,7 +256,7 @@ const CategoryFormPage = () => {
   }, [formData.name, formData.slug, isEditMode]);
   
   // Handle input changes
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
     setFormData({
@@ -275,7 +275,7 @@ const CategoryFormPage = () => {
   
   // Form validation
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string | null> = {};
     
     if (!formData.name) {
       newErrors.name = 'Le nom de la catégorie est obligatoire';
@@ -292,7 +292,7 @@ const CategoryFormPage = () => {
   };
   
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -308,7 +308,7 @@ const CategoryFormPage = () => {
       const categoryPayload: Omit<CategoryData, 'id' | 'createdAt' | 'productCount'> = {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
-        description: formData.description.trim()
+        description: formData.description?.trim() || ''
       };
       
       console.log("Sending category data:", categoryPayload);
@@ -320,7 +320,7 @@ const CategoryFormPage = () => {
         if (response && response.success) {
           toast.success('Catégorie mise à jour avec succès');
           // First invalidate the cache
-          await queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEYS.lists() });
+          await queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEYS.list() });
           // Navigate to admin products page
           navigate('/admin/products');
         }
@@ -332,7 +332,7 @@ const CategoryFormPage = () => {
         if (response && response.success) {
           toast.success('Catégorie créée avec succès');
           // First invalidate the cache
-          await queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEYS.lists() });
+          await queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEYS.list() });
           // Force immediate navigation to admin products page
           console.log('Navigating to /admin/products');
           navigate('/admin/products');

@@ -2,7 +2,6 @@ import React from 'react';
 import { styled } from 'styled-components';
 import { OrderData } from '../../../features/orders/services/types';
 import { useLanguage } from '../../../provider/LanguageProvider';
-import logo from '../../../assets/images/logo.png';
 
 interface InvoicePrintProps {
   order: OrderData;
@@ -231,7 +230,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, companyInfo }) => {
     <InvoiceContainer>
       <InvoiceHeader>
         <Logo>
-          <img src={logo} alt={companyInfo.name} />
+          <img src="/logo barbachli.png" alt={companyInfo.name} />
         </Logo>
         <CompanyInfo>
           <strong>{companyInfo.name}</strong><br />

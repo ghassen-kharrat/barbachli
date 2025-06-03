@@ -220,8 +220,9 @@ const CategorySidebar: React.FC = () => {
         setLoading(true);
         const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
         const response = await axios.get(`${API_URL}/categories`);
-        if (response.data && response.data.success) {
-          setCategories(response.data.data);
+        if (response.data) {
+          const categoriesData = response.data.success ? response.data.data : response.data;
+          setCategories(categoriesData);
         } else {
           setError(t('categories_load_error'));
         }
