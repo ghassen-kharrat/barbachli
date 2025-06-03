@@ -5,6 +5,7 @@ import { FaIcons } from '../../pages/admin/components/Icons';
 import { useLanguage } from '../../provider/LanguageProvider';
 import { ProductData } from '../../features/products/services/types';
 import ProductCard from './ProductCard';
+import IconWrapper from '../../pages/admin/components/IconWrapper';
 
 // Styled Components
 const FlashSalesContainer = styled.div`
@@ -196,7 +197,7 @@ const FlashSales: React.FC<FlashSalesProps> = ({ products, endTime }) => {
     <div>
       <FlashSalesContainer>
         <FlashIcon>
-          <span>{React.createElement(FaIcons.FaBolt)}</span>
+          <IconWrapper icon="FaBolt" />
           {t('flash_sales')}
         </FlashIcon>
         
@@ -212,7 +213,7 @@ const FlashSales: React.FC<FlashSalesProps> = ({ products, endTime }) => {
         </CountdownContainer>
         
         <ViewMoreLink to="/products?sale=flash">
-          {t('view_more')} <span>{React.createElement(FaIcons.FaArrowRight)}</span>
+          {t('view_more')} <IconWrapper icon="FaArrowRight" />
         </ViewMoreLink>
       </FlashSalesContainer>
       
