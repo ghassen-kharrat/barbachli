@@ -8,7 +8,7 @@ async function testRegistrationCamelCase() {
   const testData = {
     firstName: 'Test',
     lastName: 'User',
-    email: `test${Date.now()}@example.com`, // Use timestamp to ensure unique email
+    email: `test${Date.now()}@gmail.com`, // Use real domain instead of example.com
     password: 'password123',
     confirmPassword: 'password123',
     phone: '1234567890'
@@ -48,7 +48,7 @@ async function testRegistrationSnakeCase() {
   const testData = {
     first_name: 'Test',
     last_name: 'User',
-    email: `test${Date.now()}@example.com`, // Use timestamp to ensure unique email
+    email: `test${Date.now()}@gmail.com`, // Use real domain instead of example.com
     password: 'password123',
     confirm_password: 'password123',
     phone: '1234567890'
@@ -88,7 +88,7 @@ async function testDirectRegistration() {
   const testData = {
     firstName: 'Test',
     lastName: 'User',
-    email: `test${Date.now()}@example.com`, // Use timestamp to ensure unique email
+    email: `test${Date.now()}@gmail.com`, // Use real domain instead of example.com
     password: 'password123',
     confirmPassword: 'password123',
     phone: '1234567890'

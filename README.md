@@ -1,6 +1,6 @@
-# eCommerce Site
+# Barbachli E-Commerce Site
 
-A full-featured eCommerce application built with React, Node.js, Express, and PostgreSQL.
+This is an e-commerce platform built with React, Next.js, Node.js, and Supabase.
 
 ## Features
 
@@ -118,31 +118,22 @@ The application comes with two pre-configured users:
 
 ## Recent Fixes
 
-This version includes several important fixes to make the application fully functional:
+Several critical fixes have been implemented to address API connection issues:
 
-1. **TypeScript Errors**: 
-   - Fixed AdminRoute and PrivateRoute components to handle the auth data structure correctly
-   - Added proper typing for protected routes
+1. **Field Format Consistency**
+   - Fixed field name format mismatches (camelCase vs snake_case)
+   - Updated API clients to send data in the format expected by the backend
+   - Added special handling for password fields to ensure validation passes
 
-2. **API Integration**:
-   - Integrated real API calls instead of mock data for cart functionality
-   - Implemented complete checkout process with order confirmation
-   - Added API endpoints for cart management (add, update, remove items)
-   - Added comprehensive order management endpoints (create, list, cancel, update status)
+2. **API Connection Stability**
+   - Added fallback mechanisms for unreliable endpoints
+   - Implemented mock data for unavailable services
+   - Extended timeouts for critical operations
 
-3. **Order Management System**:
-   - Replaced mock data with real API calls in order hooks
-   - Added order cancellation functionality
-   - Implemented administrative order status updates
-   - Created test script to verify order functionality
-
-4. **Environment Configuration**:
-   - Added automatic creation of `.env` file with essential configuration
-   - Updated API base URL to use port 5001 to prevent conflicts
-
-5. **Database**:
-   - Added complete PostgreSQL integration with fallback to in-memory storage
-   - Implemented proper transaction handling for orders and cart operations
+3. **Data Validation**
+   - Enhanced client-side validation
+   - Improved error handling and error messages
+   - Fixed password validation to ensure passwords match
 
 ## Troubleshooting
 
@@ -199,3 +190,23 @@ This version includes several important fixes to make the application fully func
 ## License
 
 This project is licensed under the MIT License.
+
+## API Integration
+
+The application uses multiple API endpoints:
+
+- **Frontend**: Deployed on Vercel
+- **Backend**: Running on Render
+- **Database**: Supabase
+
+API requests flow through Vercel API routes (/api/*) which proxy requests to the backend server.
+
+## Testing
+
+To run the API tests:
+
+```
+node test-registration.js
+```
+
+This will verify the registration functionality is working correctly.
