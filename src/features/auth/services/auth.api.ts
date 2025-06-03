@@ -38,32 +38,44 @@ function validatePasswords(data: any): boolean {
 
 // Convert our frontend snake_case fields to match backend expectations
 function convertRegistrationData(data: RegisterData | any) {
-  // If data is already in snake_case format, use it directly
-  if (isSnakeCaseData(data)) {
-    console.log('Data is already in snake_case format');
+  // Check if data already has camelCase fields
+  if (data.firstName !== undefined || data.lastName !== undefined) {
+    console.log('Data is already in camelCase format');
     
-    // If the data is already in snake_case, we might still need to add confirm_password
-    // because the backend seems to require it
-    if (!data.confirm_password && data.password) {
+    // Ensure confirmPassword is set to match password if not provided
+    if (!data.confirmPassword && data.password) {
       return {
         ...data,
-        confirm_password: data.password // Add matching confirm_password
+        confirmPassword: data.password
       };
     }
     
     return data;
   }
   
-  // Ensure we don't send confirmPassword to the backend
+  // If data is in snake_case, convert to camelCase for backend
+  if (isSnakeCaseData(data)) {
+    console.log('Converting snake_case data to camelCase for backend');
+    
+    return {
+      firstName: data.first_name,
+      lastName: data.last_name,
+      email: data.email,
+      password: data.password,
+      confirmPassword: data.confirm_password || data.password,
+      phone: data.phone || ''
+    };
+  }
+  
+  // Standard conversion from frontend model to backend model
   const { confirmPassword, ...safeData } = data as any;
   
-  // Return data with both password and confirm_password to satisfy backend validation
   return {
-    first_name: safeData.firstName,
-    last_name: safeData.lastName,
+    firstName: safeData.firstName,
+    lastName: safeData.lastName,
     email: safeData.email,
     password: safeData.password,
-    confirm_password: safeData.password, // Add matching confirm_password
+    confirmPassword: safeData.password, // Include matching confirmPassword
     phone: safeData.phone || ''
   };
 }

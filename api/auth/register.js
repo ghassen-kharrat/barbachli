@@ -7,62 +7,112 @@ function isSnakeCaseData(body) {
   return body && (body.first_name !== undefined || body.last_name !== undefined);
 }
 
+// Helper function to check if data is already in camelCase format
+function isCamelCaseData(body) {
+  return body && (body.firstName !== undefined || body.lastName !== undefined);
+}
+
 // Helper function to convert field names if needed
 function adaptRequestBody(body) {
-  // Make sure we remove any confirmPassword field that might be present
-  const { confirmPassword, ...cleanBody } = body;
-  
-  // If the request already uses snake_case, make sure it has confirm_password
-  if (isSnakeCaseData(cleanBody)) {
-    console.log('Request body is already in snake_case format');
+  // If the request already uses camelCase, return it directly
+  if (isCamelCaseData(body)) {
+    console.log('Request body is already in camelCase format');
     
-    // Ensure confirm_password exists and matches password
-    if (!cleanBody.confirm_password && cleanBody.password) {
+    // Ensure confirmPassword is set to match password if not provided
+    if (!body.confirmPassword && body.password) {
       return {
-        ...cleanBody,
-        confirm_password: cleanBody.password
+        ...body,
+        confirmPassword: body.password
       };
     }
     
-    return cleanBody;
+    return body;
   }
   
-  // Convert camelCase to snake_case
+  // If the request uses snake_case, convert to camelCase for backend
+  if (isSnakeCaseData(body)) {
+    console.log('Converting snake_case to camelCase format for backend');
+    
+    // Convert snake_case to camelCase
+    return {
+      firstName: body.first_name,
+      lastName: body.last_name,
+      email: body.email,
+      password: body.password,
+      confirmPassword: body.confirm_password || body.password,
+      phone: body.phone,
+      address: body.address,
+      city: body.city,
+      zipCode: body.zip_code
+    };
+  }
+  
+  // Handle any other format (probably camelCase with confirmPassword)
+  const { confirmPassword, ...cleanBody } = body;
+  
   return {
-    first_name: cleanBody.firstName || cleanBody.first_name,
-    last_name: cleanBody.lastName || cleanBody.last_name,
+    firstName: cleanBody.firstName,
+    lastName: cleanBody.lastName,
     email: cleanBody.email,
     password: cleanBody.password,
-    confirm_password: cleanBody.password, // Always include matching confirm_password
+    confirmPassword: confirmPassword || cleanBody.password,
     phone: cleanBody.phone,
-    // Include other fields if needed
     address: cleanBody.address,
     city: cleanBody.city,
-    zip_code: cleanBody.zipCode || cleanBody.zip_code
+    zipCode: cleanBody.zipCode
   };
 }
 
 // Validate password before sending to backend
 function validateRequest(body) {
-  // If confirmPassword exists, make sure it matches password
-  if (body.confirmPassword !== undefined && body.confirmPassword !== body.password) {
-    return {
-      valid: false,
-      error: "Les mots de passe ne correspondent pas"
-    };
+  // Handle camelCase format (expected by the backend)
+  if (isCamelCaseData(body)) {
+    // Validate password match if confirmPassword is provided
+    if (body.confirmPassword !== undefined && body.confirmPassword !== body.password) {
+      return {
+        valid: false,
+        error: "Les mots de passe ne correspondent pas"
+      };
+    }
+    
+    // Validate password length
+    if (body.password && body.password.length < 6) {
+      return {
+        valid: false,
+        error: "Le mot de passe doit contenir au moins 6 caractères"
+      };
+    }
+    
+    return { valid: true };
   }
   
-  // If we're using snake_case format already, ensure confirm_password matches password
+  // Handle snake_case format (from the frontend)
   if (isSnakeCaseData(body)) {
-    // If confirm_password is missing but needed for the backend, we'll add it in adaptRequestBody
-    
-    // If confirm_password exists but doesn't match password, it's invalid
+    // Validate password match if confirm_password is provided
     if (body.confirm_password !== undefined && body.confirm_password !== body.password) {
       return {
         valid: false,
         error: "Les mots de passe ne correspondent pas"
       };
     }
+    
+    // Validate password length
+    if (body.password && body.password.length < 6) {
+      return {
+        valid: false,
+        error: "Le mot de passe doit contenir au moins 6 caractères"
+      };
+    }
+    
+    return { valid: true };
+  }
+  
+  // Handle legacy format with confirmPassword
+  if (body.confirmPassword !== undefined && body.confirmPassword !== body.password) {
+    return {
+      valid: false,
+      error: "Les mots de passe ne correspondent pas"
+    };
   }
   
   // Validate password length

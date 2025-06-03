@@ -133,16 +133,17 @@ const RegisterPage = () => {
         return;
       }
       
-      // Only send the required fields to the backend in snake_case format
+      // Send data to backend using camelCase field names
       const registrationData = {
-        first_name: values.firstName,
-        last_name: values.lastName,
+        firstName: values.firstName,
+        lastName: values.lastName,
         email: values.email,
         password: values.password,
+        confirmPassword: values.confirmPassword,
         phone: values.phone || ''
       };
       
-      console.log('Submitting registration with data:', { ...registrationData, password: '******' });
+      console.log('Submitting registration with data:', { ...registrationData, password: '******', confirmPassword: '******' });
       
       register(registrationData, {
         onSuccess: () => {
