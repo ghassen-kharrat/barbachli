@@ -88,6 +88,37 @@ const mockData = {
         role: 'user'
       }
     }
+  },
+  
+  // Mock registration success response
+  registerSuccess: {
+    status: 'success',
+    message: 'Registration successful',
+    data: {
+      user: {
+        id: 999,
+        firstName: 'New',
+        lastName: 'User',
+        email: 'new.user@example.com',
+        role: 'user'
+      }
+    }
+  },
+  
+  // Mock login success response
+  loginSuccess: {
+    status: 'success',
+    message: 'Login successful',
+    data: {
+      token: 'mock-jwt-token-for-testing-purposes-only',
+      user: {
+        id: 1,
+        firstName: 'Guest',
+        lastName: 'User',
+        email: 'guest@example.com',
+        role: 'user'
+      }
+    }
   }
 };
 
