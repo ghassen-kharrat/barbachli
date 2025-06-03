@@ -2,14 +2,20 @@
 const axios = require('axios');
 const mockData = require('../mockData');
 
+// Helper function to check if data is already in snake_case format
+function isSnakeCaseData(body) {
+  return body && (body.first_name !== undefined || body.last_name !== undefined);
+}
+
+// Helper function to check if data is already in camelCase format
+function isCamelCaseData(body) {
+  return body && (body.firstName !== undefined || body.lastName !== undefined);
+}
+
 // Helper function to convert field names if needed
 function adaptRequestBody(body) {
-  // If the request already uses snake_case, no need to convert
-  if (body.first_name) {
-    return body;
-  }
-  
-  // Convert camelCase to snake_case for login
+  // For login, we just need email and password - no conversion needed
+  // The backend's login endpoint just takes email and password, regardless of casing format
   return {
     email: body.email,
     password: body.password
