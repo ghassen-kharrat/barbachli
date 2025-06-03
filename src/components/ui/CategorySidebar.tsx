@@ -6,10 +6,11 @@ import { BiCategory } from 'react-icons/bi';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { useLanguage } from '../../provider/LanguageProvider';
 import { FaIcons } from '../../pages/admin/components/Icons';
+import { IconBaseProps } from 'react-icons';
 
 // Create proper React component wrappers for icons
 const BiIcons = {
-  BiCategory: () => <BiCategory />
+  BiCategory: (props: IconBaseProps = {}) => <span><BiCategory {...props} /></span>
 };
 
 // Additional icon wrappers for direct use in this component
@@ -176,10 +177,10 @@ const ErrorState = styled.div`
 
 // Dynamic icon component
 const DynamicIcon = ({ iconName }: { iconName: string | null }) => {
-  if (!iconName) return <BiCategory />;
+  if (!iconName) return <BiIcons.BiCategory />;
 
   // Check if icon exists in FaIcons
-  const IconComponent = (FaIcons as any)[iconName] || BiCategory;
+  const IconComponent = (FaIcons as any)[iconName] || BiIcons.BiCategory;
   return <IconComponent />;
 };
 
@@ -278,7 +279,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <BiCategory /> {t('categories')}
+          <BiIcons.BiCategory /> {t('categories')}
         </SidebarHeader>
         <LoadingState>{t('loading_categories')}</LoadingState>
       </SidebarContainer>
@@ -289,7 +290,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <BiCategory /> {t('categories')}
+          <BiIcons.BiCategory /> {t('categories')}
         </SidebarHeader>
         <ErrorState>{error}</ErrorState>
       </SidebarContainer>
@@ -300,7 +301,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <BiCategory /> {t('categories')}
+          <BiIcons.BiCategory /> {t('categories')}
         </SidebarHeader>
         <LoadingState>{t('no_categories_found')}</LoadingState>
       </SidebarContainer>
@@ -310,7 +311,7 @@ const CategorySidebar: React.FC = () => {
   return (
     <SidebarContainer>
       <SidebarHeader>
-        <BiCategory /> {t('categories')}
+        <BiIcons.BiCategory /> {t('categories')}
       </SidebarHeader>
       <CategoryList>
         {categories.map(category => (
@@ -326,7 +327,7 @@ const CategorySidebar: React.FC = () => {
                 flexDirection: language === 'ar' ? 'row-reverse' : 'row' 
               }}>
                 <CategoryIcon $rtl={language === 'ar'}>
-                  <BiCategory />
+                  <BiIcons.BiCategory />
                 </CategoryIcon>
                 <CategoryName>{getCategoryDisplayName(category)}</CategoryName>
               </div>
