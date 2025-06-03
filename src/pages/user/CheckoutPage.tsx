@@ -404,7 +404,11 @@ const CheckoutPage = () => {
         shippingCity: values.shippingCity,
         shippingZipCode: values.shippingZipCode,
         phoneNumber: values.phoneNumber,
-        notes: values.notes || undefined
+        notes: values.notes || undefined,
+        items: cartItems.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity
+        }))
       };
       
       createOrder(orderData, {

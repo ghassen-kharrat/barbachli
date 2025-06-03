@@ -911,7 +911,7 @@ const ProductDetailPage = () => {
   const { data: authData } = useAuthCheck();
   const addToCartMutation = useAddToCart();
   const { data: reviewsData, isLoading: isLoadingReviews, refetch: refetchReviews } = useProductReviews(
-    productId ? parseInt(productId) : 0,
+    productId ? Number(productId) : 0,
     reviewPage
   );
   
@@ -985,13 +985,17 @@ const ProductDetailPage = () => {
   // Calculate price and discount
   const calculateDiscount = () => {
     if (!product || !product.discountPrice) return null;
-    const discount = Math.round(((product.price - product.discountPrice) / product.price) * 100);
+    const productPrice = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+    const discountPrice = typeof product.discountPrice === 'string' ? parseFloat(product.discountPrice) : product.discountPrice;
+    const discount = Math.round(((productPrice - discountPrice) / productPrice) * 100);
     return discount > 0 ? discount : null;
   };
   
   const calculateSavings = () => {
     if (!product || !product.discountPrice) return null;
-    return (product.price - product.discountPrice).toFixed(2);
+    const productPrice = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+    const discountPrice = typeof product.discountPrice === 'string' ? parseFloat(product.discountPrice) : product.discountPrice;
+    return (productPrice - discountPrice).toFixed(2);
   };
   
   // Add check for reviewsData - is it actually coming in?
@@ -1054,14 +1058,14 @@ const ProductDetailPage = () => {
     }
     
     createReview.mutate(
-      { productId: parseInt(productId), reviewData },
+      { productId: productId ? Number(productId) : 0, reviewData },
       {
         onSuccess: () => {
           toast.success(t('review_added_success'));
           setShowReviewForm(false);
           refetchReviews();
         },
-        onError: (error) => {
+        onError: (error: any) => {
           toast.error(
             error.response?.data?.message || t('error_adding_review')
           );

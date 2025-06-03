@@ -161,13 +161,13 @@ const ProfilePage = () => {
   
   // Ensure null values are converted to empty strings
   const user = userData?.data ? {
-    firstName: userData.data.first_name || '',
-    lastName: userData.data.last_name || '',
+    firstName: userData.data.firstName || '',
+    lastName: userData.data.lastName || '',
     email: userData.data.email || '',
     phone: userData.data.phone || '',
     address: userData.data.address || '',
     city: userData.data.city || '',
-    zipCode: userData.data.zip_code || ''
+    zipCode: userData.data.zipCode || ''
   } : {
     firstName: '',
     lastName: '', 

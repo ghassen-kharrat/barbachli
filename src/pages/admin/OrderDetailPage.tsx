@@ -594,23 +594,15 @@ const OrderDetailPage = () => {
     }
   };
   
-  // Calculate order total
+  // Calculate the total price of the order
   const calculateTotal = (items: any[]) => {
-    if (!items || !items.length) return 0;
-    
-    return items.reduce((total, item) => {
-      if (item.price === undefined || item.price === null) {
-        return total;
-      }
-      
-      // Convert price to number if it's a string
-      const price = typeof item.price === 'number' ? item.price : Number(item.price);
-      
-      // Ensure quantity is a number
-      const quantity = item.quantity ? Number(item.quantity) : 0;
-      
-      return total + (price * quantity);
+    const basePrice = items.reduce((total, item) => {
+      const itemPrice = typeof item.price === 'number' ? item.price : parseFloat(item.price || '0');
+      return total + (itemPrice * item.quantity);
     }, 0);
+    
+    // Total price is the sum of base price and shipping fee
+    return parseFloat(basePrice.toString()) + parseFloat((order?.shippingFee || 0).toString());
   };
   
   if (isLoading) {

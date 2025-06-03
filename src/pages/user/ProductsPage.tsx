@@ -5,7 +5,7 @@ import UserLayout from '../../layouts/UserLayout';
 import { useProducts } from '../../features/products/hooks/use-products-query';
 import { useCategories } from '../../features/products/hooks/use-categories-query';
 import { ProductFilters } from '../../features/products/services/types';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useLanguage } from '../../provider/LanguageProvider';
 import ProductCard from '../../components/ui/ProductCard';
 
@@ -216,7 +216,7 @@ const EmptyStateText = styled.p`
   margin-bottom: 1rem;
 `;
 
-const EmptyStateButton = styled.a`
+const EmptyStateButton = styled(Link)`
   padding: 0.8rem 1.2rem;
   background-color: var(--accent-color);
   color: white;
@@ -226,6 +226,7 @@ const EmptyStateButton = styled.a`
   font-weight: 500;
   transition: var(--transition);
   text-decoration: none;
+  display: inline-block;
   
   &:hover {
     background-color: var(--primary-color);
@@ -366,7 +367,7 @@ const ProductsPage = () => {
     const [sortBy, sortOrder] = e.target.value.split('-');
     setFilters({ 
       ...filters, 
-      sortBy, 
+      sortBy: sortBy as 'price' | 'createdAt' | 'name' | 'rating' | 'discountPrice' | 'stock', 
       sortDirection: sortOrder as 'asc' | 'desc' 
     });
   };
