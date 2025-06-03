@@ -1,15 +1,96 @@
-import React from 'react';
-import * as ReactIcons from 'react-icons/fa';
-import * as FiIcons from 'react-icons/fi';
+import React, { FC } from 'react';
+import * as ReactIcons from 'react-icons';
+import * as Fa from 'react-icons/fa';
 import { IconBaseProps } from 'react-icons';
-import { PatchedIcons } from './IconWrapper';
+import * as Fi from 'react-icons/fi';
 
-// Use the patched icons instead of the direct imports
+// Create properly typed icon components
 export const FaIcons = {
-  ...PatchedIcons
+  FaStore: Fa.FaStore as FC<IconBaseProps>,
+  FaPlus: Fa.FaPlus as FC<IconBaseProps>,
+  FaEdit: Fa.FaEdit as FC<IconBaseProps>,
+  FaTrash: Fa.FaTrash as FC<IconBaseProps>,
+  FaSearch: Fa.FaSearch as FC<IconBaseProps>,
+  FaSort: Fa.FaSort as FC<IconBaseProps>,
+  FaSortUp: Fa.FaSortUp as FC<IconBaseProps>,
+  FaSortDown: Fa.FaSortDown as FC<IconBaseProps>,
+  FaExclamationCircle: Fa.FaExclamationCircle as FC<IconBaseProps>,
+  FaTimesCircle: Fa.FaTimesCircle as FC<IconBaseProps>,
+  FaUser: Fa.FaUser as FC<IconBaseProps>,
+  FaShoppingBag: Fa.FaShoppingBag as FC<IconBaseProps>,
+  FaCalendarDay: Fa.FaCalendarDay as FC<IconBaseProps>,
+  FaTruck: Fa.FaTruck as FC<IconBaseProps>,
+  FaBoxOpen: Fa.FaBoxOpen as FC<IconBaseProps>,
+  FaMoneyBillWave: Fa.FaMoneyBillWave as FC<IconBaseProps>,
+  FaSync: Fa.FaSync as FC<IconBaseProps>,
+  FaRegClock: Fa.FaRegClock as FC<IconBaseProps>,
+  FaCheckCircle: Fa.FaCheckCircle as FC<IconBaseProps>,
+  FaBan: Fa.FaBan as FC<IconBaseProps>,
+  FaQuestion: Fa.FaQuestion as FC<IconBaseProps>,
+  FaArrowLeft: Fa.FaArrowLeft as FC<IconBaseProps>,
+  FaExclamationTriangle: Fa.FaExclamationTriangle as FC<IconBaseProps>,
+  FaFileInvoice: Fa.FaFileInvoice as FC<IconBaseProps>,
+  FaTimes: Fa.FaTimes as FC<IconBaseProps>,
+  FaUpload: Fa.FaUpload as FC<IconBaseProps>,
+  FaStar: Fa.FaStar as FC<IconBaseProps>,
+  FaStarHalfAlt: Fa.FaStarHalfAlt as FC<IconBaseProps>,
+  FaRegStar: Fa.FaRegStar as FC<IconBaseProps>,
+  FaRegHeart: Fa.FaRegHeart as FC<IconBaseProps>,
+  FaSpinner: Fa.FaSpinner as FC<IconBaseProps>,
+  FaShoppingCart: Fa.FaShoppingCart as FC<IconBaseProps>,
+  FaTachometerAlt: Fa.FaTachometerAlt as FC<IconBaseProps>,
+  FaBox: Fa.FaBox as FC<IconBaseProps>,
+  FaTag: Fa.FaTag as FC<IconBaseProps>,
+  FaImages: Fa.FaImages as FC<IconBaseProps>,
+  FaUsers: Fa.FaUsers as FC<IconBaseProps>,
+  FaSignOutAlt: Fa.FaSignOutAlt as FC<IconBaseProps>,
+  FaBars: Fa.FaBars as FC<IconBaseProps>,
+  FaSignInAlt: Fa.FaSignInAlt as FC<IconBaseProps>,
+  FaUserPlus: Fa.FaUserPlus as FC<IconBaseProps>,
+  FaFacebook: Fa.FaFacebook as FC<IconBaseProps>,
+  FaTwitter: Fa.FaTwitter as FC<IconBaseProps>,
+  FaInstagram: Fa.FaInstagram as FC<IconBaseProps>,
+  FaLinkedin: Fa.FaLinkedin as FC<IconBaseProps>,
+  FaMapMarkerAlt: Fa.FaMapMarkerAlt as FC<IconBaseProps>,
+  FaPhone: Fa.FaPhone as FC<IconBaseProps>,
+  FaEnvelope: Fa.FaEnvelope as FC<IconBaseProps>,
+  FaArrowUp: Fa.FaArrowUp as FC<IconBaseProps>,
+  FaLayerGroup: Fa.FaLayerGroup as FC<IconBaseProps>,
+  FaTrashAlt: Fa.FaTrashAlt as FC<IconBaseProps>,
+  FaSave: Fa.FaSave as FC<IconBaseProps>,
+  FaImage: Fa.FaImage as FC<IconBaseProps>,
+  FaInfoCircle: Fa.FaInfoCircle as FC<IconBaseProps>,
+  FaChartLine: Fa.FaChartLine as FC<IconBaseProps>,
+  FaChartBar: Fa.FaChartBar as FC<IconBaseProps>,
+  FaChevronLeft: Fa.FaChevronLeft as FC<IconBaseProps>,
+  FaChevronRight: Fa.FaChevronRight as FC<IconBaseProps>,
+  FaFileExcel: Fa.FaFileExcel as FC<IconBaseProps>,
+  FaEye: Fa.FaEye as FC<IconBaseProps>,
+  FaArrowDown: Fa.FaArrowDown as FC<IconBaseProps>,
+  FaMinus: Fa.FaMinus as FC<IconBaseProps>,
+  FaArrowRight: Fa.FaArrowRight as FC<IconBaseProps>,
+  FaCheck: Fa.FaCheck as FC<IconBaseProps>,
+  FaDesktop: Fa.FaDesktop as FC<IconBaseProps>,
+  FaLaptop: Fa.FaLaptop as FC<IconBaseProps>,
+  FaHome: Fa.FaHome as FC<IconBaseProps>,
+  FaTshirt: Fa.FaTshirt as FC<IconBaseProps>,
+  FaHeartbeat: Fa.FaHeartbeat as FC<IconBaseProps>,
+  FaGamepad: Fa.FaGamepad as FC<IconBaseProps>,
+  FaRunning: Fa.FaRunning as FC<IconBaseProps>,
+  FaCreditCard: Fa.FaCreditCard as FC<IconBaseProps>,
+  FaShieldAlt: Fa.FaShieldAlt as FC<IconBaseProps>,
+  FaHeadset: Fa.FaHeadset as FC<IconBaseProps>,
+  FaPhoneAlt: Fa.FaPhoneAlt as FC<IconBaseProps>,
+  FaKey: Fa.FaKey as FC<IconBaseProps>
 };
 
-// Export FiIcons for use in the app
+// Create properly typed file icons
 export const FileIcons = {
-  ...FiIcons
+  FiEdit: Fi.FiEdit as FC<IconBaseProps>,
+  FiTrash2: Fi.FiTrash2 as FC<IconBaseProps>,
+  FiSearch: Fi.FiSearch as FC<IconBaseProps>,
+  FiPlus: Fi.FiPlus as FC<IconBaseProps>,
+  FiMoreVertical: Fi.FiMoreVertical as FC<IconBaseProps>,
+  FiToggleLeft: Fi.FiToggleLeft as FC<IconBaseProps>,
+  FiToggleRight: Fi.FiToggleRight as FC<IconBaseProps>
 }; 

@@ -18,10 +18,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import UserForm from './components/UserForm';
-
-// Import individual icons directly
-import { FaIcons } from './components/Icons';
-import { FileIcons } from './components/Icons';
+import { FaIcons, FileIcons } from './components/Icons';
 
 // Styles
 const PageContainer = styled.div`
@@ -691,7 +688,7 @@ const UsersPage = () => {
     buttons.push(
       <PaginationButton 
         key="next" 
-        $disabled={currentPage === usersData?.totalPages || 1}
+        $disabled={!!(currentPage === usersData?.totalPages)}
         onClick={() => setCurrentPage(currentPage + 1)}
       >
         &gt;
@@ -748,18 +745,18 @@ const UsersPage = () => {
     return (
       <ActionMenu>
         <ActionButton onClick={handleToggleDropdown}>
-          {React.createElement(FileIcons.FiMoreVertical)}
+          <FileIcons.FiMoreVertical />
         </ActionButton>
         
         {showDropdown && (
           <ActionMenuDropdown>
             <ActionMenuItem onClick={(e) => handleSelectAction('status', e)}>
-              {React.createElement(FileIcons.FiToggleRight)}
+              <FileIcons.FiToggleRight />
               {user.isActive ? 'Désactiver' : 'Activer'}
             </ActionMenuItem>
             {user.role !== 'admin' && (
               <ActionMenuItem className="danger" onClick={(e) => handleSelectAction('delete', e)}>
-                {React.createElement(FileIcons.FiTrash2)}
+                <FileIcons.FiTrash2 />
                 Supprimer
               </ActionMenuItem>
             )}
@@ -793,13 +790,13 @@ const UsersPage = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <SearchIcon>
-                  {React.createElement(FileIcons.FiSearch)}
+                  <FileIcons.FiSearch />
                 </SearchIcon>
               </form>
             </SearchContainer>
             
             <CreateButton onClick={handleOpenCreateModal}>
-              {React.createElement(FileIcons.FiPlus)}
+              <FileIcons.FiPlus />
               Nouvel utilisateur
             </CreateButton>
           </div>

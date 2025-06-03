@@ -6,6 +6,7 @@ import ProductForm from './ProductForm';
 import { ProductDataMutation } from '../../../features/products/services/types';
 import { useCreateProduct, useUpdateProduct } from '../../../features/products/hooks/use-products-query';
 import React from 'react';
+import { FaIcons } from './Icons';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -137,7 +138,7 @@ const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) => {
             {product ? 'Modifier le produit' : 'Ajouter un nouveau produit'}
           </ModalTitle>
           <CloseButton onClick={onClose}>
-            {React.createElement(FaTimes)}
+            <FaIcons.FaTimes />
           </CloseButton>
         </ModalHeader>
         

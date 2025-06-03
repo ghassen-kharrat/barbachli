@@ -55,7 +55,7 @@ export interface ProductFilters {
   category?: string;
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: 'price' | 'createdAt' | 'name' | 'rating' | 'discountPrice';
+  sortBy?: 'price' | 'createdAt' | 'name' | 'rating' | 'discountPrice' | 'stock';
   sortDirection?: 'asc' | 'desc';
   hasDiscount?: boolean;
 }

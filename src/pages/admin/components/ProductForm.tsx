@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { styled } from 'styled-components';
 import { ProductData, ProductDataMutation } from '../../../features/products/services/types';
-import { FaImage, FaTimes, FaUpload } from 'react-icons/fa';
+import { FaIcons } from './Icons';
 import { useCategories } from '../../../features/products/hooks/use-categories-query';
 import axios from 'axios';
 import React from 'react';
+import { IconBaseProps } from 'react-icons';
 
 interface ProductFormProps {
   product?: ProductData;
@@ -278,6 +279,18 @@ const SubmitButton = styled(Button)`
   }
 `;
 
+// Define a proper type for the errors object
+interface FormErrors {
+  name?: string;
+  description?: string;
+  price?: string;
+  discountPrice?: string;
+  category?: string;
+  stock?: string;
+  images?: string;
+  [key: string]: string | undefined;
+}
+
 const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormProps) => {
   // Fetch categories from backend with hierarchical=false to get all categories flat
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories(false);
@@ -312,7 +325,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
   });
   
   // État pour les erreurs de validation
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<FormErrors>({});
   
   // Gestionnaire pour les changements dans le formulaire
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -372,20 +385,24 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
   };
   
   // Gestionnaire pour l'upload d'image
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      try {
-        const dataUrl = await fileToDataUrl(e.target.files[0]);
-        addImage(dataUrl);
-      } catch (error) {
-        console.error('Error uploading image:', error);
-      }
-    }
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const files = Array.from(e.target.files);
+    
+    // For demo purposes, we'll use file URLs directly
+    // In a real application, you would upload these to a server
+    const newImages = files.map(file => URL.createObjectURL(file as unknown as Blob));
+    
+    setFormData({
+      ...formData,
+      images: [...formData.images, ...newImages]
+    });
   };
   
   // Fonction de validation
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: FormErrors = {};
     
     if (!formData.name.trim()) {
       newErrors.name = 'Le nom du produit est requis';
@@ -543,7 +560,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
             <ImagePreviewWrapper key={index}>
               <ImagePreview src={image} alt={`Product ${index}`} />
               <RemoveImageButton onClick={() => removeImage(index)}>
-                {React.createElement(FaTimes, { size: 12 })}
+                <FaIcons.FaTimes size={12} />
               </RemoveImageButton>
             </ImagePreviewWrapper>
           ))}
@@ -551,7 +568,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isSubmitting }: ProductFormP
           <label htmlFor="imageUpload">
             <ImagePlaceholder>
               <UploadIcon>
-                {React.createElement(FaUpload)}
+                <FaIcons.FaUpload />
               </UploadIcon>
               <div>Ajouter une image</div>
               <FileInput

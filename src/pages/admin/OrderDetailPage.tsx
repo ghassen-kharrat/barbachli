@@ -647,7 +647,7 @@ const OrderDetailPage = () => {
   }
   
   // Use reference for order number if available
-  const orderNumber = order.reference || order.orderNumber || `#${order.id}`;
+  const orderNumber = order.reference || (order as any).orderNumber || `#${order.id}`;
   
   return (
     <AdminLayout title={`${t('order_details_title')} ${orderNumber}`}>
@@ -712,25 +712,33 @@ const OrderDetailPage = () => {
                     <InfoItem>
                       <InfoLabel>{t('address')}</InfoLabel>
                       <InfoValue>
-                        {order.shippingAddress?.street || order.shippingAddress || t('not_provided')}
+                        {typeof order.shippingAddress === 'string' 
+                          ? order.shippingAddress 
+                          : (order.shippingAddress as any)?.street || order.shippingAddress || t('not_provided')}
                       </InfoValue>
                     </InfoItem>
                     <InfoItem>
                       <InfoLabel>{t('city')}</InfoLabel>
                       <InfoValue>
-                        {order.shippingAddress?.city || order.shippingCity || t('not_provided')}
+                        {typeof order.shippingAddress === 'string' 
+                          ? (order as any).shippingCity 
+                          : (order.shippingAddress as any)?.city || (order as any).shippingCity || t('not_provided')}
                       </InfoValue>
                     </InfoItem>
                     <InfoItem>
                       <InfoLabel>{t('postal_code_label')}</InfoLabel>
                       <InfoValue>
-                        {order.shippingAddress?.zipCode || order.shippingZipCode || t('not_provided')}
+                        {typeof order.shippingAddress === 'string' 
+                          ? (order as any).shippingZipCode 
+                          : (order.shippingAddress as any)?.zipCode || (order as any).shippingZipCode || t('not_provided')}
                       </InfoValue>
                     </InfoItem>
                     <InfoItem>
                       <InfoLabel>{t('country')}</InfoLabel>
                       <InfoValue>
-                        {order.shippingAddress?.country || order.shippingCountry || t('default_country')}
+                        {typeof order.shippingAddress === 'string' 
+                          ? (order as any).shippingCountry 
+                          : (order.shippingAddress as any)?.country || (order as any).shippingCountry || t('default_country')}
                       </InfoValue>
                     </InfoItem>
                   </InfoList>
@@ -762,7 +770,7 @@ const OrderDetailPage = () => {
                             alt={(item.product && item.product.name) || t('product_name')}
                           />
                           <div>
-                            <ProductName>{(item.product && item.product.name) || item.name || t('product_name')}</ProductName>
+                            <ProductName>{(item.product && item.product.name) || (item as any).name || t('product_name')}</ProductName>
                             <ProductSku>SKU: {(item.product && item.product.id) || item.productId || t('not_available')}</ProductSku>
                           </div>
                         </ProductInfo>

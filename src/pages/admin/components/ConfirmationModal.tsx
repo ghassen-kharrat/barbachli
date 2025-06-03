@@ -6,12 +6,13 @@ interface ConfirmationModalProps {
   isOpen: boolean;
   title: string;
   message: string;
-  confirmText?: string;
-  cancelText?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm: () => void;
-  onCancel: () => void;
+  onClose: () => void;
   isLoading?: boolean;
   icon?: 'warning' | 'delete' | 'question';
+  type?: 'danger' | 'warning' | 'info';
 }
 
 const ModalOverlay = styled.div`
@@ -158,24 +159,25 @@ const ConfirmationModal = ({
   isOpen,
   title,
   message,
-  confirmText = 'Confirmer',
-  cancelText = 'Annuler',
+  confirmLabel = 'Confirmer',
+  cancelLabel = 'Annuler',
   onConfirm,
-  onCancel,
+  onClose,
   isLoading = false,
-  icon = 'warning'
+  icon = 'warning',
+  type = 'warning'
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;
   
   return (
-    <ModalOverlay onClick={onCancel}>
+    <ModalOverlay onClick={onClose}>
       <ModalContent onClick={e => e.stopPropagation()}>
-        <CloseButton onClick={onCancel}>
+        <CloseButton onClick={onClose}>
           <FaIcons.FaTimes />
         </CloseButton>
         
         <ModalHeader>
-          <IconWrapper $color={icon}>
+          <IconWrapper $color={type === 'danger' ? 'delete' : type === 'warning' ? 'warning' : 'question'}>
             <FaIcons.FaExclamationTriangle />
           </IconWrapper>
           <Title>{title}</Title>
@@ -184,16 +186,16 @@ const ConfirmationModal = ({
         <Message>{message}</Message>
         
         <ButtonGroup>
-          <CancelButton onClick={onCancel} disabled={isLoading}>
-            {cancelText}
+          <CancelButton onClick={onClose} disabled={isLoading}>
+            {cancelLabel}
           </CancelButton>
-          {icon === 'delete' ? (
+          {type === 'danger' ? (
             <DeleteButton onClick={onConfirm} disabled={isLoading}>
-              {isLoading ? 'Chargement...' : confirmText}
+              {isLoading ? 'Chargement...' : confirmLabel}
             </DeleteButton>
           ) : (
             <ConfirmButton onClick={onConfirm} disabled={isLoading}>
-              {isLoading ? 'Chargement...' : confirmText}
+              {isLoading ? 'Chargement...' : confirmLabel}
             </ConfirmButton>
           )}
         </ButtonGroup>

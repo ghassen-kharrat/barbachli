@@ -677,8 +677,8 @@ const ProductsPage = () => {
                       <td>
                         <StockIndicator $inStock={product.stock > 0}>
                           {product.stock > 0 ? 
-                            React.createElement(FaCheckCircle) : 
-                            React.createElement(FaExclamationCircle)}
+                            <FaIcons.FaCheckCircle /> : 
+                            <FaIcons.FaExclamationCircle />}
                           {product.stock} {product.stock > 1 ? 'unités' : 'unité'}
                         </StockIndicator>
                       </td>
