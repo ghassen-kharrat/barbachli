@@ -22,7 +22,12 @@ export interface OrderData {
   userId: number;
   reference: string;
   status: OrderStatus;
-  shippingAddress: string;
+  shippingAddress?: string | {
+    street: string;
+    city: string;
+    zipCode: string;
+    country: string;
+  };
   shippingCity: string;
   shippingZipCode: string;
   phoneNumber: string;
@@ -36,11 +41,23 @@ export interface OrderData {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
   };
+  shippingFee?: number;
+  shippingCountry?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  transactionId?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
 }
 
 // Data for creating a new order
 export interface CreateOrderData {
+  items: {
+    productId: number;
+    quantity: number;
+  }[];
   shippingAddress: string;
   shippingCity: string;
   shippingZipCode: string;

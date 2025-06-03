@@ -1,18 +1,10 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import axiosClient from '../../../apis/axios-client';
 import { CategoriesListData, CategoryData, ResponseData } from './types';
 
 // Base URL for category endpoints
 const baseUrl = '/categories';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
-
-// Types for category data
-export interface CategoryData {
-  id?: number;
-  name: string;
-  slug: string;
-  description?: string;
-}
 
 // API service for categories
 const categoriesApi = {
@@ -25,7 +17,8 @@ const categoriesApi = {
       console.log('Raw categories response:', response);
       return response.data;
     } catch (error) {
-      console.error('Categories fetch error:', error.response?.data || error.message);
+      const axiosError = error as AxiosError;
+      console.error('Categories fetch error:', axiosError.response?.data || axiosError.message);
       throw error;
     }
   },
@@ -49,7 +42,8 @@ const categoriesApi = {
       console.log('Raw category creation response:', response);
       return response.data;
     } catch (error) {
-      console.error('Category creation error:', error.response?.data || error.message);
+      const axiosError = error as AxiosError;
+      console.error('Category creation error:', axiosError.response?.data || axiosError.message);
       throw error;
     }
   },

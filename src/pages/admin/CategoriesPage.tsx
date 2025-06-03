@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import axiosClient from '../../apis/axios-client';
 import { useCategories } from '../../features/products/hooks/use-categories-query';
 import { useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 // Styles
 const PageHeader = styled.div`
@@ -147,7 +148,7 @@ const CategoriesPage = () => {
   const { data: categoriesResponse, isLoading, refetch } = useCategories();
   const categories = categoriesResponse?.data || [];
   
-  const handleEditCategory = (id) => {
+  const handleEditCategory = (id: number) => {
     navigate(`/admin/categories/edit/${id}`);
   };
 
@@ -155,19 +156,18 @@ const CategoriesPage = () => {
     navigate('/admin/categories/add');
   };
   
-  const handleDeleteCategory = async (id, name) => {
+  const handleDeleteCategory = async (id: number, name: string) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${name}" ?`)) {
       try {
         const response = await axiosClient.delete(`/categories/${id}`);
-        if (response.data && response.data.success) {
-          toast.success('Catégorie supprimée avec succès');
-          refetch();
-        }
+        toast.success('Catégorie supprimée avec succès');
+        refetch();
       } catch (error) {
         console.error('Error deleting category:', error);
         
-        if (error.response && error.response.data && error.response.data.message) {
-          toast.error(error.response.data.message);
+        const axiosError = error as AxiosError<{message: string}>;
+        if (axiosError.response && axiosError.response.data && 'message' in axiosError.response.data) {
+          toast.error(axiosError.response.data.message);
         } else {
           toast.error('Erreur lors de la suppression de la catégorie');
         }

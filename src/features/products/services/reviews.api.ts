@@ -14,16 +14,19 @@ const reviewsApi = {
       
       // Ensure the response has the expected structure
       if (response) {
+        // Extract the data from the response
+        const responseData = response as unknown as ReviewsListData;
+        
         // Make sure stats.averageRating is a number
-        if (response.stats && response.stats.averageRating) {
-          response.stats.averageRating = Number(response.stats.averageRating);
+        if (responseData.stats && responseData.stats.averageRating) {
+          responseData.stats.averageRating = Number(responseData.stats.averageRating);
         }
         
         // Ensure distribution is properly formatted
-        if (response.stats && response.stats.distribution) {
+        if (responseData.stats && responseData.stats.distribution) {
           // If distribution is not an array or is empty, create a default one
-          if (!Array.isArray(response.stats.distribution) || response.stats.distribution.length === 0) {
-            response.stats.distribution = [
+          if (!Array.isArray(responseData.stats.distribution) || responseData.stats.distribution.length === 0) {
+            responseData.stats.distribution = [
               { rating: 5, count: "0" },
               { rating: 4, count: "0" },
               { rating: 3, count: "0" },
@@ -32,7 +35,7 @@ const reviewsApi = {
             ];
           } else {
             // Ensure each distribution item has the correct format
-            response.stats.distribution = response.stats.distribution.map(item => {
+            responseData.stats.distribution = responseData.stats.distribution.map(item => {
               if (typeof item === 'object' && item !== null) {
                 return {
                   rating: Number(item.rating || 0),
@@ -44,7 +47,7 @@ const reviewsApi = {
           }
         }
         
-        return response as unknown as ReviewsListData;
+        return responseData;
       } else {
         console.error('Unexpected API response structure:', response);
         // Return a properly structured response even if the API returns something unexpected

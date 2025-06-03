@@ -584,7 +584,7 @@ const CarouselPage: React.FC = () => {
                 <ModalTitle>{t('confirm_delete')}</ModalTitle>
               </ModalHeader>
               <ModalContent>
-                {t('confirm_delete_carousel_slide', { title: selectedSlide.title })}
+                {t('confirm_delete_carousel_slide')}
               </ModalContent>
               <ModalActions>
                 <CancelButton onClick={() => setShowDeleteModal(false)}>

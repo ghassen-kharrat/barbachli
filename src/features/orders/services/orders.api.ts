@@ -46,7 +46,7 @@ const ordersApi = {
     try {
       const response = await axiosClient.put(`${baseUrl}/${id}/status`, data);
       console.log('Status update response:', response);
-      return response;
+      return response as unknown as OrderResponseData;
     } catch (error) {
       console.error('API error updating status:', error);
       throw error;

@@ -100,6 +100,7 @@ export const FaIcons = {
   FaBook: (props: IconBaseProps = {}) => <span><ReactIcons.FaBook {...props} /></span>,
   FaKey: (props: IconBaseProps = {}) => <span><ReactIcons.FaKey {...props} /></span>,
   FaStore: (props: IconBaseProps = {}) => <span><ReactIcons.FaStore {...props} /></span>,
+  FaLayerGroup: (props: IconBaseProps = {}) => <span><ReactIcons.FaLayerGroup {...props} /></span>,
   
   // Add missing icons used in OrderDetailPage.tsx
   FaSync: (props: IconBaseProps = {}) => <span><ReactIcons.FaSync {...props} /></span>,
