@@ -2,18 +2,11 @@ import React from 'react';
 import * as ReactIcons from 'react-icons/fa';
 import * as FiIcons from 'react-icons/fi';
 import { IconBaseProps } from 'react-icons';
+import { PatchedIcons } from './IconWrapper';
 
-// Use a simpler approach to avoid type issues
+// Use the patched icons instead of the direct imports
 export const FaIcons = {
-  // Instead of wrapping each icon in a component, use the React components directly
-  ...ReactIcons,
-  
-  // Only add special handling for FaSpinner which needs a wrapper
-  FaSpinner: (props: IconBaseProps = {}) => (
-    <span className="icon-spinner">
-      <ReactIcons.FaSpinner {...props} />
-    </span>
-  )
+  ...PatchedIcons
 };
 
 // Export FiIcons for use in the app

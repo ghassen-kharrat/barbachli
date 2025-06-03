@@ -5,6 +5,7 @@ import { FaIcons } from '../../pages/admin/components/Icons';
 import { CarouselSlide } from '../../features/carousel/types';
 import { useCarouselSlides } from '../../features/carousel/hooks/use-carousel-query';
 import { useLanguage } from '../../provider/LanguageProvider';
+import IconWrapper from '../../pages/admin/components/IconWrapper';
 
 // Keyframes for animations
 const fadeIn = keyframes`
@@ -360,7 +361,7 @@ const HomeCarousel: React.FC = () => {
     return (
       <CarouselContainer>
         <LoadingState>
-          <FaIcons.FaSpinner style={{ animation: 'spin 1s linear infinite', fontSize: '2rem' }} />
+          <IconWrapper icon="FaSpinner" props={{ style: { animation: 'spin 1s linear infinite', fontSize: '2rem' } }} />
         </LoadingState>
       </CarouselContainer>
     );
@@ -381,10 +382,10 @@ const HomeCarousel: React.FC = () => {
       
       <CarouselArrows>
         <ArrowButton onClick={prevSlide} aria-label={isRTL ? t('next') : t('previous')}>
-          {isRTL ? <FaIcons.FaChevronRight /> : <FaIcons.FaChevronLeft />}
+          {isRTL ? <IconWrapper icon="FaChevronRight" /> : <IconWrapper icon="FaChevronLeft" />}
         </ArrowButton>
         <ArrowButton onClick={nextSlide} aria-label={isRTL ? t('previous') : t('next')}>
-          {isRTL ? <FaIcons.FaChevronLeft /> : <FaIcons.FaChevronRight />}
+          {isRTL ? <IconWrapper icon="FaChevronLeft" /> : <IconWrapper icon="FaChevronRight" />}
         </ArrowButton>
       </CarouselArrows>
       
