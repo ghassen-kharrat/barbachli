@@ -1,27 +1,9 @@
-import React, { useState, useEffect, ReactElement } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 import axios from 'axios';
-import { BiCategory } from 'react-icons/bi';
-import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { useLanguage } from '../../provider/LanguageProvider';
-import { FaIcons } from '../../pages/admin/components/Icons';
-import { IconBaseProps } from 'react-icons';
-
-// Simple wrapper function for icons
-function IconWrapper(Component: any): React.FC<IconBaseProps> {
-  return (props) => React.createElement('span', {}, React.createElement(Component, props));
-}
-
-// Create icon components
-const BiIcons = {
-  BiCategory: IconWrapper(BiCategory)
-};
-
-const ChevronIcons = {
-  FaChevronUp: ({size}: {size?: number}) => React.createElement('span', {}, React.createElement(FaChevronUp, {size})),
-  FaChevronDown: ({size}: {size?: number}) => React.createElement('span', {}, React.createElement(FaChevronDown, {size}))
-};
+import { FaList, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 
 // Types
 interface Category {
@@ -40,26 +22,22 @@ const SidebarContainer = styled.div`
   overflow: hidden;
   margin-bottom: 1.5rem;
   height: fit-content;
-  max-height: calc(100vh - 100px); /* Limit height to viewport minus some space for header */
+  max-height: calc(100vh - 100px);
   overflow-y: auto;
   
-  /* Hide scrollbar for Chrome, Safari and Opera */
   &::-webkit-scrollbar {
     width: 6px;
   }
   
-  /* Track */
   &::-webkit-scrollbar-track {
     background: var(--card-bg);
   }
   
-  /* Handle */
   &::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: 3px;
   }
   
-  /* Handle on hover */
   &::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
   }
@@ -115,7 +93,7 @@ const CategoryLink = styled.div<{ $isActive?: boolean; $rtl?: boolean }>`
   `}
 `;
 
-const CategoryIcon = styled.span<{ $rtl?: boolean }>`
+const IconWrapper = styled.span<{ $rtl?: boolean }>`
   margin-right: ${props => props.$rtl ? '0' : '0.75rem'};
   margin-left: ${props => props.$rtl ? '0.75rem' : '0'};
   display: flex;
@@ -179,18 +157,6 @@ const ErrorState = styled.div`
   color: var(--danger-color);
 `;
 
-// Dynamic icon component
-const DynamicIcon = ({ iconName }: { iconName: string | null }) => {
-  if (!iconName) {
-    const Icon = BiIcons.BiCategory;
-    return <Icon />;
-  }
-
-  // Check if icon exists in FaIcons
-  const IconComponent = (FaIcons as any)[iconName] || BiIcons.BiCategory;
-  return <IconComponent />;
-};
-
 // Helper function to map category names to translation keys
 const getCategoryTranslationKey = (name: string): string => {
   const categoryMap: Record<string, string> = {
@@ -217,8 +183,6 @@ const getCategoryTranslationKey = (name: string): string => {
     'Ordinateurs de bureau': 'subcategory_desktops',
     'Périphériques': 'subcategory_peripherals',
     'Stockage': 'subcategory_storage',
-    
-    // Add more subcategories as needed
   };
   
   return categoryMap[name] || '';
@@ -265,13 +229,11 @@ const CategorySidebar: React.FC = () => {
     if (category.subcategories && category.subcategories.length > 0) {
       toggleCategory(category.id);
     } else {
-      // Store original category name for navigation even when displaying translated names
       navigate(`/products?category=${encodeURIComponent(category.name)}`);
     }
   };
 
   const handleSubcategoryClick = (subcategory: Category) => {
-    // Store original subcategory name for navigation even when displaying translated names
     navigate(`/products?category=${encodeURIComponent(subcategory.name)}`);
   };
 
@@ -287,7 +249,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <BiIcons.BiCategory /> {t('categories')}
+          <FaList /> {t('categories')}
         </SidebarHeader>
         <LoadingState>{t('loading_categories')}</LoadingState>
       </SidebarContainer>
@@ -298,7 +260,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <BiIcons.BiCategory /> {t('categories')}
+          <FaList /> {t('categories')}
         </SidebarHeader>
         <ErrorState>{error}</ErrorState>
       </SidebarContainer>
@@ -309,7 +271,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <BiIcons.BiCategory /> {t('categories')}
+          <FaList /> {t('categories')}
         </SidebarHeader>
         <LoadingState>{t('no_categories_found')}</LoadingState>
       </SidebarContainer>
@@ -319,7 +281,7 @@ const CategorySidebar: React.FC = () => {
   return (
     <SidebarContainer>
       <SidebarHeader>
-        <BiIcons.BiCategory /> {t('categories')}
+        <FaList /> {t('categories')}
       </SidebarHeader>
       <CategoryList>
         {categories.map(category => (
@@ -334,17 +296,17 @@ const CategorySidebar: React.FC = () => {
                 alignItems: 'center',
                 flexDirection: language === 'ar' ? 'row-reverse' : 'row' 
               }}>
-                <CategoryIcon $rtl={language === 'ar'}>
-                  <DynamicIcon iconName={category.icon} />
-                </CategoryIcon>
+                <IconWrapper $rtl={language === 'ar'}>
+                  <FaList />
+                </IconWrapper>
                 <CategoryName>{getCategoryDisplayName(category)}</CategoryName>
               </div>
               {category.subcategories && category.subcategories.length > 0 && (
                 <ExpandIcon>
                   {expandedCategories[category.id] ? (
-                    <ChevronIcons.FaChevronUp size={12} />
+                    <FaChevronUp size={12} />
                   ) : (
-                    <ChevronIcons.FaChevronDown size={12} />
+                    <FaChevronDown size={12} />
                   )}
                 </ExpandIcon>
               )}
