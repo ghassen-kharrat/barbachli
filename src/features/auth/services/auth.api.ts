@@ -23,8 +23,19 @@ const directApiClient = axios.create({
   withCredentials: false
 });
 
+// Determine if data is already in snake_case format
+function isSnakeCaseData(data: any): boolean {
+  return data && (data.first_name !== undefined || data.last_name !== undefined);
+}
+
 // Convert our frontend snake_case fields to match backend expectations
-function convertRegistrationData(data: RegisterData) {
+function convertRegistrationData(data: RegisterData | any) {
+  // If data is already in snake_case format, use it directly
+  if (isSnakeCaseData(data)) {
+    console.log('Data is already in snake_case format');
+    return data;
+  }
+  
   // Ensure we don't send confirmPassword to the backend
   const { confirmPassword, ...safeData } = data as any;
   
@@ -68,11 +79,11 @@ const authApi = {
   },
   
   // Enregistrement d'un nouvel utilisateur
-  register: async (data: RegisterData): Promise<AuthResponseData> => {
+  register: async (data: RegisterData | any): Promise<AuthResponseData> => {
     try {
       console.log('Registering user with data:', { ...data, password: '******' });
       
-      // Convert data to match backend expectations
+      // Convert data to match backend expectations if needed
       const adaptedData = convertRegistrationData(data);
       console.log('Adapted registration data:', { ...adaptedData, password: '******' });
       

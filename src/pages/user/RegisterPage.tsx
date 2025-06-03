@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import { styled } from 'styled-components';
 import UserLayout from '../../layouts/UserLayout';
 import { useRegister } from '../../features/auth/hooks/use-auth-query';
+import { useState } from 'react';
 
 // Styles
 const PageContainer = styled.div`
@@ -108,6 +109,7 @@ const validationSchema = Yup.object({
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { mutate: register, isPending: isLoading, error } = useRegister();
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
   
   const formik = useFormik({
     initialValues: {
@@ -120,11 +122,18 @@ const RegisterPage = () => {
     },
     validationSchema,
     onSubmit: (values) => {
+      // Check if passwords match
+      if (values.password !== values.confirmPassword) {
+        setPasswordMismatch(true);
+        return;
+      }
+      
+      setPasswordMismatch(false);
+      
       // Only send the required fields to the backend
-      // Remove confirmPassword as backend doesn't expect it
       const registrationData = {
-        firstName: values.firstName,
-        lastName: values.lastName,
+        first_name: values.firstName,
+        last_name: values.lastName,
         email: values.email,
         password: values.password,
         phone: values.phone || ''
@@ -215,7 +224,10 @@ const RegisterPage = () => {
               type="password"
               placeholder="Votre mot de passe"
               value={formik.values.password}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                formik.handleChange(e);
+                if (passwordMismatch) setPasswordMismatch(false);
+              }}
               onBlur={formik.handleBlur}
             />
             {formik.touched.password && formik.errors.password && (
@@ -231,13 +243,20 @@ const RegisterPage = () => {
               type="password"
               placeholder="Confirmez votre mot de passe"
               value={formik.values.confirmPassword}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                formik.handleChange(e);
+                if (passwordMismatch) setPasswordMismatch(false);
+              }}
               onBlur={formik.handleBlur}
             />
             {formik.touched.confirmPassword && formik.errors.confirmPassword && (
               <ErrorText>{formik.errors.confirmPassword}</ErrorText>
             )}
           </FormGroup>
+          
+          {passwordMismatch && (
+            <ErrorText>Les mots de passe ne correspondent pas</ErrorText>
+          )}
           
           {error && (
             <ErrorText>

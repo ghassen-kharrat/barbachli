@@ -2,13 +2,19 @@
 const axios = require('axios');
 const mockData = require('../mockData');
 
+// Helper function to check if data is already in snake_case format
+function isSnakeCaseData(body) {
+  return body && (body.first_name !== undefined || body.last_name !== undefined);
+}
+
 // Helper function to convert field names if needed
 function adaptRequestBody(body) {
   // Make sure we remove any confirmPassword field that might be present
   const { confirmPassword, ...cleanBody } = body;
   
   // If the request already uses snake_case, no need to convert
-  if (cleanBody.first_name) {
+  if (isSnakeCaseData(cleanBody)) {
+    console.log('Request body is already in snake_case format');
     return cleanBody;
   }
   
@@ -112,12 +118,13 @@ module.exports = async (req, res) => {
     
     // Forward registration request to backend with increased timeout
     try {
+      console.log('Making direct API request to backend...');
       const response = await axios.post(url, adaptedBody, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        timeout: 30000 // 30 second timeout
+        timeout: 40000 // 40 second timeout
       });
       
       // Return the response from the backend
@@ -130,6 +137,7 @@ module.exports = async (req, res) => {
       });
     } catch (requestError) {
       console.error('Error during request to backend:', requestError.message);
+      console.error('Error details:', requestError.response?.data || 'No response data');
       
       // If the backend is slow or returns a 5xx error, we'll use mockData for testing
       if (requestError.code === 'ECONNABORTED' || 
@@ -140,6 +148,17 @@ module.exports = async (req, res) => {
       
       // For other errors, return the error response
       if (requestError.response) {
+        // Special handling for password errors
+        if (requestError.response.data && 
+            (requestError.response.data.message?.includes('mot de passe') || 
+             requestError.response.data.error?.includes('mot de passe'))) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Les mots de passe ne correspondent pas',
+            error: 'PASSWORD_MISMATCH'
+          });
+        }
+        
         return res.status(requestError.response.status).json({
           status: 'error',
           message: requestError.response.data?.message || 'Registration failed',
