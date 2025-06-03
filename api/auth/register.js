@@ -21,8 +21,13 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Log the request body for debugging
-  console.log('Register request body:', req.body);
+  // Log the request body for debugging (without password)
+  if (req.body) {
+    const { password, ...safeBody } = req.body;
+    console.log('Register request body:', { ...safeBody, password: '******' });
+  } else {
+    console.log('Register request body is empty or undefined');
+  }
 
   try {
     // Forward registration request to backend with timeout
@@ -35,6 +40,7 @@ module.exports = async (req, res) => {
     });
     
     // Return the response from the backend
+    console.log('Registration successful:', response.status);
     res.status(200).json({
       status: 'success',
       data: response.data
@@ -51,10 +57,12 @@ module.exports = async (req, res) => {
       });
     }
     
-    // Forward the error from the backend
+    // Forward the error from the backend with detailed logging
     if (error.response) {
+      console.error('Backend returned error:', error.response.status, error.response.data);
       res.status(error.response.status).json(error.response.data);
     } else {
+      console.error('Unknown error during registration:', error);
       res.status(500).json({ 
         status: 'error',
         message: 'Registration failed. Please try again later.',
