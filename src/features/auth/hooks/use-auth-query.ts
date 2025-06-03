@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import authApi from '../services/auth.api';
 import { ChangePasswordData, LoginData, RegisterData, UpdateProfileData } from '../services/types';
+import { useEffect } from 'react';
 
 // Clés de requête pour React Query
 export const AUTH_QUERY_KEYS = {
@@ -11,7 +12,7 @@ export const AUTH_QUERY_KEYS = {
 
 // Hook pour vérifier l'authentification
 export const useAuthCheck = () => {
-  return useQuery({
+  const query = useQuery({
     queryKey: AUTH_QUERY_KEYS.check(),
     queryFn: () => authApi.checkAuth(),
     retry: false,
@@ -24,13 +25,17 @@ export const useAuthCheck = () => {
     // même si le fetch échoue
     meta: {
       suppressErrorMessages: true
-    },
-    // Gérer les erreurs 401 (non autorisé) silencieusement
-    onError: () => {
-      localStorage.removeItem('auth_token');
-      return { data: null };
     }
   });
+  
+  // Handle errors separately using useEffect
+  useEffect(() => {
+    if (query.error) {
+      localStorage.removeItem('auth_token');
+    }
+  }, [query.error]);
+  
+  return query;
 };
 
 // Hook pour récupérer le profil utilisateur
