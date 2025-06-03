@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 import axios from 'axios';
 import { useLanguage } from '../../provider/LanguageProvider';
-import { FaList, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 
 // Types
 interface Category {
@@ -13,6 +12,25 @@ interface Category {
   icon: string | null;
   subcategories: Category[];
 }
+
+// Simple SVG icons as components
+const ListIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+    <path fillRule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+  </svg>
+);
+
+const ChevronUpIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+    <path fillRule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+    <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+  </svg>
+);
 
 // Styled Components
 const SidebarContainer = styled.div`
@@ -249,7 +267,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <FaList /> {t('categories')}
+          <ListIcon /> {t('categories')}
         </SidebarHeader>
         <LoadingState>{t('loading_categories')}</LoadingState>
       </SidebarContainer>
@@ -260,7 +278,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <FaList /> {t('categories')}
+          <ListIcon /> {t('categories')}
         </SidebarHeader>
         <ErrorState>{error}</ErrorState>
       </SidebarContainer>
@@ -271,7 +289,7 @@ const CategorySidebar: React.FC = () => {
     return (
       <SidebarContainer>
         <SidebarHeader>
-          <FaList /> {t('categories')}
+          <ListIcon /> {t('categories')}
         </SidebarHeader>
         <LoadingState>{t('no_categories_found')}</LoadingState>
       </SidebarContainer>
@@ -281,7 +299,7 @@ const CategorySidebar: React.FC = () => {
   return (
     <SidebarContainer>
       <SidebarHeader>
-        <FaList /> {t('categories')}
+        <ListIcon /> {t('categories')}
       </SidebarHeader>
       <CategoryList>
         {categories.map(category => (
@@ -297,16 +315,16 @@ const CategorySidebar: React.FC = () => {
                 flexDirection: language === 'ar' ? 'row-reverse' : 'row' 
               }}>
                 <IconWrapper $rtl={language === 'ar'}>
-                  <FaList />
+                  <ListIcon />
                 </IconWrapper>
                 <CategoryName>{getCategoryDisplayName(category)}</CategoryName>
               </div>
               {category.subcategories && category.subcategories.length > 0 && (
                 <ExpandIcon>
                   {expandedCategories[category.id] ? (
-                    <FaChevronUp size={12} />
+                    <ChevronUpIcon />
                   ) : (
-                    <FaChevronDown size={12} />
+                    <ChevronDownIcon />
                   )}
                 </ExpandIcon>
               )}
