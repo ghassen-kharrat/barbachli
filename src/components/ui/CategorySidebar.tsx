@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 import axios from 'axios';
@@ -8,27 +8,19 @@ import { useLanguage } from '../../provider/LanguageProvider';
 import { FaIcons } from '../../pages/admin/components/Icons';
 import { IconBaseProps } from 'react-icons';
 
-// Create explicit React functional components for icons
-const BiCategoryIcon: React.FC<IconBaseProps> = (props) => {
-  return <BiCategory {...props} />;
-};
+// Simple wrapper function for icons
+function IconWrapper(Component: any): React.FC<IconBaseProps> {
+  return (props) => React.createElement('span', {}, React.createElement(Component, props));
+}
 
-const FaChevronUpIcon: React.FC<{size?: number}> = ({size}) => {
-  return <FaChevronUp size={size} />;
-};
-
-const FaChevronDownIcon: React.FC<{size?: number}> = ({size}) => {
-  return <FaChevronDown size={size} />;
-};
-
-// Wrapper objects for consistent usage
+// Create icon components
 const BiIcons = {
-  BiCategory: BiCategoryIcon
+  BiCategory: IconWrapper(BiCategory)
 };
 
 const ChevronIcons = {
-  FaChevronUp: FaChevronUpIcon,
-  FaChevronDown: FaChevronDownIcon
+  FaChevronUp: ({size}: {size?: number}) => React.createElement('span', {}, React.createElement(FaChevronUp, {size})),
+  FaChevronDown: ({size}: {size?: number}) => React.createElement('span', {}, React.createElement(FaChevronDown, {size}))
 };
 
 // Types
@@ -189,7 +181,10 @@ const ErrorState = styled.div`
 
 // Dynamic icon component
 const DynamicIcon = ({ iconName }: { iconName: string | null }) => {
-  if (!iconName) return <BiIcons.BiCategory />;
+  if (!iconName) {
+    const Icon = BiIcons.BiCategory;
+    return <Icon />;
+  }
 
   // Check if icon exists in FaIcons
   const IconComponent = (FaIcons as any)[iconName] || BiIcons.BiCategory;
@@ -340,7 +335,7 @@ const CategorySidebar: React.FC = () => {
                 flexDirection: language === 'ar' ? 'row-reverse' : 'row' 
               }}>
                 <CategoryIcon $rtl={language === 'ar'}>
-                  <BiIcons.BiCategory />
+                  <DynamicIcon iconName={category.icon} />
                 </CategoryIcon>
                 <CategoryName>{getCategoryDisplayName(category)}</CategoryName>
               </div>
