@@ -31,13 +31,13 @@ export interface LoginData {
 
 // Type pour l'enregistrement d'un nouvel utilisateur
 export interface RegisterData {
-  username: string;
+  username?: string;
   email: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
   firstName: string;
   lastName: string;
-  phone: string;
+  phone?: string;
   address?: string;
   city?: string;
   zipCode?: string;

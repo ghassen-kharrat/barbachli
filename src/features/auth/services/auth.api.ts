@@ -25,12 +25,15 @@ const directApiClient = axios.create({
 
 // Convert our frontend snake_case fields to match backend expectations
 function convertRegistrationData(data: RegisterData) {
+  // Ensure we don't send confirmPassword to the backend
+  const { confirmPassword, ...safeData } = data as any;
+  
   return {
-    first_name: data.firstName,
-    last_name: data.lastName,
-    email: data.email,
-    password: data.password,
-    phone: data.phone
+    first_name: safeData.firstName,
+    last_name: safeData.lastName,
+    email: safeData.email,
+    password: safeData.password,
+    phone: safeData.phone || ''
   };
 }
 
@@ -97,6 +100,7 @@ const authApi = {
         console.error('Vercel proxy registration failed, trying direct API:', proxyError);
         
         // If Vercel proxy fails, try direct API
+        console.log('Trying direct API call to:', directApiClient.defaults.baseURL + '/auth/register');
         const directResponse = await directApiClient.post('/auth/register', adaptedData);
         
         // Stocker le token dans le localStorage
@@ -111,7 +115,24 @@ const authApi = {
       }
     } catch (error) {
       console.error('Registration failed completely:', error);
-      throw error;
+      
+      // Format a better error message
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (axios.isAxiosError(error) && error.response) {
+        // Try to extract error message from backend
+        const backendMessage = error.response.data?.message || error.response.data?.error;
+        if (backendMessage) {
+          errorMessage = `Registration failed: ${backendMessage}`;
+        }
+        
+        // Check for password mismatch errors
+        if (error.response.data?.error && error.response.data.error.includes('password')) {
+          errorMessage = 'The passwords do not match.';
+        }
+      }
+      
+      throw new Error(errorMessage);
     }
   },
   

@@ -99,7 +99,6 @@ const validationSchema = Yup.object({
   lastName: Yup.string().required('Le nom est requis'),
   email: Yup.string().email('Email invalide').required('Email requis'),
   phone: Yup.string(),
-  username: Yup.string(),
   password: Yup.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères').required('Mot de passe requis'),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password')], 'Les mots de passe doivent correspondre')
@@ -117,20 +116,23 @@ const RegisterPage = () => {
       email: '',
       password: '',
       confirmPassword: '',
-      username: '',
       phone: ''
     },
     validationSchema,
     onSubmit: (values) => {
-      register({
+      // Only send the required fields to the backend
+      // Remove confirmPassword as backend doesn't expect it
+      const registrationData = {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         password: values.password,
-        confirmPassword: values.confirmPassword,
-        username: values.email, // Use email as username by default
         phone: values.phone || ''
-      }, {
+      };
+      
+      console.log('Submitting registration with data:', { ...registrationData, password: '******' });
+      
+      register(registrationData, {
         onSuccess: () => {
           navigate('/login?registered=true');
         }

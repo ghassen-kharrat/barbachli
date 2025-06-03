@@ -4,23 +4,39 @@ const mockData = require('../mockData');
 
 // Helper function to convert field names if needed
 function adaptRequestBody(body) {
+  // Make sure we remove any confirmPassword field that might be present
+  const { confirmPassword, ...cleanBody } = body;
+  
   // If the request already uses snake_case, no need to convert
-  if (body.first_name) {
-    return body;
+  if (cleanBody.first_name) {
+    return cleanBody;
   }
   
   // Convert camelCase to snake_case
   return {
-    first_name: body.firstName || body.first_name,
-    last_name: body.lastName || body.last_name,
-    email: body.email,
-    password: body.password,
-    phone: body.phone,
+    first_name: cleanBody.firstName || cleanBody.first_name,
+    last_name: cleanBody.lastName || cleanBody.last_name,
+    email: cleanBody.email,
+    password: cleanBody.password,
+    phone: cleanBody.phone,
     // Include other fields if needed
-    address: body.address,
-    city: body.city,
-    zip_code: body.zipCode || body.zip_code
+    address: cleanBody.address,
+    city: cleanBody.city,
+    zip_code: cleanBody.zipCode || cleanBody.zip_code
   };
+}
+
+// Validate password before sending to backend
+function validateRequest(body) {
+  // Check if confirmPassword exists and is different from password
+  if (body.confirmPassword !== undefined && body.confirmPassword !== body.password) {
+    return {
+      valid: false,
+      error: "Les mots de passe ne correspondent pas"
+    };
+  }
+  
+  return { valid: true };
 }
 
 module.exports = async (req, res) => {
@@ -68,6 +84,17 @@ module.exports = async (req, res) => {
     console.log('Register request body:', { ...safeBody, password: '******' });
   } catch (e) {
     console.error('Error parsing request body:', e.message);
+  }
+  
+  // Validate request before sending to backend
+  const validation = validateRequest(req.body);
+  if (!validation.valid) {
+    console.error('Validation error:', validation.error);
+    return res.status(400).json({
+      status: 'error',
+      message: validation.error,
+      error: validation.error
+    });
   }
 
   try {
