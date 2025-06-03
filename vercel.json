@@ -5,7 +5,11 @@
   "framework": "create-react-app",
   "env": {
     "TSC_COMPILE_ON_ERROR": "true",
-    "CI": "false"
+    "CI": "false",
+    "REACT_APP_API_URL": "/api",
+    "BACKEND_URL": "https://barbachli-1.onrender.com",
+    "SUPABASE_URL": "https://iptgkvofawoqvykmkcrk.supabase.co",
+    "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdGdrdm9mYXdvcXZ5a21rY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjkxMTMsImV4cCI6MjA2NDQ0NTExM30.oUsFpKGgeddXRU5lbaeaufBZ2wV7rnl1a0h2YEfC9b8"
   },
   "headers": [
     {
