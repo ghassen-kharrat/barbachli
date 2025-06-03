@@ -102,4 +102,16 @@ If you encounter issues during deployment:
 
 The project has been configured to build successfully despite TypeScript errors by setting `TSC_COMPILE_ON_ERROR=true` in the build script. This allows deployment while there are still some type issues in the codebase.
 
-For a production environment, it's recommended to gradually fix these TypeScript errors to ensure better code quality and prevent potential runtime issues. 
+For a production environment, it's recommended to gradually fix these TypeScript errors to ensure better code quality and prevent potential runtime issues. The main TypeScript errors that need to be addressed include:
+
+1. URL.createObjectURL() type issues in ProductForm.tsx
+2. FormErrors interface property access in various components
+3. Type conversions for price and discountPrice properties
+4. Order property type issues in OrderDetailPage.tsx
+5. User data property naming conventions (firstName vs first_name, etc.)
+
+To fix these issues systematically, consider:
+- Adding proper type assertions for File objects
+- Defining complete interfaces for all data structures
+- Using consistent property naming across the application
+- Implementing proper type guards for conditional rendering 
