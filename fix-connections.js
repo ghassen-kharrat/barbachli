@@ -8,7 +8,7 @@ const path = require('path');
 // Configuration
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://iptgkvofawoqvykmkcrk.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdGdrdm9mYXdvcXZ5a21rY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjkxMTMsImV4cCI6MjA2NDQ0NTExM30.oUsFpKGgeddXRU5lbaeaufBZ2wV7rnl1a0h2YEfC9b8';
-const BACKEND_URL = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://barbachli-auth.onrender.com';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://barbachli.vercel.app';
 
 // Create Supabase client

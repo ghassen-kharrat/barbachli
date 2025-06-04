@@ -188,7 +188,7 @@ module.exports = async (req, res) => {
     console.log('Forwarding registration request to backend...');
     
     // Always use a direct backend URL
-    const backendBaseUrl = 'https://barbachli-1.onrender.com';
+    const backendBaseUrl = 'https://barbachli-auth.onrender.com';
     const url = `${backendBaseUrl}/api/auth/register`;
     
     console.log(`Sending request to: ${url}`);

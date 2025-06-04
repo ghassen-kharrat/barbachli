@@ -101,9 +101,13 @@ const authApi = {
             localStorage.setItem('auth_token', response.data.token);
           }
           
+          // Log user role
+          const userData = response.data.data || response.data;
+          console.log(`Login successful - User: ${userData.email}, Role: ${userData.role}`);
+          
           return {
             success: true,
-            data: response.data.data || response.data
+            data: userData
           };
         } catch (directError) {
           console.error('Direct API login failed:', directError);
@@ -125,9 +129,13 @@ const authApi = {
         localStorage.setItem('auth_token', response.data.data.token);
       }
       
+      // Log user role
+      const userData = response.data.data || response.data;
+      console.log(`Login successful - User: ${userData.email}, Role: ${userData.role}`);
+      
       return {
         success: true,
-        data: response.data.data || response.data
+        data: userData
       };
     } catch (error) {
       console.error('Login error:', error);

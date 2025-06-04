@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
   const path = req.url.replace(/^\/api/, '');
   
   // Use environment variable for backend URL if available, otherwise use hardcoded URL
-  const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+  const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-auth.onrender.com';
   const backendUrl = `${backendBaseUrl}/api${path}`;
   
   console.log(`Proxying request to: ${backendUrl}`);

@@ -43,7 +43,7 @@ async function testLogin() {
       // Try direct backend
       console.log('\nTrying login via direct backend...');
       try {
-        const directResponse = await axios.post('https://barbachli-1.onrender.com/api/auth/login', credentials, {
+        const directResponse = await axios.post('https://barbachli-auth.onrender.com/api/auth/login', credentials, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'

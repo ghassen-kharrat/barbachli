@@ -3,7 +3,7 @@ const axios = require('axios');
 
 // Configuration
 const LOCAL_API = 'http://localhost:3001/api';
-const RENDER_API = 'https://barbachli-1.onrender.com/api';
+const RENDER_API = 'https://barbachli-auth.onrender.com/api';
 const VERCEL_API = 'https://barbachli.vercel.app/api';
 
 // Test credentials

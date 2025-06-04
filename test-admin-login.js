@@ -12,7 +12,7 @@ const vercelApi = axios.create({
 });
 
 const backendApi = axios.create({
-  baseURL: 'https://barbachli-1.onrender.com',
+  baseURL: 'https://barbachli-auth.onrender.com',
   timeout: 40000,
   headers: {
     'Content-Type': 'application/json',

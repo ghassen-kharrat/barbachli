@@ -251,6 +251,9 @@ app.post('/api/auth/login', (req, res) => {
     const userData = { ...user };
     delete userData.password;
     
+    // Log user role
+    console.log(`User logged in - Email: ${email}, Role: ${userData.role}, ID: ${userData.id}`);
+    
     return res.json({
       success: true,
       data: {
