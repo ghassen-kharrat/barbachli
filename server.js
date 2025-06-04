@@ -689,6 +689,7 @@ app.get('/api/categories', (req, res) => {
 
 // Catch-all for undefined routes
 app.use('/api/*', (req, res) => {
+  console.log(`404 for: ${req.originalUrl}`);
   res.status(404).json({
     status: 'error',
     message: 'Endpoint not found'
