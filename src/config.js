@@ -3,6 +3,9 @@ const config = {
   // API URL - prioritize hardcoded backend URL for reliability
   apiUrl: 'https://barbachli-1.onrender.com/api',
   
+  // Auth API URL - using dedicated auth service
+  authApiUrl: 'https://barbachli-auth.onrender.com/api',
+  
   // Image base URL
   imageBaseUrl: 'https://barbachli-1.onrender.com/images',
   
@@ -17,6 +20,7 @@ const config = {
     enableLogging: true,
     enableCache: true,
     useDirectSupabase: false, // Set to true if you want to use Supabase client directly in the frontend
+    useDirectAuth: true, // Set to true to use direct auth API calls (bypassing Vercel functions)
   },
   
   // API timeouts

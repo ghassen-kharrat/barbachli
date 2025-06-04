@@ -1,5 +1,6 @@
 import axiosClient from '../../../apis/axios-client';
 import axios from 'axios';
+import config from '../../../config';
 import { 
   AuthResponseData, 
   ChangePasswordData, 
@@ -14,12 +15,12 @@ const baseUrl = '/auth';
 
 // Create a special client just for direct API access
 const directApiClient = axios.create({
-  baseURL: 'https://barbachli-1.onrender.com/api',
+  baseURL: config.authApiUrl, // Use the dedicated auth service URL from config
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 30000, // 30 second timeout
+  timeout: config.timeouts.auth, // Use the auth timeout from config
   withCredentials: false
 });
 
@@ -85,16 +86,41 @@ const authApi = {
   // Connexion utilisateur
   login: async (data: LoginData): Promise<AuthResponseData> => {
     try {
-      // Use Vercel API proxy
+      console.log('Attempting login with auth service...');
+      
+      // Prioritize direct API calls if the feature flag is enabled
+      if (config.features.useDirectAuth) {
+        try {
+          // Use direct API call to dedicated auth service
+          const response = await directApiClient.post('/auth/login', data);
+          
+          // Store token in localStorage
+          if (response.data && response.data.data && response.data.data.token) {
+            localStorage.setItem('auth_token', response.data.data.token);
+          } else if (response.data && response.data.token) {
+            localStorage.setItem('auth_token', response.data.token);
+          }
+          
+          return {
+            success: true,
+            data: response.data.data || response.data
+          };
+        } catch (directError) {
+          console.error('Direct API login failed:', directError);
+          // Fall back to Vercel API proxy
+        }
+      }
+      
+      // Fall back to Vercel API proxy
       const response = await axios.post('/api/auth/login', data, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        timeout: 30000
+        timeout: config.timeouts.auth
       });
       
-      // Stocker le token dans le localStorage
+      // Store token in localStorage
       if (response.data && response.data.data && response.data.data.token) {
         localStorage.setItem('auth_token', response.data.data.token);
       }
@@ -124,59 +150,48 @@ const authApi = {
       const adaptedData = convertRegistrationData(data);
       console.log('Adapted registration data:', { ...adaptedData, password: '******' });
       
-      // First try the Vercel API proxy
-      try {
-        console.log('Trying Vercel API proxy...');
-        const response = await axios.post('/api/auth/register', adaptedData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          timeout: 30000
-        });
-        
-        // Stocker le token dans le localStorage
-        if (response.data && response.data.data && response.data.data.token) {
-          localStorage.setItem('auth_token', response.data.data.token);
-        }
-        
-        return {
-          success: true,
-          data: response.data.data || response.data
-        };
-      } catch (proxyError) {
-        console.error('Vercel proxy registration failed, trying direct API:', proxyError);
-        
-        // Check if this is a password mismatch error
-        if (axios.isAxiosError(proxyError) && proxyError.response?.data) {
-          const errorData = proxyError.response.data;
+      // Prioritize direct API calls if the feature flag is enabled
+      if (config.features.useDirectAuth) {
+        try {
+          console.log('Trying direct API call to:', directApiClient.defaults.baseURL + '/auth/register');
+          const directResponse = await directApiClient.post('/auth/register', adaptedData);
           
-          // Safely check for string inclusion
-          const hasPasswordError = 
-            (typeof errorData.message === 'string' && 
-             (errorData.message.includes('mot de passe') || errorData.message.includes('password'))) ||
-            (typeof errorData.error === 'string' && 
-             (errorData.error.includes('mot de passe') || errorData.error.includes('password')));
-          
-          if (hasPasswordError) {
-            throw new Error('Les mots de passe ne correspondent pas');
+          // Store token in localStorage
+          if (directResponse.data && directResponse.data.data && directResponse.data.data.token) {
+            localStorage.setItem('auth_token', directResponse.data.data.token);
+          } else if (directResponse.data && directResponse.data.token) {
+            localStorage.setItem('auth_token', directResponse.data.token);
           }
+          
+          return {
+            success: true,
+            data: directResponse.data.data || directResponse.data
+          };
+        } catch (directError) {
+          console.error('Direct API registration failed:', directError);
+          // Fall back to Vercel API proxy
         }
-        
-        // If Vercel proxy fails, try direct API
-        console.log('Trying direct API call to:', directApiClient.defaults.baseURL + '/auth/register');
-        const directResponse = await directApiClient.post('/auth/register', adaptedData);
-        
-        // Stocker le token dans le localStorage
-        if (directResponse.data && directResponse.data.token) {
-          localStorage.setItem('auth_token', directResponse.data.token);
-        }
-        
-        return {
-          success: true,
-          data: directResponse.data
-        };
       }
+      
+      // Fall back to Vercel API proxy
+      console.log('Trying Vercel API proxy...');
+      const response = await axios.post('/api/auth/register', adaptedData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        timeout: config.timeouts.auth
+      });
+      
+      // Store token in localStorage
+      if (response.data && response.data.data && response.data.data.token) {
+        localStorage.setItem('auth_token', response.data.data.token);
+      }
+      
+      return {
+        success: true,
+        data: response.data.data || response.data
+      };
     } catch (error) {
       console.error('Registration failed completely:', error);
       
@@ -254,28 +269,34 @@ const authApi = {
   // Vérifier le statut d'authentification
   checkAuth: async (): Promise<UserResponseData> => {
     try {
-      // First try the Vercel API proxy
-      try {
-        const response = await axios.get('/api/auth/check', {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          },
-          timeout: 10000
-        });
-        return response.data.data || response.data;
-      } catch (proxyError) {
-        console.error('Auth check via proxy failed, trying direct API:', proxyError);
-        
-        // If proxy fails, try direct API
-        const directResponse = await directApiClient.get('/auth/check', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        });
-        return directResponse.data;
+      // Prioritize direct API calls if the feature flag is enabled
+      if (config.features.useDirectAuth) {
+        try {
+          console.log('Checking auth via direct API');
+          const directResponse = await directApiClient.get('/auth/check', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            },
+            timeout: 15000
+          });
+          return directResponse.data.data || directResponse.data;
+        } catch (directError) {
+          console.error('Auth check via direct API failed:', directError);
+          // Fall back to Vercel API proxy
+        }
       }
+      
+      // Fall back to Vercel API proxy
+      console.log('Checking auth via proxy');
+      const response = await axios.get('/api/auth/check', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        timeout: 10000
+      });
+      return response.data.data || response.data;
     } catch (error) {
       console.error('Auth check failed completely:', error);
       throw error;
