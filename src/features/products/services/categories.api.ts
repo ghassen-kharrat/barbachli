@@ -1,10 +1,11 @@
 import axios, { AxiosError } from 'axios';
 import axiosClient from '../../../apis/axios-client';
+import config from '../../../config';
 import { CategoriesListData, CategoryData, ResponseData } from './types';
 
 // Base URL for category endpoints
 const baseUrl = '/categories';
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+const API_BASE_URL = config.apiUrl;
 
 // API service for categories
 const categoriesApi = {

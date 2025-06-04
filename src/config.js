@@ -1,13 +1,13 @@
 // Configuration file for the application
 const config = {
-  // API URL - prioritize hardcoded backend URL for reliability
-  apiUrl: 'https://barbachli-1.onrender.com/api',
+  // API URL - now using our enhanced authentication server for all endpoints
+  apiUrl: 'https://barbachli-auth.onrender.com/api',
   
-  // Auth API URL - using dedicated auth service
+  // Auth API URL - using the same enhanced auth service
   authApiUrl: 'https://barbachli-auth.onrender.com/api',
   
   // Image base URL
-  imageBaseUrl: 'https://barbachli-1.onrender.com/images',
+  imageBaseUrl: 'https://barbachli-auth.onrender.com/images',
   
   // Supabase configuration - these will be used by the frontend for direct Supabase client operations if needed
   supabase: {
