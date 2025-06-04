@@ -27,9 +27,7 @@ const PORT = customPort || process.env.PORT || 5001;
 
 // Middlewares
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://barbachli.vercel.app', 'https://barbachli-ecommerce.vercel.app', 'https://barbachli-site.vercel.app'] 
-    : 'http://localhost:3000',
+  origin: '*', // Allow all origins temporarily for debugging
   credentials: true
 }));
 // Increase payload size limit to 50MB for large image uploads
