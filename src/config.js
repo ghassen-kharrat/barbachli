@@ -1,20 +1,20 @@
 // Configuration file for the application
 const config = {
-  // API URL - using barbachli-1 for general endpoints
-  apiUrl: 'https://barbachli-1.onrender.com/api',
+  // API URL - using barbachli-auth for all endpoints
+  apiUrl: 'https://barbachli-auth.onrender.com/api',
   
   // Auth API URL - using barbachli-auth for authentication
   authApiUrl: 'https://barbachli-auth.onrender.com/api',
   
   // Image base URL
-  imageBaseUrl: 'https://barbachli-1.onrender.com/images',
+  imageBaseUrl: 'https://barbachli-auth.onrender.com/images',
   
-  // Endpoints configuration
+  // Endpoints configuration (all using barbachli-auth)
   endpoints: {
     auth: 'https://barbachli-auth.onrender.com/api',
-    products: 'https://barbachli-1.onrender.com/api',
-    categories: 'https://barbachli-1.onrender.com/api',
-    cart: 'https://barbachli-1.onrender.com/api',
+    products: 'https://barbachli-auth.onrender.com/api',
+    categories: 'https://barbachli-auth.onrender.com/api',
+    cart: 'https://barbachli-auth.onrender.com/api',
   },
   
   // Supabase configuration - these will be used by the frontend for direct Supabase client operations if needed
