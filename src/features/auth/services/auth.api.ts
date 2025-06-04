@@ -13,14 +13,14 @@ import {
 // URL de base pour les endpoints d'authentification
 const baseUrl = '/auth';
 
-// Create a special client just for direct API access
+// Create a special client just for direct API access - VERSION MARKER: v1.0.1
 const directApiClient = axios.create({
-  baseURL: config.authApiUrl, // Use the dedicated auth service URL from config
+  baseURL: 'https://barbachli-auth.onrender.com/api', // Force using barbachli-auth
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: config.timeouts.auth, // Use the auth timeout from config
+  timeout: 40000, // Use a longer timeout for auth operations
   withCredentials: false
 });
 
@@ -93,13 +93,13 @@ const authApi = {
         try {
           // Use direct API call to dedicated auth service
           const response = await directApiClient.post('/auth/login', data);
-          
+      
           // Store token in localStorage
           if (response.data && response.data.data && response.data.data.token) {
             localStorage.setItem('auth_token', response.data.data.token);
           } else if (response.data && response.data.token) {
-            localStorage.setItem('auth_token', response.data.token);
-          }
+        localStorage.setItem('auth_token', response.data.token);
+      }
           
           // Log user role
           const userData = response.data.data || response.data;
@@ -163,7 +163,7 @@ const authApi = {
         try {
           console.log('Trying direct API call to:', directApiClient.defaults.baseURL + '/auth/register');
           const directResponse = await directApiClient.post('/auth/register', adaptedData);
-          
+      
           // Store token in localStorage
           if (directResponse.data && directResponse.data.data && directResponse.data.data.token) {
             localStorage.setItem('auth_token', directResponse.data.data.token);
