@@ -1,388 +1,413 @@
+// Simple authentication server with file-based storage
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
+const cors = require('cors');
 
-// Load environment variables
-dotenv.config();
-
-// Create Express application
+// Initialize Express app
 const app = express();
+const PORT = process.env.PORT || 3001;
 
-// Get port from command line arguments or environment variables
-const args = process.argv.slice(2);
-let customPort;
-args.forEach(arg => {
-  if (arg.startsWith('--port=')) {
-    customPort = parseInt(arg.split('=')[1]);
+// Create data directory if it doesn't exist
+const DATA_DIR = path.join(__dirname, 'data');
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// Define database files
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const TOKENS_FILE = path.join(DATA_DIR, 'tokens.json');
+
+// Initialize database
+function initDatabase() {
+  // Create users file if it doesn't exist
+  if (!fs.existsSync(USERS_FILE)) {
+    const defaultUsers = [
+      {
+        id: '57ecae66-fe5e-4c89-9296-5a31240a6a31',
+        email: 'admin@example.com',
+        password: hashPassword('Password123!'),
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'admin',
+        isActive: true
+      },
+      {
+        id: 'e8fd159b-57c4-4d36-9bd7-a59ca13057bb',
+        email: 'test@example.com',
+        password: hashPassword('Password123!'),
+        firstName: 'Test',
+        lastName: 'User',
+        role: 'user',
+        isActive: true
+      }
+    ];
+    fs.writeFileSync(USERS_FILE, JSON.stringify(defaultUsers, null, 2));
+    console.log('Created default users file');
   }
-});
-const PORT = customPort || process.env.PORT || 5001;
 
-// Middlewares
+  // Create tokens file if it doesn't exist
+  if (!fs.existsSync(TOKENS_FILE)) {
+    fs.writeFileSync(TOKENS_FILE, JSON.stringify([], null, 2));
+    console.log('Created tokens file');
+  }
+}
+
+// Hash password
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+// Generate a random token
+function generateToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// Get users from the database
+function getUsers() {
+  if (!fs.existsSync(USERS_FILE)) {
+    return [];
+  }
+  return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+}
+
+// Get tokens from the database
+function getTokens() {
+  if (!fs.existsSync(TOKENS_FILE)) {
+    return [];
+  }
+  return JSON.parse(fs.readFileSync(TOKENS_FILE, 'utf8'));
+}
+
+// Save a token
+function saveToken(token, userId) {
+  const tokens = getTokens();
+  tokens.push({
+    token,
+    userId,
+    createdAt: new Date().toISOString()
+  });
+  fs.writeFileSync(TOKENS_FILE, JSON.stringify(tokens, null, 2));
+}
+
+// Find user by email
+function findUserByEmail(email) {
+  const users = getUsers();
+  return users.find(user => user.email === email);
+}
+
+// Find user by token
+function findUserByToken(token) {
+  const tokens = getTokens();
+  const tokenRecord = tokens.find(t => t.token === token);
+  if (!tokenRecord) return null;
+  
+  const users = getUsers();
+  return users.find(user => user.id === tokenRecord.userId);
+}
+
+// Add a new user
+function addUser(userData) {
+  const users = getUsers();
+  const newUser = {
+    id: crypto.randomUUID(),
+    ...userData,
+    isActive: true
+  };
+  
+  users.push(newUser);
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  return newUser;
+}
+
+// Middleware
+app.use(express.json());
+
+// Configure CORS - very important for cross-domain requests
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://barbachli.vercel.app', 'https://barbachli-ecommerce.vercel.app', 'https://barbachli-site.vercel.app'] 
-    : 'http://localhost:3000',
+  origin: ['https://barbachli.vercel.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true
 }));
-// Increase payload size limit to 50MB for large image uploads
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
-// Create Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || 'https://iptgkvofawoqvykmkcrk.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdGdrdm9mYXdvcXZ5a21rY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjkxMTMsImV4cCI6MjA2NDQ0NTExM30.oUsFpKGgeddXRU5lbaeaufBZ2wV7rnl1a0h2YEfC9b8';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Request logging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
-console.log(`Supabase client initialized with URL: ${supabaseUrl}`);
-
-// Test Supabase connection
-(async () => {
-  try {
-    const { data, error } = await supabase.from('products').select('count');
-    if (error) {
-      console.error('❌ Supabase connection error:', error);
-    } else {
-      console.log('✅ Supabase connection successful!');
-    }
-  } catch (err) {
-    console.error('Error testing Supabase connection:', err);
-  }
-})();
-
-// API status endpoint
-app.get('/api', (req, res) => {
-  res.json({
-    success: true,
-    message: 'API fonctionne correctement',
-    version: '1.0.0',
-    database: 'Supabase',
-    timestamp: new Date()
+// Error handler middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err.message);
+  res.status(500).json({
+    status: 'error',
+    message: 'Internal server error'
   });
 });
 
-// PRODUCTS ENDPOINTS
-
-// Get all products
-app.get('/api/products', async (req, res) => {
-  try {
-    const { 
-      page = 1, 
-      limit = 10, 
-      category, 
-      minPrice, 
-      maxPrice, 
-      search, 
-      sortBy = 'created_at',
-      sortDirection = 'desc',
-      hasDiscount
-    } = req.query;
-    
-    // Build query
-    let query = supabase.from('products')
-      .select('*, product_images(image_url)', { count: 'exact' });
-    
-    // Apply filters
-    if (category) {
-      query = query.or(`category.eq.${category},category.ilike.${category}`);
-    }
-    
-    if (minPrice) {
-      query = query.gte('price', minPrice);
-    }
-    
-    if (maxPrice) {
-      query = query.lte('price', maxPrice);
-    }
-    
-    if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%,category.ilike.%${search}%`);
-    }
-    
-    if (hasDiscount === 'true') {
-      query = query.not('discount_price', 'is', null);
-    }
-
-    // Calculate pagination
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.max(1, Math.min(50, parseInt(limit)));
-    const offset = (pageNum - 1) * limitNum;
-    
-    // Apply pagination and sorting
-    query = query
-      .order(sortBy, { ascending: sortDirection === 'asc' })
-      .range(offset, offset + limitNum - 1);
-    
-    // Execute query
-    const { data, error, count } = await query;
-    
-    if (error) {
-      throw error;
-    }
-    
-    // Format response
-    const formattedProducts = data.map(product => ({
-      ...product,
-      images: product.product_images?.map(img => img.image_url) || []
-    }));
-    
-    const totalPages = Math.ceil(count / limitNum);
-    
-    return res.json({
-      items: formattedProducts,
-      total: count,
-      page: pageNum,
-      limit: limitNum,
-      totalPages
-    });
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la récupération des produits'
-    });
-  }
+// Main API endpoint
+app.get('/api', (req, res) => {
+  res.json({
+    success: true,
+    message: "API fonctionne correctement",
+    version: "1.0.0",
+    database: "File-based",
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Get single product by ID
-app.get('/api/products/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Get product with images
-    const { data: product, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        product_images(image_url)
-      `)
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      throw error;
-    }
-    
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: 'Produit non trouvé'
-      });
-    }
-    
-    // Format response
-    const formattedProduct = {
-      ...product,
-      images: product.product_images?.map(img => img.image_url) || []
-    };
-    
-    return res.json({
-      success: true,
-      data: formattedProduct
-    });
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la récupération du produit'
-    });
-  }
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'Server is running'
+  });
 });
 
-// CATEGORIES ENDPOINTS
-
-// Get all categories
-app.get('/api/categories', async (req, res) => {
-  try {
-    // Get all categories
-    const { data: categories, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('display_order', { ascending: true });
-    
-    if (error) {
-      throw error;
-    }
-    
-    // Format for frontend
-    const formattedCategories = categories.map(cat => ({
-      id: cat.id,
-      name: cat.name,
-      slug: cat.slug,
-      description: cat.description,
-      parentId: cat.parent_id,
-      icon: cat.icon,
-      displayOrder: cat.display_order,
-      isActive: cat.is_active,
-      createdAt: cat.created_at
-    }));
-    
-    return res.json({
-      success: true,
-      data: formattedCategories
-    });
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la récupération des catégories'
-    });
-  }
-});
-
-// AUTHENTICATION ENDPOINTS
-
-// Login user
-app.post('/api/auth/login', async (req, res) => {
+// Login route
+app.post('/api/auth/login', (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Use Supabase auth
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    
-    if (error) {
-      return res.status(401).json({
-        success: false,
-        message: error.message || 'Email ou mot de passe incorrect'
+    if (!email || !password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Email and password are required'
       });
     }
     
-    // Get user details from our users table
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id, first_name, last_name, role, is_active')
-      .eq('email', email)
-      .single();
+    const user = findUserByEmail(email);
     
-    if (userError || !userData) {
+    if (!user || user.password !== hashPassword(password)) {
       return res.status(401).json({
-      success: false,
-        message: 'Utilisateur non trouvé'
+        status: 'error',
+        message: 'Invalid credentials'
       });
     }
     
-    if (!userData.is_active) {
-      return res.status(401).json({
-        success: false,
-        message: 'Votre compte a été désactivé'
-      });
-    }
+    // Generate and save token
+    const token = generateToken();
+    saveToken(token, user.id);
+    
+    // Return user data (without password)
+    const userData = { ...user };
+    delete userData.password;
     
     return res.json({
       success: true,
       data: {
-        id: userData.id,
-        firstName: userData.first_name,
-        lastName: userData.last_name,
-        email: email,
-        role: userData.role,
-        token: data.session.access_token
+        ...userData,
+        token
       }
     });
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la connexion'
+      status: 'error',
+      message: 'Server error during login'
     });
   }
 });
 
-// Register new user
-app.post('/api/auth/register', async (req, res) => {
+// Auth check route
+app.get('/api/auth/check', (req, res) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword, phone, address, city, zipCode } = req.body;
-
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Les mots de passe ne correspondent pas'
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'No token provided'
       });
     }
     
-    // Register user with Supabase auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
+    const token = authHeader.split(' ')[1];
+    const user = findUserByToken(token);
+    
+    if (!user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Invalid token'
+      });
+    }
+    
+    // Return user data (without password)
+    const userData = { ...user };
+    delete userData.password;
+    
+    return res.json({
+      status: 'success',
       data: {
-          first_name: firstName,
-          last_name: lastName
-        }
+        authenticated: true,
+        user: userData
       }
     });
-    
-    if (authError) {
-      return res.status(400).json({
-        success: false,
-        message: authError.message
-      });
-    }
-    
-    // Create user record in our database
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .insert([
-        {
-          email,
-          first_name: firstName,
-          last_name: lastName,
-          role: 'user',
-          is_active: true,
-          phone: phone || null,
-          address: address || null,
-          city: city || null,
-          zip_code: zipCode || null
-        }
-      ])
-      .select('id, first_name, last_name, email, role')
-      .single();
-    
-    if (userError) {
-      console.error('Error creating user record:', userError);
+  } catch (error) {
+    console.error('Auth check error:', error);
     return res.status(500).json({
-      success: false,
-        message: 'Erreur lors de la création de l\'utilisateur'
+      status: 'error',
+      message: 'Server error during authentication check'
+    });
+  }
+});
+
+// Register route
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const { firstName, lastName, email, password, confirmPassword } = req.body;
+    
+    // Validate input
+    if (!email || !password || !firstName || !lastName) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'All fields are required'
       });
     }
+    
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Passwords do not match'
+      });
+    }
+    
+    // Check if user already exists
+    const existingUser = findUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User with this email already exists'
+      });
+    }
+    
+    // Create new user
+    const newUser = addUser({
+      email,
+      password: hashPassword(password),
+      firstName,
+      lastName,
+      role: 'user'
+    });
+    
+    // Generate and save token
+    const token = generateToken();
+    saveToken(token, newUser.id);
+    
+    // Return user data (without password)
+    const userData = { ...newUser };
+    delete userData.password;
     
     return res.status(201).json({
-      success: true,
+      status: 'success',
       data: {
-        id: userData.id,
-        firstName: userData.first_name,
-        lastName: userData.last_name,
-        email: userData.email,
-        role: userData.role,
-        token: authData.session?.access_token
+        ...userData,
+        token
       }
     });
   } catch (error) {
     console.error('Registration error:', error);
     return res.status(500).json({
-      success: false,
-      message: 'Erreur lors de l\'inscription'
+      status: 'error',
+      message: 'Server error during registration'
     });
   }
 });
 
-// Start the server
-  app.listen(PORT, () => {
-    console.log(`
-🚀 Server running on port ${PORT}
-✨ Mode: ${process.env.NODE_ENV || 'development'} (Supabase)
-🔗 API URL: http://localhost:${PORT}/api
-⌛ Time: ${new Date().toLocaleString()}
-    `);
+// Profile route
+app.get('/api/auth/profile', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'No token provided'
+      });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const user = findUserByToken(token);
+    
+    if (!user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Invalid token'
+      });
+    }
+    
+    // Return user data (without password)
+    const userData = { ...user };
+    delete userData.password;
+    
+    return res.json({
+      status: 'success',
+      data: userData
+    });
+  } catch (error) {
+    console.error('Profile error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error while fetching profile'
+    });
+  }
+});
+
+// Mock carousel data for backup
+app.get('/api/carousel', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      {
+        id: 1,
+        title: "Nouvelle Collection",
+        subtitle: "Découvrez nos dernières nouveautés",
+        imageUrl: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3",
+        linkUrl: "/products"
+      },
+      {
+        id: 2,
+        title: "Promotions d'été",
+        subtitle: "Jusqu'à 50% de réduction",
+        imageUrl: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3",
+        linkUrl: "/products?discount=true"
+      }
+    ]
+  });
+});
+
+// Mock banner data for backup
+app.get('/api/banner', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      id: 1,
+      title: "Offre Spéciale",
+      subtitle: "Livraison gratuite pour toute commande supérieure à 50€",
+      backgroundColor: "#FFC107",
+      textColor: "#000000",
+      isActive: true
+    }
+  });
+});
+
+// Catch-all for undefined routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: 'Endpoint not found'
+  });
+});
+
+// Initialize database
+initDatabase();
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`http://localhost:${PORT}/api/health`);
+  console.log('\nTest credentials:');
+  console.log('- Admin: admin@example.com / Password123!');
+  console.log('- User: test@example.com / Password123!');
 }); 

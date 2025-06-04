@@ -1,5 +1,22 @@
 services:
   - type: web
+    name: barbachli-auth
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 8080
+    plan: free
+    repo: https://github.com/yourusername/ecommerce-site
+    branch: main
+    autoDeploy: true
+    cors:
+      allowOrigins:
+        - https://barbachli.vercel.app
+        - http://localhost:3000
+    healthCheckPath: /api/health
+  - type: web
     name: barbachli-api
     env: node
     buildCommand: npm install

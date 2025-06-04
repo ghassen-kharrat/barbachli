@@ -210,3 +210,70 @@ node test-registration.js
 ```
 
 This will verify the registration functionality is working correctly.
+
+# Barbachli E-Commerce Authentication Server
+
+This is the authentication server for the Barbachli E-Commerce platform. It provides authentication endpoints that work with the frontend application.
+
+## Features
+
+- User authentication (login, register)
+- Session management
+- User profiles
+- Admin access
+- CORS support for Vercel frontend
+
+## Deployment Instructions
+
+### Deploying to Render
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Use the following settings:
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Environment Variables**:
+     - `PORT`: 8080
+
+### Deploying to Vercel
+
+The frontend is already deployed on Vercel. To update it:
+
+1. Push changes to your GitHub repository
+2. Vercel will automatically deploy the changes
+
+## Local Development
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+
+2. Start the development server:
+   ```
+   npm run dev
+   ```
+
+## API Endpoints
+
+- `GET /api/health` - Health check
+- `POST /api/auth/login` - User login
+- `GET /api/auth/check` - Check authentication
+- `GET /api/auth/profile` - Get user profile
+- `POST /api/auth/register` - Register new user
+
+## Test Credentials
+
+- **Admin User**:
+  - Email: admin@example.com
+  - Password: Password123!
+
+- **Regular User**:
+  - Email: test@example.com
+  - Password: Password123!
+
+## Troubleshooting
+
+If you encounter CORS issues, make sure the Render service has the proper CORS configuration allowing requests from:
+- https://barbachli.vercel.app
+- http://localhost:3000
