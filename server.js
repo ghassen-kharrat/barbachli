@@ -18,6 +18,7 @@ if (!fs.existsSync(DATA_DIR)) {
 // Define database files
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const TOKENS_FILE = path.join(DATA_DIR, 'tokens.json');
+const CART_FILE = path.join(DATA_DIR, 'cart.json');
 
 // Initialize database
 function initDatabase() {
@@ -31,7 +32,8 @@ function initDatabase() {
         firstName: 'Admin',
         lastName: 'User',
         role: 'admin',
-        isActive: true
+        isActive: true,
+        created_at: new Date().toISOString()
       },
       {
         id: 'e8fd159b-57c4-4d36-9bd7-a59ca13057bb',
@@ -40,7 +42,8 @@ function initDatabase() {
         firstName: 'Test',
         lastName: 'User',
         role: 'user',
-        isActive: true
+        isActive: true,
+        created_at: new Date().toISOString()
       }
     ];
     fs.writeFileSync(USERS_FILE, JSON.stringify(defaultUsers, null, 2));
@@ -51,6 +54,12 @@ function initDatabase() {
   if (!fs.existsSync(TOKENS_FILE)) {
     fs.writeFileSync(TOKENS_FILE, JSON.stringify([], null, 2));
     console.log('Created tokens file');
+  }
+  
+  // Create empty cart file if it doesn't exist
+  if (!fs.existsSync(CART_FILE)) {
+    fs.writeFileSync(CART_FILE, JSON.stringify({}, null, 2));
+    console.log('Created cart file');
   }
 }
 
@@ -113,7 +122,8 @@ function addUser(userData) {
   const newUser = {
     id: crypto.randomUUID(),
     ...userData,
-    isActive: true
+    isActive: true,
+    created_at: new Date().toISOString()
   };
   
   users.push(newUser);
@@ -121,12 +131,33 @@ function addUser(userData) {
   return newUser;
 }
 
+// Get user cart
+function getUserCart(userId) {
+  if (!fs.existsSync(CART_FILE)) {
+    return { items: [], total: 0 };
+  }
+  
+  const carts = JSON.parse(fs.readFileSync(CART_FILE, 'utf8'));
+  return carts[userId] || { items: [], total: 0 };
+}
+
+// Save user cart
+function saveUserCart(userId, cart) {
+  let carts = {};
+  if (fs.existsSync(CART_FILE)) {
+    carts = JSON.parse(fs.readFileSync(CART_FILE, 'utf8'));
+  }
+  
+  carts[userId] = cart;
+  fs.writeFileSync(CART_FILE, JSON.stringify(carts, null, 2));
+}
+
 // Middleware
 app.use(express.json());
 
 // Configure CORS - very important for cross-domain requests
 app.use(cors({
-  origin: ['https://barbachli.vercel.app', 'http://localhost:3000'],
+  origin: ['https://barbachli.vercel.app', 'https://barbachli-fqliwa57g-ghassen-kharrats-projects.vercel.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true
@@ -137,6 +168,31 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
 });
+
+// Auth middleware to extract user from token
+function authMiddleware(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      req.user = null;
+      return next();
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const user = findUserByToken(token);
+    
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    req.user = null;
+    next();
+  }
+}
+
+// Use auth middleware for all routes
+app.use(authMiddleware);
 
 // Error handler middleware
 app.use((err, req, res, next) => {
@@ -214,27 +270,15 @@ app.post('/api/auth/login', (req, res) => {
 // Auth check route
 app.get('/api/auth/check', (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!req.user) {
       return res.status(401).json({
         status: 'error',
-        message: 'No token provided'
-      });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const user = findUserByToken(token);
-    
-    if (!user) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Invalid token'
+        message: 'Not authenticated'
       });
     }
     
     // Return user data (without password)
-    const userData = { ...user };
+    const userData = { ...req.user };
     delete userData.password;
     
     return res.json({
@@ -318,27 +362,15 @@ app.post('/api/auth/register', (req, res) => {
 // Profile route
 app.get('/api/auth/profile', (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!req.user) {
       return res.status(401).json({
         status: 'error',
-        message: 'No token provided'
-      });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const user = findUserByToken(token);
-    
-    if (!user) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Invalid token'
+        message: 'Not authenticated'
       });
     }
     
     // Return user data (without password)
-    const userData = { ...user };
+    const userData = { ...req.user };
     delete userData.password;
     
     return res.json({
@@ -350,6 +382,214 @@ app.get('/api/auth/profile', (req, res) => {
     return res.status(500).json({
       status: 'error',
       message: 'Server error while fetching profile'
+    });
+  }
+});
+
+// Mock products data - new products
+app.get('/api/products', (req, res) => {
+  try {
+    // Sample mock data
+    const products = [
+      {
+        id: 1,
+        name: 'Smartphone XYZ',
+        description: 'Latest smartphone with amazing features',
+        price: 899.99,
+        discountPrice: 799.99,
+        hasDiscount: true,
+        images: ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'],
+        category: 'electronics',
+        stock: 25,
+        createdAt: '2023-05-15T08:30:00Z',
+        rating: 4.8
+      },
+      {
+        id: 2,
+        name: 'Laptop Pro',
+        description: 'Powerful laptop for professionals',
+        price: 1499.99,
+        discountPrice: null,
+        hasDiscount: false,
+        images: ['https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'],
+        category: 'electronics',
+        stock: 15,
+        createdAt: '2023-05-10T10:15:00Z',
+        rating: 4.5
+      },
+      {
+        id: 3,
+        name: 'Wireless Headphones',
+        description: 'Premium sound quality with noise cancellation',
+        price: 299.99,
+        discountPrice: 249.99,
+        hasDiscount: true,
+        images: ['https://images.unsplash.com/photo-1546435770-a3e429dcb388?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'],
+        category: 'electronics',
+        stock: 30,
+        createdAt: '2023-05-20T14:45:00Z',
+        rating: 4.7
+      },
+      {
+        id: 4,
+        name: 'Smart Watch',
+        description: 'Track your fitness and stay connected',
+        price: 199.99,
+        discountPrice: 179.99,
+        hasDiscount: true,
+        images: ['https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'],
+        category: 'electronics',
+        stock: 20,
+        createdAt: '2023-05-18T09:30:00Z',
+        rating: 4.6
+      },
+      {
+        id: 5,
+        name: 'Tablet Mini',
+        description: 'Compact tablet for entertainment and productivity',
+        price: 399.99,
+        discountPrice: 349.99,
+        hasDiscount: true,
+        images: ['https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'],
+        category: 'electronics',
+        stock: 18,
+        createdAt: '2023-05-16T11:20:00Z',
+        rating: 4.4
+      },
+      {
+        id: 6,
+        name: 'Bluetooth Speaker',
+        description: 'Portable speaker with rich bass',
+        price: 149.99,
+        discountPrice: 129.99,
+        hasDiscount: true,
+        images: ['https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'],
+        category: 'electronics',
+        stock: 22,
+        createdAt: '2023-05-12T16:40:00Z',
+        rating: 4.3
+      }
+    ];
+    
+    // Get query parameters
+    const limit = parseInt(req.query.limit) || products.length;
+    const hasDiscount = req.query.has_discount === 'true';
+    const sortBy = req.query.sort_by || 'createdAt';
+    const sortDirection = req.query.sort_direction || 'desc';
+    
+    // Filter products
+    let filteredProducts = [...products];
+    if (hasDiscount) {
+      filteredProducts = filteredProducts.filter(p => p.hasDiscount);
+    }
+    
+    // Sort products
+    filteredProducts.sort((a, b) => {
+      const aValue = a[sortBy];
+      const bValue = b[sortBy];
+      
+      if (sortDirection === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+    
+    // Limit the number of products
+    filteredProducts = filteredProducts.slice(0, limit);
+    
+    res.json({
+      status: 'success',
+      data: filteredProducts,
+      pagination: {
+        total: products.length,
+        count: filteredProducts.length,
+        page: 1,
+        pages: 1
+      }
+    });
+  } catch (error) {
+    console.error('Products error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error while fetching products'
+    });
+  }
+});
+
+// Get/update cart
+app.get('/api/cart', (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not authenticated'
+      });
+    }
+    
+    const cart = getUserCart(req.user.id);
+    
+    return res.json({
+      status: 'success',
+      data: cart
+    });
+  } catch (error) {
+    console.error('Cart error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error while fetching cart'
+    });
+  }
+});
+
+// Add to cart
+app.post('/api/cart', (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not authenticated'
+      });
+    }
+    
+    const { productId, quantity } = req.body;
+    if (!productId || !quantity || quantity < 1) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Product ID and quantity are required'
+      });
+    }
+    
+    let cart = getUserCart(req.user.id);
+    
+    // Check if product is already in cart
+    const existingItem = cart.items.find(item => item.productId === productId);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      // Add new item
+      cart.items.push({
+        productId,
+        quantity,
+        addedAt: new Date().toISOString()
+      });
+    }
+    
+    // Update cart total (simplified)
+    cart.total = cart.items.reduce((total, item) => total + item.quantity * 10, 0);
+    
+    // Save cart
+    saveUserCart(req.user.id, cart);
+    
+    return res.json({
+      status: 'success',
+      data: cart
+    });
+  } catch (error) {
+    console.error('Add to cart error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error while updating cart'
     });
   }
 });
@@ -389,6 +629,61 @@ app.get('/api/banner', (req, res) => {
       textColor: "#000000",
       isActive: true
     }
+  });
+});
+
+// Mock categories data
+app.get('/api/categories', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      {
+        id: 1,
+        name: "Electronics",
+        slug: "electronics",
+        description: "Electronic devices and gadgets",
+        parent_id: null,
+        children: [
+          {
+            id: 2,
+            name: "Smartphones",
+            slug: "smartphones",
+            description: "Mobile phones and accessories",
+            parent_id: 1
+          },
+          {
+            id: 3,
+            name: "Laptops",
+            slug: "laptops",
+            description: "Notebook computers",
+            parent_id: 1
+          }
+        ]
+      },
+      {
+        id: 4,
+        name: "Clothing",
+        slug: "clothing",
+        description: "Apparel and fashion items",
+        parent_id: null,
+        children: [
+          {
+            id: 5,
+            name: "Men's Clothing",
+            slug: "mens-clothing",
+            description: "Clothing for men",
+            parent_id: 4
+          },
+          {
+            id: 6,
+            name: "Women's Clothing",
+            slug: "womens-clothing",
+            description: "Clothing for women",
+            parent_id: 4
+          }
+        ]
+      }
+    ]
   });
 });
 
