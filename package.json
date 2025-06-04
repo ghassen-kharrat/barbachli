@@ -62,6 +62,7 @@
     "start:backend": "node start-backend.js --supabase",
     "start:index": "node index.js",
     "setup-db": "node setup-db.js",
+    "setup-supabase-db": "node setup-supabase-db.js",
     "test-db": "node test-connection.js",
     "test-connections": "node test-connection.js",
     "fix-connections": "node fix-connections.js",
