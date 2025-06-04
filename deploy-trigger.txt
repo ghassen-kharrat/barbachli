@@ -1,1 +1,2 @@
-Deployment triggered at 2025-06-03T17:25:48.578Z
+DEPLOY_TRIGGER=2025-06-04T12:13:00.631Z
+API_URL=https://barbachli-auth.onrender.com/api
