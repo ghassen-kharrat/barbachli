@@ -3,8 +3,10 @@ import config from '../config';
 
 // Determine the best API URL based on environment and connection health
 const API_BASE_URL = config.apiUrl || 'https://barbachli-1.onrender.com/api';
+const AUTH_API_URL = config.authApiUrl || 'https://barbachli-auth.onrender.com/api';
 
 console.log('Using API base URL:', API_BASE_URL);
+console.log('Using Auth API base URL:', AUTH_API_URL);
 
 // Create Axios client with default configuration
 const axiosClient: AxiosInstance = axios.create({
@@ -21,23 +23,34 @@ const axiosClient: AxiosInstance = axios.create({
 
 // Request interceptor
 axiosClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (axiosConfig: InternalAxiosRequestConfig) => {
     // Get auth token from localStorage
     const token = localStorage.getItem('auth_token');
     
+    // Set appropriate base URL based on endpoint
+    if (axiosConfig.url?.startsWith('/auth')) {
+      axiosConfig.baseURL = AUTH_API_URL;
+    } else if (axiosConfig.url?.startsWith('/products')) {
+      axiosConfig.baseURL = config.endpoints?.products || API_BASE_URL;
+    } else if (axiosConfig.url?.startsWith('/categories')) {
+      axiosConfig.baseURL = config.endpoints?.categories || API_BASE_URL;
+    } else if (axiosConfig.url?.startsWith('/cart')) {
+      axiosConfig.baseURL = config.endpoints?.cart || API_BASE_URL;
+    }
+    
     // Debug: log request information
-    console.log(`Request to ${config.baseURL}${config.url}:`, {
-      method: config.method,
+    console.log(`Request to ${axiosConfig.baseURL}${axiosConfig.url}:`, {
+      method: axiosConfig.method,
       hasToken: !!token,
-      hasData: !!config.data,
+      hasData: !!axiosConfig.data,
     });
     
     // Add token to headers if it exists
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token && axiosConfig.headers) {
+      axiosConfig.headers.Authorization = `Bearer ${token}`;
     }
     
-    return config;
+    return axiosConfig;
   },
   (error: AxiosError) => {
     console.error('Request error:', error.message);
