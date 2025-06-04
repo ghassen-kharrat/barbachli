@@ -57,6 +57,58 @@ console.log(`Supabase client initialized with URL: ${supabaseUrl}`);
   }
 })();
 
+// Auth middleware to extract user from token
+const authMiddleware = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      req.user = null;
+      return next();
+    }
+    
+    const token = authHeader.split(' ')[1];
+    
+    // Verify token with Supabase
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    
+    if (error || !user) {
+      req.user = null;
+      return next();
+    }
+    
+    // Get user details from our users table
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id, email, first_name, last_name, role, is_active')
+      .eq('email', user.email)
+      .single();
+    
+    if (userError || !userData) {
+      req.user = null;
+      return next();
+    }
+    
+    req.user = {
+      id: userData.id,
+      email: userData.email,
+      firstName: userData.first_name,
+      lastName: userData.last_name,
+      role: userData.role,
+      isActive: userData.is_active
+    };
+    
+    next();
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    req.user = null;
+    next();
+  }
+};
+
+// Use auth middleware for all routes
+app.use(authMiddleware);
+
 // API status endpoint
 app.get('/api', (req, res) => {
   res.json({
@@ -65,6 +117,16 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     database: 'Supabase',
     timestamp: new Date()
+  });
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'Server is running',
+    database: 'Supabase',
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -136,11 +198,14 @@ app.get('/api/products', async (req, res) => {
     const totalPages = Math.ceil(count / limitNum);
     
     return res.json({
-      items: formattedProducts,
-      total: count,
-      page: pageNum,
-      limit: limitNum,
-      totalPages
+      status: 'success',
+      data: formattedProducts,
+      pagination: {
+        total: count,
+        count: formattedProducts.length,
+        page: pageNum,
+        pages: totalPages
+      }
     });
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -201,6 +266,8 @@ app.get('/api/products/:id', async (req, res) => {
 // Get all categories
 app.get('/api/categories', async (req, res) => {
   try {
+    const { hierarchical } = req.query;
+    
     // Get all categories
     const { data: categories, error } = await supabase
       .from('categories')
@@ -212,17 +279,30 @@ app.get('/api/categories', async (req, res) => {
     }
     
     // Format for frontend
-    const formattedCategories = categories.map(cat => ({
+    let formattedCategories = categories.map(cat => ({
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
       description: cat.description,
-      parentId: cat.parent_id,
+      parent_id: cat.parent_id,
       icon: cat.icon,
       displayOrder: cat.display_order,
       isActive: cat.is_active,
       createdAt: cat.created_at
     }));
+    
+    // Build hierarchical structure if requested
+    if (hierarchical === 'true') {
+      const rootCategories = formattedCategories.filter(c => !c.parent_id);
+      
+      formattedCategories = rootCategories.map(root => {
+        const children = formattedCategories.filter(c => c.parent_id === root.id);
+        return {
+          ...root,
+          children
+        };
+      });
+    }
     
     return res.json({
       success: true,
@@ -231,7 +311,7 @@ app.get('/api/categories', async (req, res) => {
   } catch (error) {
     console.error('Error fetching categories:', error);
     return res.status(500).json({
-      success: false,
+      status: 'error',
       message: 'Erreur lors de la récupération des catégories'
     });
   }
@@ -252,7 +332,7 @@ app.post('/api/auth/login', async (req, res) => {
     
     if (error) {
       return res.status(401).json({
-        success: false,
+        status: 'error',
         message: error.message || 'Email ou mot de passe incorrect'
       });
     }
@@ -266,17 +346,20 @@ app.post('/api/auth/login', async (req, res) => {
     
     if (userError || !userData) {
       return res.status(401).json({
-        success: false,
+        status: 'error',
         message: 'Utilisateur non trouvé'
       });
     }
     
     if (!userData.is_active) {
       return res.status(401).json({
-        success: false,
+        status: 'error',
         message: 'Votre compte a été désactivé'
       });
     }
+    
+    // Log user role
+    console.log(`User logged in - Email: ${email}, Role: ${userData.role}, ID: ${userData.id}`);
     
     return res.json({
       success: true,
@@ -292,7 +375,7 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({
-      success: false,
+      status: 'error',
       message: 'Erreur lors de la connexion'
     });
   }
@@ -306,7 +389,7 @@ app.post('/api/auth/register', async (req, res) => {
     // Check if passwords match
     if (password !== confirmPassword) {
       return res.status(400).json({
-        success: false,
+        status: 'error',
         message: 'Les mots de passe ne correspondent pas'
       });
     }
@@ -325,7 +408,7 @@ app.post('/api/auth/register', async (req, res) => {
     
     if (authError) {
       return res.status(400).json({
-        success: false,
+        status: 'error',
         message: authError.message
       });
     }
@@ -352,7 +435,7 @@ app.post('/api/auth/register', async (req, res) => {
     if (userError) {
       console.error('Error creating user record:', userError);
       return res.status(500).json({
-        success: false,
+        status: 'error',
         message: 'Erreur lors de la création de l\'utilisateur'
       });
     }
@@ -371,8 +454,321 @@ app.post('/api/auth/register', async (req, res) => {
   } catch (error) {
     console.error('Registration error:', error);
     return res.status(500).json({
-      success: false,
+      status: 'error',
       message: 'Erreur lors de l\'inscription'
+    });
+  }
+});
+
+// Auth check endpoint
+app.get('/api/auth/check', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not authenticated'
+      });
+    }
+    
+    return res.json({
+      status: 'success',
+      data: {
+        authenticated: true,
+        user: req.user
+      }
+    });
+  } catch (error) {
+    console.error('Auth check error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error during authentication check'
+    });
+  }
+});
+
+// Profile endpoint
+app.get('/api/auth/profile', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not authenticated'
+      });
+    }
+    
+    return res.json({
+      status: 'success',
+      data: req.user
+    });
+  } catch (error) {
+    console.error('Profile error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error while fetching profile'
+    });
+  }
+});
+
+// CART ENDPOINTS
+
+// Get user cart
+app.get('/api/cart', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not authenticated'
+      });
+    }
+    
+    // Get cart from database
+    const { data: cartData, error: cartError } = await supabase
+      .from('cart_items')
+      .select(`
+        id,
+        product_id,
+        quantity,
+        created_at,
+        products:product_id (
+          id,
+          name,
+          price,
+          discount_price,
+          product_images (image_url)
+        )
+      `)
+      .eq('user_id', req.user.id);
+    
+    if (cartError) {
+      throw cartError;
+    }
+    
+    // Format cart items
+    const items = cartData.map(item => ({
+      id: item.id,
+      productId: item.product_id,
+      quantity: item.quantity,
+      product: {
+        id: item.products.id,
+        name: item.products.name,
+        price: item.products.price,
+        discountPrice: item.products.discount_price,
+        image: item.products.product_images?.[0]?.image_url || null
+      },
+      addedAt: item.created_at
+    }));
+    
+    // Calculate total
+    const total = items.reduce((sum, item) => {
+      const price = item.product.discountPrice || item.product.price;
+      return sum + (price * item.quantity);
+    }, 0);
+    
+    return res.json({
+      status: 'success',
+      data: {
+        items,
+        total
+      }
+    });
+  } catch (error) {
+    console.error('Cart error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error while fetching cart'
+    });
+  }
+});
+
+// Add to cart
+app.post('/api/cart', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not authenticated'
+      });
+    }
+    
+    const { productId, quantity } = req.body;
+    if (!productId || !quantity || quantity < 1) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Product ID and quantity are required'
+      });
+    }
+    
+    // Check if product exists
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('id')
+      .eq('id', productId)
+      .single();
+    
+    if (productError || !product) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Product not found'
+      });
+    }
+    
+    // Check if item is already in cart
+    const { data: existingItem, error: existingError } = await supabase
+      .from('cart_items')
+      .select('id, quantity')
+      .eq('user_id', req.user.id)
+      .eq('product_id', productId)
+      .single();
+    
+    let result;
+    
+    if (existingItem) {
+      // Update existing item
+      const newQuantity = existingItem.quantity + quantity;
+      
+      result = await supabase
+        .from('cart_items')
+        .update({ quantity: newQuantity })
+        .eq('id', existingItem.id);
+    } else {
+      // Add new item
+      result = await supabase
+        .from('cart_items')
+        .insert({
+          user_id: req.user.id,
+          product_id: productId,
+          quantity: quantity
+        });
+    }
+    
+    if (result.error) {
+      throw result.error;
+    }
+    
+    // Return updated cart
+    return await getCart(req, res);
+  } catch (error) {
+    console.error('Add to cart error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error while updating cart'
+    });
+  }
+});
+
+// Helper function to get cart
+async function getCart(req, res) {
+  // Reuse the GET /api/cart logic
+  return await app._router.handle(req, res);
+}
+
+// Mock carousel data for backup
+app.get('/api/carousel', async (req, res) => {
+  try {
+    // Try to get carousel from database
+    const { data: carouselData, error } = await supabase
+      .from('carousel')
+      .select('*')
+      .order('display_order', { ascending: true });
+    
+    if (error || !carouselData || carouselData.length === 0) {
+      // Fall back to mock data
+      return res.json({
+        success: true,
+        data: [
+          {
+            id: 1,
+            title: "Nouvelle Collection",
+            subtitle: "Découvrez nos dernières nouveautés",
+            imageUrl: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3",
+            linkUrl: "/products"
+          },
+          {
+            id: 2,
+            title: "Promotions d'été",
+            subtitle: "Jusqu'à 50% de réduction",
+            imageUrl: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3",
+            linkUrl: "/products?discount=true"
+          }
+        ]
+      });
+    }
+    
+    return res.json({
+      success: true,
+      data: carouselData
+    });
+  } catch (error) {
+    console.error('Carousel error:', error);
+    
+    // Fall back to mock data on error
+    return res.json({
+      success: true,
+      data: [
+        {
+          id: 1,
+          title: "Nouvelle Collection",
+          subtitle: "Découvrez nos dernières nouveautés",
+          imageUrl: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3",
+          linkUrl: "/products"
+        },
+        {
+          id: 2,
+          title: "Promotions d'été",
+          subtitle: "Jusqu'à 50% de réduction",
+          imageUrl: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3",
+          linkUrl: "/products?discount=true"
+        }
+      ]
+    });
+  }
+});
+
+// Mock banner data for backup
+app.get('/api/banner', async (req, res) => {
+  try {
+    // Try to get banner from database
+    const { data: bannerData, error } = await supabase
+      .from('banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (error || !bannerData) {
+      // Fall back to mock data
+      return res.json({
+        success: true,
+        data: {
+          id: 1,
+          title: "Offre Spéciale",
+          subtitle: "Livraison gratuite pour toute commande supérieure à 50€",
+          backgroundColor: "#FFC107",
+          textColor: "#000000",
+          isActive: true
+        }
+      });
+    }
+    
+    return res.json({
+      success: true,
+      data: bannerData
+    });
+  } catch (error) {
+    console.error('Banner error:', error);
+    
+    // Fall back to mock data on error
+    return res.json({
+      success: true,
+      data: {
+        id: 1,
+        title: "Offre Spéciale",
+        subtitle: "Livraison gratuite pour toute commande supérieure à 50€",
+        backgroundColor: "#FFC107",
+        textColor: "#000000",
+        isActive: true
+      }
     });
   }
 });
