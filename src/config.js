@@ -1,20 +1,28 @@
-// Configuration file for the application
+// Configuration file for the application - VERSION MARKER: v2.0.0
+
+// Check if we have an API URL override in localStorage
+const API_URL_OVERRIDE = typeof localStorage !== 'undefined' ? localStorage.getItem('api_url_override') : null;
+
+// If API_URL_OVERRIDE exists, use it; otherwise, use the environment variable or default
+const apiUrl = API_URL_OVERRIDE || process.env.REACT_APP_API_URL || 'https://barbachli-auth.onrender.com/api';
+const authApiUrl = API_URL_OVERRIDE || process.env.REACT_APP_AUTH_API_URL || 'https://barbachli-auth.onrender.com/api';
+
 const config = {
   // API URL - using barbachli-auth for all endpoints
-  apiUrl: 'https://barbachli-auth.onrender.com/api',
+  apiUrl,
   
   // Auth API URL - using barbachli-auth for authentication
-  authApiUrl: 'https://barbachli-auth.onrender.com/api',
+  authApiUrl,
   
   // Image base URL
   imageBaseUrl: 'https://barbachli-auth.onrender.com/images',
   
   // Endpoints configuration (all using barbachli-auth)
   endpoints: {
-    auth: 'https://barbachli-auth.onrender.com/api',
-    products: 'https://barbachli-auth.onrender.com/api',
-    categories: 'https://barbachli-auth.onrender.com/api',
-    cart: 'https://barbachli-auth.onrender.com/api',
+    auth: apiUrl,
+    products: apiUrl,
+    categories: apiUrl,
+    cart: apiUrl,
   },
   
   // Supabase configuration - these will be used by the frontend for direct Supabase client operations if needed
@@ -38,12 +46,13 @@ const config = {
   }
 };
 
-// Log config for debugging - VERSION MARKER: v1.0.1
+// Log config for debugging - VERSION MARKER: v2.0.0
 console.log('CONFIG LOADED:', {
   apiUrl: config.apiUrl,
   authApiUrl: config.authApiUrl,
   env: process.env.NODE_ENV,
-  reactAppApiUrl: process.env.REACT_APP_API_URL
+  reactAppApiUrl: process.env.REACT_APP_API_URL,
+  apiUrlOverride: API_URL_OVERRIDE
 });
 
 export default config; 

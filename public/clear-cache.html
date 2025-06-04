@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clearing Cache - Barbachli</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #333;
+    }
+    .progress {
+      height: 10px;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+      margin: 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: #4caf50;
+      border-radius: 5px;
+      width: 0%;
+      transition: width 0.5s;
+    }
+    .status {
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .version {
+      font-size: 12px;
+      color: #999;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Clearing Cache</h1>
+    <div class="status" id="status">Preparing to clear cache...</div>
+    <div class="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div id="message">Please wait while we clear your browser cache and reload the application with the latest version.</div>
+    <div class="version">v2.0.0 - API URL: https://barbachli-auth.onrender.com</div>
+  </div>
+
+  <script>
+    // Force cache clearing and hard reload
+    function clearCacheAndReload() {
+      const status = document.getElementById('status');
+      const progressBar = document.getElementById('progress-bar');
+      
+      // Set localStorage flag to use the correct API URL
+      localStorage.setItem('api_url_override', 'https://barbachli-auth.onrender.com/api');
+      
+      // Update status and progress
+      status.textContent = "Clearing application cache...";
+      progressBar.style.width = "25%";
+      
+      // Clear application cache
+      if ('caches' in window) {
+        setTimeout(() => {
+          caches.keys().then(cacheNames => {
+            status.textContent = "Removing cached files...";
+            progressBar.style.width = "50%";
+            
+            return Promise.all(
+              cacheNames.map(cacheName => {
+                return caches.delete(cacheName);
+              })
+            );
+          }).then(() => {
+            status.textContent = "Cache cleared successfully!";
+            progressBar.style.width = "75%";
+            
+            setTimeout(() => {
+              status.textContent = "Reloading application...";
+              progressBar.style.width = "100%";
+              
+              // Force reload bypassing cache
+              setTimeout(() => {
+                window.location.href = '/?v=' + Date.now();
+              }, 1000);
+            }, 500);
+          }).catch(err => {
+            console.error('Cache clearing failed:', err);
+            status.textContent = "Cache clearing failed. Reloading anyway...";
+            progressBar.style.width = "100%";
+            
+            setTimeout(() => {
+              window.location.href = '/?v=' + Date.now();
+            }, 1000);
+          });
+        }, 1000);
+      } else {
+        // Fallback for browsers without cache API
+        status.textContent = "Cache API not available. Reloading...";
+        progressBar.style.width = "100%";
+        
+        setTimeout(() => {
+          window.location.href = '/?v=' + Date.now();
+        }, 1000);
+      }
+    }
+    
+    // Start the process when page loads
+    window.onload = function() {
+      setTimeout(clearCacheAndReload, 1000);
+    };
+  </script>
+</body>
+</html> 
