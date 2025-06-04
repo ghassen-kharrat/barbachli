@@ -38,4 +38,12 @@ const config = {
   }
 };
 
+// Log config for debugging - VERSION MARKER: v1.0.1
+console.log('CONFIG LOADED:', {
+  apiUrl: config.apiUrl,
+  authApiUrl: config.authApiUrl,
+  env: process.env.NODE_ENV,
+  reactAppApiUrl: process.env.REACT_APP_API_URL
+});
+
 export default config; 
