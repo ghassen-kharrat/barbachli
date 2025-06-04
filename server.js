@@ -1,4 +1,4 @@
-// Simple authentication server with file-based storage
+// Simple authentication server with file-based storage - Updated for Render deployment
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
