@@ -27,13 +27,28 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR NOT NULL UNIQUE,
   first_name VARCHAR NOT NULL,
   last_name VARCHAR NOT NULL,
-  password VARCHAR,
+  password VARCHAR NOT NULL,
   role VARCHAR NOT NULL DEFAULT 'user',
   is_active BOOLEAN DEFAULT true,
   phone VARCHAR,
   address VARCHAR,
   city VARCHAR,
   zip_code VARCHAR,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### Categories Table
+```sql
+CREATE TABLE IF NOT EXISTS categories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR NOT NULL,
+  slug VARCHAR NOT NULL UNIQUE,
+  description TEXT,
+  parent_id UUID REFERENCES categories(id),
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -54,13 +69,13 @@ CREATE TABLE IF NOT EXISTS products (
 );
 ```
 
-### Categories Table
+### Product Images Table
 ```sql
-CREATE TABLE IF NOT EXISTS categories (
+CREATE TABLE IF NOT EXISTS product_images (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR NOT NULL,
-  description TEXT,
-  parent_id UUID REFERENCES categories(id),
+  product_id UUID NOT NULL REFERENCES products(id),
+  image_url VARCHAR NOT NULL,
+  is_primary BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -79,18 +94,6 @@ CREATE TABLE IF NOT EXISTS cart_items (
 );
 ```
 
-### Product Images Table
-```sql
-CREATE TABLE IF NOT EXISTS product_images (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  product_id UUID NOT NULL REFERENCES products(id),
-  image_url VARCHAR NOT NULL,
-  is_primary BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
 ## 3. Initialize the Database
 
 Run the database setup script to create initial data:
@@ -103,6 +106,8 @@ This will create:
 - An admin user
 - Sample categories
 - Sample products
+- Product images
+- Test user
 
 ## 4. Test Credentials
 
@@ -133,6 +138,14 @@ If you see 500 errors or database connection failures:
 1. Check if tables exist in Supabase using the SQL Editor
 2. Verify RLS (Row Level Security) policies aren't blocking access
 3. Try running the setup script with `npm run setup-supabase-db`
+
+### Table Schema Issues
+
+If you're getting database errors:
+
+1. Check that all required fields are included in your tables
+2. Make sure to create tables in the right order (categories before products)
+3. Use the SQL definitions provided above to recreate tables if needed
 
 ### Product-Related Errors
 
