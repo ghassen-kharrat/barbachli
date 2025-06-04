@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Constants
-const BACKEND_URL = 'https://barbachli-1.onrender.com/api';
+const BACKEND_URL = 'https://barbachli-auth.onrender.com/api';
 const VERCEL_URL = 'https://barbachli.vercel.app/api';
 const ADMIN_EMAIL = 'admin@example.com';
 const ADMIN_PASSWORD = 'Password123!';
@@ -504,8 +504,8 @@ setupDatabase().catch(console.error);
       
       // Fix URLs and error handling in auth.api.ts
       const fixedAuthClient = authClientContent
-        .replace(/https:\/\/barbachli-api\.onrender\.com\/api/g, 'https://barbachli-1.onrender.com/api')
-        .replace(/https:\/\/barbachli-1\.onrender\.com\/api/g, 'https://barbachli-1.onrender.com/api');
+        .replace(/https:\/\/barbachli-api\.onrender\.com\/api/g, 'https://barbachli-auth.onrender.com/api')
+        .replace(/https:\/\/barbachli-1\.onrender\.com\/api/g, 'https://barbachli-auth.onrender.com/api');
       
       fs.writeFileSync(`${authClientPath}.backup`, authClientContent); // Create backup
       fs.writeFileSync(authClientPath, fixedAuthClient);

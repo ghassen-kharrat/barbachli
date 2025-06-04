@@ -3,7 +3,7 @@ const axios = require('axios');
 
 // Create a direct axios instance for the backend
 const backendApi = axios.create({
-  baseURL: 'https://barbachli-1.onrender.com',
+  baseURL: 'https://barbachli-auth.onrender.com',
   timeout: 40000,
   headers: {
     'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ async function checkAdminRoutes() {
         
         // Try to access potential admin endpoints with token
         const authApi = axios.create({
-          baseURL: 'https://barbachli-1.onrender.com',
+          baseURL: 'https://barbachli-auth.onrender.com',
           timeout: 40000,
           headers: {
             'Content-Type': 'application/json',

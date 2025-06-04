@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResp
 import config from '../config';
 
 // Determine the best API URL based on environment and connection health
-const API_BASE_URL = config.apiUrl || 'https://barbachli-1.onrender.com/api';
+const API_BASE_URL = config.apiUrl || 'https://barbachli-auth.onrender.com/api';
 const AUTH_API_URL = config.authApiUrl || 'https://barbachli-auth.onrender.com/api';
 
 console.log('Using API base URL:', API_BASE_URL);

@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const dotenv = require('dotenv');
+const bcrypt = require('bcryptjs');
 
 // Load environment variables
 dotenv.config();
@@ -11,29 +12,39 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 console.log(`Setting up database at: ${supabaseUrl}`);
 
+// Generate slug from name
+function generateSlug(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 async function setupDatabase() {
   try {
-    // Create or update tables using Supabase SQL
+    // 1. Create categories table and add sample categories first
+    console.log('Adding sample categories...');
+    const sampleCategories = [
+      { name: 'Laptops', slug: 'laptops', description: 'Portable computers', parent_id: null, display_order: 1, is_active: true },
+      { name: 'Smartphones', slug: 'smartphones', description: 'Mobile phones', parent_id: null, display_order: 2, is_active: true },
+      { name: 'Audio', slug: 'audio', description: 'Sound equipment', parent_id: null, display_order: 3, is_active: true }
+    ];
     
-    // 1. Create users table
-    console.log('Creating users table...');
-    const { error: usersError } = await supabase
-      .from('users')
-      .insert({
-        email: 'admin@example.com',
-        first_name: 'Admin',
-        last_name: 'User',
-        role: 'admin',
-        is_active: true
-      })
-      .select()
-      .single();
+    // Insert categories and store their actual IDs
+    const categoryIds = {};
     
-    if (usersError && !usersError.message.includes('duplicate')) {
-      console.error('Error creating users table or admin user:', usersError);
-    } else {
-      console.log('✅ Users table ready');
+    for (const category of sampleCategories) {
+      const { data: insertedCategory, error: categoryError } = await supabase
+        .from('categories')
+        .upsert(category, { onConflict: 'slug' })
+        .select('id, name')
+        .single();
+      
+      if (categoryError) {
+        console.error(`Error adding category "${category.name}":`, categoryError);
+      } else {
+        console.log(`✅ Category "${category.name}" added or updated with ID: ${insertedCategory.id}`);
+        categoryIds[category.name] = insertedCategory.id;
+      }
     }
+    console.log('✅ Categories setup complete');
     
     // 2. Create products table and add sample products
     console.log('Adding sample products...');
@@ -44,7 +55,7 @@ async function setupDatabase() {
         price: 1299.99,
         discount_price: 1199.99,
         stock: 10,
-        category_id: 1
+        category_id: categoryIds['Laptops']
       },
       {
         name: 'Smartphone Samsung Galaxy S21',
@@ -52,7 +63,7 @@ async function setupDatabase() {
         price: 899.99,
         discount_price: 849.99,
         stock: 15,
-        category_id: 2
+        category_id: categoryIds['Smartphones']
       },
       {
         name: 'Headphones Sony WH-1000XM4',
@@ -60,55 +71,221 @@ async function setupDatabase() {
         price: 349.99,
         discount_price: 299.99,
         stock: 20,
-        category_id: 3
+        category_id: categoryIds['Audio']
       }
     ];
+    
+    // Store product IDs for images
+    const productIds = {};
     
     for (const product of sampleProducts) {
-      const { error: productError } = await supabase
-        .from('products')
-        .insert(product);
-      
-      if (productError && !productError.message.includes('duplicate')) {
-        console.error(`Error adding product "${product.name}":`, productError);
+      // Skip products with missing category IDs
+      if (!product.category_id) {
+        console.warn(`Skipping product "${product.name}" due to missing category ID`);
+        continue;
       }
+      
+      // First check if product already exists by name
+      const { data: existingProducts, error: checkError } = await supabase
+        .from('products')
+        .select('id, name')
+        .eq('name', product.name);
+      
+      if (checkError) {
+        console.error(`Error checking if product "${product.name}" exists:`, checkError);
+        continue;
+      }
+      
+      let productId;
+      
+      if (existingProducts && existingProducts.length > 0) {
+        // Product exists, use its ID
+        productId = existingProducts[0].id;
+        console.log(`Product "${product.name}" already exists with ID: ${productId}`);
+      } else {
+        // Product doesn't exist, insert it
+        const { data: insertedProduct, error: productError } = await supabase
+          .from('products')
+          .insert(product)
+          .select('id, name')
+          .single();
+        
+        if (productError) {
+          console.error(`Error adding product "${product.name}":`, productError);
+          continue;
+        }
+        
+        productId = insertedProduct.id;
+        console.log(`✅ Product "${product.name}" added with ID: ${productId}`);
+      }
+      
+      // Store product ID for later use with images
+      productIds[product.name] = productId;
     }
-    console.log('✅ Products added');
+    console.log('✅ Products setup complete');
     
-    // 3. Create categories table and add sample categories
-    console.log('Adding sample categories...');
-    const sampleCategories = [
-      { id: 1, name: 'Laptops', parent_id: null },
-      { id: 2, name: 'Smartphones', parent_id: null },
-      { id: 3, name: 'Audio', parent_id: null }
+    // 3. Add product images
+    console.log('Adding product images...');
+    const productImageData = [
+      {
+        product_name: 'Laptop Dell XPS 13',
+        image_url: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?ixlib=rb-4.0.3',
+        is_primary: true
+      },
+      {
+        product_name: 'Smartphone Samsung Galaxy S21',
+        image_url: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?ixlib=rb-4.0.3',
+        is_primary: true
+      },
+      {
+        product_name: 'Headphones Sony WH-1000XM4',
+        image_url: 'https://images.unsplash.com/photo-1599669454699-248893623440?ixlib=rb-4.0.3',
+        is_primary: true
+      }
     ];
     
-    for (const category of sampleCategories) {
-      const { error: categoryError } = await supabase
-        .from('categories')
-        .insert(category);
+    for (const imageData of productImageData) {
+      const productId = productIds[imageData.product_name];
       
-      if (categoryError && !categoryError.message.includes('duplicate')) {
-        console.error(`Error adding category "${category.name}":`, categoryError);
+      // Skip images with missing product IDs
+      if (!productId) {
+        console.warn(`Skipping image for "${imageData.product_name}" due to missing product ID`);
+        continue;
+      }
+      
+      // Check if image already exists for this product
+      const { data: existingImages, error: checkImageError } = await supabase
+        .from('product_images')
+        .select('id')
+        .eq('product_id', productId)
+        .eq('is_primary', imageData.is_primary);
+      
+      if (checkImageError) {
+        console.error(`Error checking images for "${imageData.product_name}":`, checkImageError);
+        continue;
+      }
+      
+      if (existingImages && existingImages.length > 0) {
+        console.log(`Image for "${imageData.product_name}" already exists`);
+        continue;
+      }
+      
+      // Insert new image
+      const image = {
+        product_id: productId,
+        image_url: imageData.image_url,
+        is_primary: imageData.is_primary
+      };
+      
+      const { error: imageError } = await supabase
+        .from('product_images')
+        .insert(image);
+      
+      if (imageError) {
+        console.error(`Error adding product image for "${imageData.product_name}":`, imageError);
+      } else {
+        console.log(`✅ Product image added for "${imageData.product_name}"`);
       }
     }
-    console.log('✅ Categories added');
+    console.log('✅ Product images setup complete');
     
-    // 4. Create cart_items table
-    console.log('Setting up cart_items table...');
-    // This is just a check, we don't insert anything
-    const { data: cartItems, error: cartError } = await supabase
-      .from('cart_items')
-      .select('id')
-      .limit(1);
+    // 4. Create admin user
+    console.log('Creating admin user...');
     
-    if (cartError && cartError.code === '42P01') {
-      console.error('Cart items table does not exist:', cartError);
-    } else {
-      console.log('✅ Cart items table ready');
+    // First register with Supabase Auth
+    const adminEmail = 'admin@example.com';
+    const adminPassword = 'admin123';
+    
+    // Suppress errors for already registered users
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: adminEmail,
+        password: adminPassword,
+        options: {
+          data: {
+            first_name: 'Admin',
+            last_name: 'User'
+          }
+        }
+      });
+      
+      if (authError && !authError.message.includes('already registered')) {
+        console.error('Error creating admin auth:', authError);
+      } else {
+        console.log('✅ Admin auth created or already exists');
+      }
+    } catch (err) {
+      console.warn('Auth signup error (might be rate limited):', err.message);
     }
     
-    console.log('Database setup completed successfully!');
+    // Then create user record directly in database
+    const adminUserData = {
+      email: adminEmail,
+      password: bcrypt.hashSync(adminPassword, 10),
+      first_name: 'Admin',
+      last_name: 'User',
+      role: 'admin',
+      is_active: true
+    };
+    
+    const { error: usersError } = await supabase
+      .from('users')
+      .upsert(adminUserData, { onConflict: 'email' });
+    
+    if (usersError) {
+      console.error('Error creating admin user:', usersError);
+    } else {
+      console.log('✅ Admin user created or updated');
+    }
+    
+    // 5. Create test user
+    console.log('Creating test user...');
+    const testEmail = 'test@example.com';
+    const testPassword = 'Password123!';
+    
+    // Suppress errors for already registered users
+    try {
+      const { data: testAuthData, error: testAuthError } = await supabase.auth.signUp({
+        email: testEmail,
+        password: testPassword,
+        options: {
+          data: {
+            first_name: 'Test',
+            last_name: 'User'
+          }
+        }
+      });
+      
+      if (testAuthError && !testAuthError.message.includes('already registered') && !testAuthError.message.includes('rate limit')) {
+        console.error('Error creating test auth:', testAuthError);
+      } else {
+        console.log('✅ Test auth created or already exists');
+      }
+    } catch (err) {
+      console.warn('Auth signup error (might be rate limited):', err.message);
+    }
+    
+    // Then create user record directly in database
+    const testUserData = {
+      email: testEmail,
+      password: bcrypt.hashSync(testPassword, 10),
+      first_name: 'Test',
+      last_name: 'User',
+      role: 'user',
+      is_active: true
+    };
+    
+    const { error: testUserError } = await supabase
+      .from('users')
+      .upsert(testUserData, { onConflict: 'email' });
+    
+    if (testUserError) {
+      console.error('Error creating test user:', testUserError);
+    } else {
+      console.log('✅ Test user created or updated');
+    }
+    
+    console.log('\nDatabase setup completed successfully!');
     console.log('\nTest credentials:');
     console.log('- Admin: admin@example.com / admin123');
     console.log('- User: test@example.com / Password123!');

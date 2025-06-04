@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
 
   try {
     // Use environment variable for backend URL if available, otherwise use hardcoded URL
-    const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-1.onrender.com';
+    const backendBaseUrl = process.env.BACKEND_URL || 'https://barbachli-auth.onrender.com';
     
     // Get carousel data from backend with timeout
     const response = await axios.get(`${backendBaseUrl}/api/carousel`, {

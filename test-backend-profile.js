@@ -15,7 +15,7 @@ async function testUserProfile() {
   try {
     // Step 1: Login to get token
     console.log('\nStep 1: Logging in to get token...');
-    const loginResponse = await axios.post('https://barbachli-1.onrender.com/api/auth/login', credentials, {
+    const loginResponse = await axios.post('https://barbachli-auth.onrender.com/api/auth/login', credentials, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -40,7 +40,7 @@ async function testUserProfile() {
     
     // Check if /api/auth/me endpoint exists
     try {
-      const meResponse = await axios.get('https://barbachli-1.onrender.com/api/auth/me', {
+      const meResponse = await axios.get('https://barbachli-auth.onrender.com/api/auth/me', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -57,7 +57,7 @@ async function testUserProfile() {
       
       // Try /api/users/me endpoint
       try {
-        const userMeResponse = await axios.get('https://barbachli-1.onrender.com/api/users/me', {
+        const userMeResponse = await axios.get('https://barbachli-auth.onrender.com/api/users/me', {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -76,7 +76,7 @@ async function testUserProfile() {
     
     // Step 3: Try to access products endpoint
     console.log('\nStep 3: Accessing products endpoint...');
-    const productsResponse = await axios.get('https://barbachli-1.onrender.com/api/products', {
+    const productsResponse = await axios.get('https://barbachli-auth.onrender.com/api/products', {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

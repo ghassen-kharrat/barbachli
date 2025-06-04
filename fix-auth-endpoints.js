@@ -5,7 +5,7 @@ const path = require('path');
 
 // API URLs
 const vercelUrl = 'https://barbachli.vercel.app/api';
-const backendUrl = 'https://barbachli-1.onrender.com/api';
+const backendUrl = 'https://barbachli-auth.onrender.com/api';
 
 // List of endpoints to check
 const endpoints = [
