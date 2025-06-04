@@ -1,9 +1,9 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import config from '../config';
 
-// Determine the best API URL based on environment and connection health
-const API_BASE_URL = config.apiUrl || 'https://barbachli-auth.onrender.com/api';
-const AUTH_API_URL = config.authApiUrl || 'https://barbachli-auth.onrender.com/api';
+// Force using barbachli-auth API URL - VERSION MARKER: v1.0.1
+const API_BASE_URL = 'https://barbachli-auth.onrender.com/api';
+const AUTH_API_URL = 'https://barbachli-auth.onrender.com/api';
 
 console.log('Using API base URL:', API_BASE_URL);
 console.log('Using Auth API base URL:', AUTH_API_URL);
@@ -31,11 +31,11 @@ axiosClient.interceptors.request.use(
     if (axiosConfig.url?.startsWith('/auth')) {
       axiosConfig.baseURL = AUTH_API_URL;
     } else if (axiosConfig.url?.startsWith('/products')) {
-      axiosConfig.baseURL = config.endpoints?.products || API_BASE_URL;
+      axiosConfig.baseURL = API_BASE_URL;
     } else if (axiosConfig.url?.startsWith('/categories')) {
-      axiosConfig.baseURL = config.endpoints?.categories || API_BASE_URL;
+      axiosConfig.baseURL = API_BASE_URL;
     } else if (axiosConfig.url?.startsWith('/cart')) {
-      axiosConfig.baseURL = config.endpoints?.cart || API_BASE_URL;
+      axiosConfig.baseURL = API_BASE_URL;
     }
     
     // Debug: log request information
