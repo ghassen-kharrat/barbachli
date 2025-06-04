@@ -85,18 +85,42 @@ async function setupDatabase() {
         continue;
       }
       
-      const { data: insertedProduct, error: productError } = await supabase
+      // First check if product already exists by name
+      const { data: existingProducts, error: checkError } = await supabase
         .from('products')
-        .upsert(product, { onConflict: 'name' })
         .select('id, name')
-        .single();
+        .eq('name', product.name);
       
-      if (productError) {
-        console.error(`Error adding product "${product.name}":`, productError);
-      } else {
-        console.log(`✅ Product "${product.name}" added or updated with ID: ${insertedProduct.id}`);
-        productIds[product.name] = insertedProduct.id;
+      if (checkError) {
+        console.error(`Error checking if product "${product.name}" exists:`, checkError);
+        continue;
       }
+      
+      let productId;
+      
+      if (existingProducts && existingProducts.length > 0) {
+        // Product exists, use its ID
+        productId = existingProducts[0].id;
+        console.log(`Product "${product.name}" already exists with ID: ${productId}`);
+      } else {
+        // Product doesn't exist, insert it
+        const { data: insertedProduct, error: productError } = await supabase
+          .from('products')
+          .insert(product)
+          .select('id, name')
+          .single();
+        
+        if (productError) {
+          console.error(`Error adding product "${product.name}":`, productError);
+          continue;
+        }
+        
+        productId = insertedProduct.id;
+        console.log(`✅ Product "${product.name}" added with ID: ${productId}`);
+      }
+      
+      // Store product ID for later use with images
+      productIds[product.name] = productId;
     }
     console.log('✅ Products setup complete');
     
@@ -129,6 +153,24 @@ async function setupDatabase() {
         continue;
       }
       
+      // Check if image already exists for this product
+      const { data: existingImages, error: checkImageError } = await supabase
+        .from('product_images')
+        .select('id')
+        .eq('product_id', productId)
+        .eq('is_primary', imageData.is_primary);
+      
+      if (checkImageError) {
+        console.error(`Error checking images for "${imageData.product_name}":`, checkImageError);
+        continue;
+      }
+      
+      if (existingImages && existingImages.length > 0) {
+        console.log(`Image for "${imageData.product_name}" already exists`);
+        continue;
+      }
+      
+      // Insert new image
       const image = {
         product_id: productId,
         image_url: imageData.image_url,
@@ -137,7 +179,7 @@ async function setupDatabase() {
       
       const { error: imageError } = await supabase
         .from('product_images')
-        .upsert(image);
+        .insert(image);
       
       if (imageError) {
         console.error(`Error adding product image for "${imageData.product_name}":`, imageError);
