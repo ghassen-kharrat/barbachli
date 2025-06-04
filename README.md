@@ -277,3 +277,139 @@ The frontend is already deployed on Vercel. To update it:
 If you encounter CORS issues, make sure the Render service has the proper CORS configuration allowing requests from:
 - https://barbachli.vercel.app
 - http://localhost:3000
+
+# E-commerce Website with Supabase
+
+This is an e-commerce website with frontend deployed on Vercel and backend API deployed on Render, using Supabase as the database.
+
+## Architecture
+
+The application consists of three main components:
+
+1. **Frontend**: React application deployed on Vercel
+2. **Backend API**: Express.js API server deployed on Render
+3. **Database**: Supabase PostgreSQL database
+
+## Deployment Instructions
+
+### Backend API (Render)
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Configure the following settings:
+   - **Name**: barbachli-supabase
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server-supabase.js`
+   - **Environment Variables**:
+     - `SUPABASE_URL`: https://iptgkvofawoqvykmkcrk.supabase.co
+     - `SUPABASE_KEY`: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdGdrdm9mYXdvcXZ5a21rY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjkxMTMsImV4cCI6MjA2NDQ0NTExM30.oUsFpKGgeddXRU5lbaeaufBZ2wV7rnl1a0h2YEfC9b8
+     - `NODE_ENV`: production
+     - `PORT`: 3001
+
+### Frontend (Vercel)
+
+1. Connect your GitHub repository to Vercel
+2. Configure the following environment variables:
+   - `NEXT_PUBLIC_API_URL`: https://barbachli-supabase.onrender.com/api
+   - `NEXT_PUBLIC_IMAGE_BASE_URL`: https://barbachli-supabase.onrender.com/images
+
+## Database Setup
+
+The Supabase database should have the following tables:
+
+1. **users**: User accounts
+   - id (uuid, primary key)
+   - email (text, unique)
+   - first_name (text)
+   - last_name (text)
+   - role (text)
+   - is_active (boolean)
+   - phone (text, nullable)
+   - address (text, nullable)
+   - city (text, nullable)
+   - zip_code (text, nullable)
+   - created_at (timestamp with time zone)
+
+2. **products**: Product catalog
+   - id (uuid, primary key)
+   - name (text)
+   - description (text)
+   - price (numeric)
+   - discount_price (numeric, nullable)
+   - category (text)
+   - stock (integer)
+   - created_at (timestamp with time zone)
+   - rating (numeric)
+
+3. **product_images**: Product images
+   - id (uuid, primary key)
+   - product_id (uuid, foreign key to products.id)
+   - image_url (text)
+   - display_order (integer)
+
+4. **categories**: Product categories
+   - id (uuid, primary key)
+   - name (text)
+   - slug (text, unique)
+   - description (text, nullable)
+   - parent_id (uuid, self-reference, nullable)
+   - icon (text, nullable)
+   - display_order (integer)
+   - is_active (boolean)
+   - created_at (timestamp with time zone)
+
+5. **cart_items**: Shopping cart items
+   - id (uuid, primary key)
+   - user_id (uuid, foreign key to users.id)
+   - product_id (uuid, foreign key to products.id)
+   - quantity (integer)
+   - created_at (timestamp with time zone)
+
+6. **carousel**: Homepage carousel slides
+   - id (uuid, primary key)
+   - title (text)
+   - subtitle (text, nullable)
+   - image_url (text)
+   - link_url (text)
+   - display_order (integer)
+   - is_active (boolean)
+   - created_at (timestamp with time zone)
+
+7. **banners**: Promotional banners
+   - id (uuid, primary key)
+   - title (text)
+   - subtitle (text, nullable)
+   - background_color (text)
+   - text_color (text)
+   - is_active (boolean)
+   - created_at (timestamp with time zone)
+
+## Test Credentials
+
+- **Admin User**: admin@example.com / Password123!
+- **Regular User**: test@example.com / Password123!
+
+## API Endpoints
+
+The API provides the following endpoints:
+
+- **Authentication**:
+  - POST /api/auth/login
+  - POST /api/auth/register
+  - GET /api/auth/check
+  - GET /api/auth/profile
+
+- **Products**:
+  - GET /api/products
+  - GET /api/products/:id
+
+- **Categories**:
+  - GET /api/categories
+
+- **Cart**:
+  - GET /api/cart
+  - POST /api/cart
+
+- **UI Components**:
+  - GET /api/carousel
+  - GET /api/banner

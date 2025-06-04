@@ -47,7 +47,7 @@
     "yup": "^1.3.3"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "node server-supabase.js",
     "build": "set \"TSC_COMPILE_ON_ERROR=true\" && react-scripts build",
     "build:vercel": "cross-env TSC_COMPILE_ON_ERROR=true PUBLIC_URL=/ react-scripts build",
     "build:ignore-ts": "node ignore-ts-errors.js",
@@ -62,6 +62,7 @@
     "start:backend": "node start-backend.js --supabase",
     "start:index": "node index.js",
     "setup-db": "node setup-db.js",
+    "setup-supabase-db": "node setup-supabase-db.js",
     "test-db": "node test-connection.js",
     "test-connections": "node test-connection.js",
     "fix-connections": "node fix-connections.js",
