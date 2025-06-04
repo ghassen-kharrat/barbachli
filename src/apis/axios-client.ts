@@ -1,12 +1,44 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import config from '../config';
 
-// Force using barbachli-auth API URL - VERSION MARKER: v1.0.1
-const API_BASE_URL = 'https://barbachli-auth.onrender.com/api';
-const AUTH_API_URL = 'https://barbachli-auth.onrender.com/api';
+// VERSION MARKER: v2.0.0
+// Force using barbachli-auth API URL with multiple fallbacks
+const getApiUrl = () => {
+  // First check localStorage override
+  const override = typeof localStorage !== 'undefined' ? localStorage.getItem('api_url_override') : null;
+  if (override) {
+    console.log('Using API URL from localStorage override:', override);
+    return override;
+  }
+  
+  // Then check environment variable
+  if (process.env.REACT_APP_API_URL) {
+    console.log('Using API URL from environment variable:', process.env.REACT_APP_API_URL);
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // Hardcoded fallback - ALWAYS use barbachli-auth
+  const hardcodedUrl = 'https://barbachli-auth.onrender.com/api';
+  console.log('Using hardcoded API URL:', hardcodedUrl);
+  return hardcodedUrl;
+};
 
-console.log('Using API base URL:', API_BASE_URL);
-console.log('Using Auth API base URL:', AUTH_API_URL);
+const API_BASE_URL = getApiUrl();
+const AUTH_API_URL = getApiUrl();
+
+console.log('FINAL API CONFIGURATION:');
+console.log('- API base URL:', API_BASE_URL);
+console.log('- Auth API URL:', AUTH_API_URL);
+console.log('- From config.js:', config.apiUrl);
+
+// Ensure URL always uses the correct domain
+const correctUrl = (url: string) => {
+  if (url.includes('barbachli-supabase.onrender.com')) {
+    console.warn('❌ Incorrect API URL detected, fixing:', url);
+    return url.replace('barbachli-supabase.onrender.com', 'barbachli-auth.onrender.com');
+  }
+  return url;
+};
 
 // Create Axios client with default configuration
 const axiosClient: AxiosInstance = axios.create({
@@ -26,6 +58,15 @@ axiosClient.interceptors.request.use(
   (axiosConfig: InternalAxiosRequestConfig) => {
     // Get auth token from localStorage
     const token = localStorage.getItem('auth_token');
+    
+    // Ensure URL always uses the correct domain
+    if (axiosConfig.url) {
+      axiosConfig.url = correctUrl(axiosConfig.url);
+    }
+    
+    if (axiosConfig.baseURL) {
+      axiosConfig.baseURL = correctUrl(axiosConfig.baseURL);
+    }
     
     // Set appropriate base URL based on endpoint
     if (axiosConfig.url?.startsWith('/auth')) {
