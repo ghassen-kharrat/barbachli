@@ -22,20 +22,26 @@ async function setupDatabase() {
     // 1. Create categories table and add sample categories first
     console.log('Adding sample categories...');
     const sampleCategories = [
-      { id: '1', name: 'Laptops', slug: 'laptops', description: 'Portable computers', parent_id: null, display_order: 1, is_active: true },
-      { id: '2', name: 'Smartphones', slug: 'smartphones', description: 'Mobile phones', parent_id: null, display_order: 2, is_active: true },
-      { id: '3', name: 'Audio', slug: 'audio', description: 'Sound equipment', parent_id: null, display_order: 3, is_active: true }
+      { name: 'Laptops', slug: 'laptops', description: 'Portable computers', parent_id: null, display_order: 1, is_active: true },
+      { name: 'Smartphones', slug: 'smartphones', description: 'Mobile phones', parent_id: null, display_order: 2, is_active: true },
+      { name: 'Audio', slug: 'audio', description: 'Sound equipment', parent_id: null, display_order: 3, is_active: true }
     ];
     
+    // Insert categories and store their actual IDs
+    const categoryIds = {};
+    
     for (const category of sampleCategories) {
-      const { error: categoryError } = await supabase
+      const { data: insertedCategory, error: categoryError } = await supabase
         .from('categories')
-        .upsert(category, { onConflict: 'id' });
+        .upsert(category, { onConflict: 'slug' })
+        .select('id, name')
+        .single();
       
-      if (categoryError && !categoryError.message.includes('duplicate')) {
+      if (categoryError) {
         console.error(`Error adding category "${category.name}":`, categoryError);
       } else {
-        console.log(`✅ Category "${category.name}" added or updated`);
+        console.log(`✅ Category "${category.name}" added or updated with ID: ${insertedCategory.id}`);
+        categoryIds[category.name] = insertedCategory.id;
       }
     }
     console.log('✅ Categories setup complete');
@@ -44,77 +50,99 @@ async function setupDatabase() {
     console.log('Adding sample products...');
     const sampleProducts = [
       {
-        id: '1',
         name: 'Laptop Dell XPS 13',
         description: 'Powerful ultrabook with Intel Core i7',
         price: 1299.99,
         discount_price: 1199.99,
         stock: 10,
-        category_id: '1'
+        category_id: categoryIds['Laptops']
       },
       {
-        id: '2',
         name: 'Smartphone Samsung Galaxy S21',
         description: 'Latest Samsung flagship phone',
         price: 899.99,
         discount_price: 849.99,
         stock: 15,
-        category_id: '2'
+        category_id: categoryIds['Smartphones']
       },
       {
-        id: '3',
         name: 'Headphones Sony WH-1000XM4',
         description: 'Noise cancelling wireless headphones',
         price: 349.99,
         discount_price: 299.99,
         stock: 20,
-        category_id: '3'
+        category_id: categoryIds['Audio']
       }
     ];
     
+    // Store product IDs for images
+    const productIds = {};
+    
     for (const product of sampleProducts) {
-      const { error: productError } = await supabase
-        .from('products')
-        .upsert(product, { onConflict: 'id' });
+      // Skip products with missing category IDs
+      if (!product.category_id) {
+        console.warn(`Skipping product "${product.name}" due to missing category ID`);
+        continue;
+      }
       
-      if (productError && !productError.message.includes('duplicate')) {
+      const { data: insertedProduct, error: productError } = await supabase
+        .from('products')
+        .upsert(product, { onConflict: 'name' })
+        .select('id, name')
+        .single();
+      
+      if (productError) {
         console.error(`Error adding product "${product.name}":`, productError);
       } else {
-        console.log(`✅ Product "${product.name}" added or updated`);
+        console.log(`✅ Product "${product.name}" added or updated with ID: ${insertedProduct.id}`);
+        productIds[product.name] = insertedProduct.id;
       }
     }
     console.log('✅ Products setup complete');
     
     // 3. Add product images
     console.log('Adding product images...');
-    const productImages = [
+    const productImageData = [
       {
-        id: '1',
-        product_id: '1',
+        product_name: 'Laptop Dell XPS 13',
         image_url: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?ixlib=rb-4.0.3',
         is_primary: true
       },
       {
-        id: '2',
-        product_id: '2',
+        product_name: 'Smartphone Samsung Galaxy S21',
         image_url: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?ixlib=rb-4.0.3',
         is_primary: true
       },
       {
-        id: '3',
-        product_id: '3',
+        product_name: 'Headphones Sony WH-1000XM4',
         image_url: 'https://images.unsplash.com/photo-1599669454699-248893623440?ixlib=rb-4.0.3',
         is_primary: true
       }
     ];
     
-    for (const image of productImages) {
+    for (const imageData of productImageData) {
+      const productId = productIds[imageData.product_name];
+      
+      // Skip images with missing product IDs
+      if (!productId) {
+        console.warn(`Skipping image for "${imageData.product_name}" due to missing product ID`);
+        continue;
+      }
+      
+      const image = {
+        product_id: productId,
+        image_url: imageData.image_url,
+        is_primary: imageData.is_primary
+      };
+      
       const { error: imageError } = await supabase
         .from('product_images')
-        .upsert(image, { onConflict: 'id' });
+        .upsert(image);
       
-      if (imageError && !imageError.message.includes('duplicate')) {
-        console.error(`Error adding product image:`, imageError);
+      if (imageError) {
+        console.error(`Error adding product image for "${imageData.product_name}":`, imageError);
+      } else {
+        console.log(`✅ Product image added for "${imageData.product_name}"`);
       }
     }
     console.log('✅ Product images setup complete');
@@ -126,37 +154,43 @@ async function setupDatabase() {
     const adminEmail = 'admin@example.com';
     const adminPassword = 'admin123';
     
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: adminEmail,
-      password: adminPassword,
-      options: {
-        data: {
-          first_name: 'Admin',
-          last_name: 'User'
+    // Suppress errors for already registered users
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: adminEmail,
+        password: adminPassword,
+        options: {
+          data: {
+            first_name: 'Admin',
+            last_name: 'User'
+          }
         }
+      });
+      
+      if (authError && !authError.message.includes('already registered')) {
+        console.error('Error creating admin auth:', authError);
+      } else {
+        console.log('✅ Admin auth created or already exists');
       }
-    });
-    
-    if (authError && !authError.message.includes('already registered')) {
-      console.error('Error creating admin auth:', authError);
-    } else {
-      console.log('✅ Admin auth created or already exists');
+    } catch (err) {
+      console.warn('Auth signup error (might be rate limited):', err.message);
     }
     
-    // Then create user record
+    // Then create user record directly in database
+    const adminUserData = {
+      email: adminEmail,
+      password: bcrypt.hashSync(adminPassword, 10),
+      first_name: 'Admin',
+      last_name: 'User',
+      role: 'admin',
+      is_active: true
+    };
+    
     const { error: usersError } = await supabase
       .from('users')
-      .upsert({
-        id: authData?.user?.id || '57ecae66-fe5e-4c89-9296-5a51240a6a31', // Fallback ID if auth fails
-        email: adminEmail,
-        password: bcrypt.hashSync(adminPassword, 10),
-        first_name: 'Admin',
-        last_name: 'User',
-        role: 'admin',
-        is_active: true
-      }, { onConflict: 'email' });
+      .upsert(adminUserData, { onConflict: 'email' });
     
-    if (usersError && !usersError.message.includes('duplicate')) {
+    if (usersError) {
       console.error('Error creating admin user:', usersError);
     } else {
       console.log('✅ Admin user created or updated');
@@ -167,36 +201,43 @@ async function setupDatabase() {
     const testEmail = 'test@example.com';
     const testPassword = 'Password123!';
     
-    const { data: testAuthData, error: testAuthError } = await supabase.auth.signUp({
-      email: testEmail,
-      password: testPassword,
-      options: {
-        data: {
-          first_name: 'Test',
-          last_name: 'User'
+    // Suppress errors for already registered users
+    try {
+      const { data: testAuthData, error: testAuthError } = await supabase.auth.signUp({
+        email: testEmail,
+        password: testPassword,
+        options: {
+          data: {
+            first_name: 'Test',
+            last_name: 'User'
+          }
         }
+      });
+      
+      if (testAuthError && !testAuthError.message.includes('already registered') && !testAuthError.message.includes('rate limit')) {
+        console.error('Error creating test auth:', testAuthError);
+      } else {
+        console.log('✅ Test auth created or already exists');
       }
-    });
-    
-    if (testAuthError && !testAuthError.message.includes('already registered')) {
-      console.error('Error creating test auth:', testAuthError);
-    } else {
-      console.log('✅ Test auth created or already exists');
+    } catch (err) {
+      console.warn('Auth signup error (might be rate limited):', err.message);
     }
+    
+    // Then create user record directly in database
+    const testUserData = {
+      email: testEmail,
+      password: bcrypt.hashSync(testPassword, 10),
+      first_name: 'Test',
+      last_name: 'User',
+      role: 'user',
+      is_active: true
+    };
     
     const { error: testUserError } = await supabase
       .from('users')
-      .upsert({
-        id: testAuthData?.user?.id || 'e437f625-a8a5-46ee-8d5f-f73946a09855', // Fallback ID if auth fails
-        email: testEmail,
-        password: bcrypt.hashSync(testPassword, 10),
-        first_name: 'Test',
-        last_name: 'User',
-        role: 'user',
-        is_active: true
-      }, { onConflict: 'email' });
+      .upsert(testUserData, { onConflict: 'email' });
     
-    if (testUserError && !testUserError.message.includes('duplicate')) {
+    if (testUserError) {
       console.error('Error creating test user:', testUserError);
     } else {
       console.log('✅ Test user created or updated');
