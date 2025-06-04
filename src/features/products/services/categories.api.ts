@@ -5,7 +5,8 @@ import { CategoriesListData, CategoryData, ResponseData } from './types';
 
 // Base URL for category endpoints
 const baseUrl = '/categories';
-const API_BASE_URL = config.apiUrl;
+// Force using barbachli-auth - VERSION MARKER: v1.0.1
+const API_BASE_URL = 'https://barbachli-auth.onrender.com/api';
 
 // API service for categories
 const categoriesApi = {
