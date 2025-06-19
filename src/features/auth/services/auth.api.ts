@@ -28,7 +28,6 @@ const directApiClient = axios.create({
 const saveUserData = (userData: any) => {
   try {
     if (!userData) {
-      console.log('User data saved to localStorage: undefined');
       return;
     }
     
@@ -40,7 +39,6 @@ const saveUserData = (userData: any) => {
     };
     
     localStorage.setItem('user_data', JSON.stringify(formattedUser));
-    console.log('User data saved to localStorage:', formattedUser.email, 'Role:', formattedUser.role);
   } catch (e) {
     console.error('Error saving user data to localStorage:', e);
   }

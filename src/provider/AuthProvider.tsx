@@ -75,7 +75,6 @@ const saveUserToLocalStorage = (userData: any): void => {
     };
     
     localStorage.setItem('user_data', JSON.stringify(formattedUser));
-    console.log('User data saved to localStorage:', formattedUser.email, 'Role:', formattedUser.role);
   } catch (e) {
     console.error('Error saving user data to localStorage:', e);
   }
@@ -97,7 +96,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const hasToken = !!localStorage.getItem('auth_token');
     
     if (storedUser && hasToken) {
-      console.log('Found user in localStorage:', storedUser.email, 'Role:', storedUser.role);
       setUser(storedUser);
     }
   }, []);
