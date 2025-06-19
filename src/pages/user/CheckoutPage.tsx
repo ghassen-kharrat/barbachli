@@ -29,26 +29,44 @@ const CheckoutContainer = styled.div`
   grid-template-columns: 3fr 2fr;
   gap: 2rem;
   
+  @media (max-width: 992px) {
+    gap: 1.5rem;
+  }
+  
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const PageTitle = styled.h1`
-  color: #1a1a2e;
+  color: var(--primary-color);
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 576px) {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const FormSection = styled.div`
   margin-bottom: 2rem;
+  
+  @media (max-width: 576px) {
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const SectionTitle = styled.h2`
   font-size: 1.5rem;
-  color: #1a1a2e;
+  color: var(--primary-color);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
+  
+  @media (max-width: 576px) {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
 `;
 
 const Form = styled.form`
@@ -64,6 +82,7 @@ const FormRow = styled.div`
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 `;
 
@@ -75,59 +94,77 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   font-weight: bold;
-  color: #333;
+  color: var(--text-color);
 `;
 
 const Input = styled.input`
   padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   font-size: 1rem;
   
   &:focus {
     outline: none;
-    border-color: #0f3460;
+    border-color: var(--accent-color);
+  }
+  
+  @media (max-width: 576px) {
+    padding: 0.75rem;
   }
 `;
 
 const Textarea = styled.textarea`
   padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   font-size: 1rem;
   min-height: 100px;
   resize: vertical;
   
   &:focus {
     outline: none;
-    border-color: #0f3460;
+    border-color: var(--accent-color);
+  }
+  
+  @media (max-width: 576px) {
+    padding: 0.75rem;
+    min-height: 80px;
   }
 `;
 
 const ErrorText = styled.div`
-  color: #e94560;
+  color: var(--error-color);
   font-size: 0.8rem;
 `;
 
 const PaymentMethod = styled.div`
   padding: 1.5rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   display: flex;
   align-items: center;
   gap: 1rem;
   cursor: pointer;
   margin-bottom: 1rem;
-  background-color: #f8f9fa;
+  background-color: var(--light-bg);
   
   &:hover {
-    border-color: #0f3460;
+    border-color: var(--accent-color);
+  }
+  
+  @media (max-width: 576px) {
+    padding: 1rem;
+    gap: 0.75rem;
   }
 `;
 
 const PaymentIcon = styled.div`
   font-size: 1.5rem;
-  color: #0f3460;
+  color: var(--accent-color);
+  
+  @media (max-width: 576px) {
+    font-size: 1.25rem;
+  }
 `;
 
 const PaymentDetails = styled.div`
@@ -137,11 +174,20 @@ const PaymentDetails = styled.div`
 const PaymentTitle = styled.h3`
   font-size: 1.1rem;
   margin-bottom: 0.3rem;
+  
+  @media (max-width: 576px) {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
 `;
 
 const PaymentDescription = styled.p`
-  color: #555;
+  color: var(--light-text);
   font-size: 0.9rem;
+  
+  @media (max-width: 576px) {
+    font-size: 0.85rem;
+  }
 `;
 
 const PaymentCheck = styled.div<{ $selected: boolean }>`
@@ -165,36 +211,62 @@ const PaymentCheck = styled.div<{ $selected: boolean }>`
 
 const OrderSummary = styled.div`
   padding: 1.5rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
   position: sticky;
-  top: 2rem;
+  top: 100px;
+  
+  @media (max-width: 768px) {
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 1.25rem;
+  }
 `;
 
 const SummaryTitle = styled.h2`
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin-bottom: 1.5rem;
-  color: #1a1a2e;
+  color: var(--primary-color);
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
+  
+  @media (max-width: 576px) {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const OrderItems = styled.div`
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 576px) {
+    margin-bottom: 1rem;
+  }
 `;
 
 const OrderItem = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 0.8rem 0;
-  border-bottom: 1px solid #f1f1f1;
+  border-bottom: 1px solid var(--border-color);
+  
+  @media (max-width: 576px) {
+    padding: 0.6rem 0;
+  }
 `;
 
 const ItemInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  
+  @media (max-width: 576px) {
+    gap: 0.35rem;
+  }
 `;
 
 const ItemQuantity = styled.span`
@@ -206,12 +278,25 @@ const ItemQuantity = styled.span`
 `;
 
 const ItemName = styled.span`
-  font-weight: bold;
+  font-weight: 500;
+  
+  @media (max-width: 576px) {
+    font-size: 0.9rem;
+    
+    /* Limit to 1 line with ellipsis */
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `;
 
 const ItemPrice = styled.span`
-  font-weight: bold;
-  color: #333;
+  font-weight: 600;
+  
+  @media (max-width: 576px) {
+    font-size: 0.9rem;
+  }
 `;
 
 // Add missing styled components
@@ -302,25 +387,53 @@ const TotalValue = styled.span`
   color: #e94560;
 `;
 
+const SummaryRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  
+  &:last-of-type {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 576px) {
+    &:last-of-type {
+      font-size: 1rem;
+    }
+  }
+`;
+
 const PlaceOrderButton = styled.button`
   width: 100%;
-  background-color: #e94560;
+  background-color: var(--secondary-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   padding: 1rem;
-  margin-top: 1.5rem;
-  font-weight: bold;
+  margin-top: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
   
   &:hover {
-    background-color: #d3405c;
+    background-color: var(--primary-color);
   }
   
   &:disabled {
-    background-color: #ccc;
+    background-color: var(--border-color);
     cursor: not-allowed;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 0.875rem;
   }
 `;
 

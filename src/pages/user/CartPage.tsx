@@ -19,20 +19,33 @@ const CartContainer = styled.div`
   grid-template-columns: 3fr 1fr;
   gap: 2rem;
   
+  @media (max-width: 992px) {
+    gap: 1.5rem;
+  }
+  
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const CartTitle = styled.h1`
-  color: #1a1a2e;
+  color: var(--primary-color);
   margin-bottom: 2rem;
+  
+  @media (max-width: 576px) {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const CartItems = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  
+  @media (max-width: 576px) {
+    gap: 1rem;
+  }
 `;
 
 const CartItem = styled.div`
@@ -41,14 +54,25 @@ const CartItem = styled.div`
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  
+  @media (max-width: 992px) {
+    grid-template-columns: 80px 2fr 1fr 1fr auto;
+    gap: 0.75rem;
+  }
   
   @media (max-width: 768px) {
-    grid-template-columns: 80px 2fr 1fr;
+    grid-template-columns: 80px 1fr auto;
     grid-template-rows: auto auto;
     gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  @media (max-width: 576px) {
+    grid-template-columns: 70px 1fr auto;
+    padding: 0.75rem;
   }
 `;
 
@@ -56,10 +80,15 @@ const ProductImage = styled.img`
   width: 100%;
   height: 100px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   
   @media (max-width: 768px) {
     grid-row: span 2;
+    height: 80px;
+  }
+  
+  @media (max-width: 576px) {
+    height: 70px;
   }
 `;
 
@@ -69,27 +98,39 @@ const ProductDetails = styled.div`
   gap: 0.5rem;
   
   @media (max-width: 768px) {
-    grid-column: 2 / span 2;
+    grid-column: 2 / span 1;
   }
 `;
 
 const ProductName = styled(Link)`
   font-weight: bold;
-  color: #333;
+  color: var(--text-color);
   text-decoration: none;
   
   &:hover {
-    color: #e94560;
+    color: var(--secondary-color);
+  }
+  
+  @media (max-width: 576px) {
+    font-size: 0.95rem;
+    
+    /* Limit to 2 lines with ellipsis */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 
 const ProductPrice = styled.div`
   font-weight: bold;
-  color: #e94560;
+  color: var(--secondary-color);
   
   @media (max-width: 768px) {
     grid-column: 2;
     grid-row: 2;
+    font-size: 0.95rem;
   }
 `;
 
@@ -99,8 +140,14 @@ const QuantityControl = styled.div`
   gap: 0.5rem;
   
   @media (max-width: 768px) {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 2;
+    justify-self: end;
+    margin-right: 1rem;
+  }
+  
+  @media (max-width: 576px) {
+    gap: 0.25rem;
   }
 `;
 
@@ -110,18 +157,23 @@ const QuantityButton = styled.button`
   justify-content: center;
   width: 30px;
   height: 30px;
-  border: 1px solid #ddd;
-  background-color: #f5f5f5;
+  border: 1px solid var(--border-color);
+  background-color: var(--light-bg);
   border-radius: 4px;
   cursor: pointer;
   
   &:hover {
-    background-color: #e1e1e1;
+    background-color: var(--hover-bg);
   }
   
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+  
+  @media (max-width: 576px) {
+    width: 28px;
+    height: 28px;
   }
 `;
 
@@ -131,13 +183,18 @@ const QuantityInput = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
+  
+  @media (max-width: 576px) {
+    width: 28px;
+    height: 28px;
+  }
 `;
 
 const TotalPrice = styled.div`
   font-weight: bold;
-  color: #333;
+  color: var(--text-color);
   
   @media (max-width: 768px) {
     display: none;
@@ -151,19 +208,24 @@ const DeleteButton = styled.button`
   width: 36px;
   height: 36px;
   border: none;
-  background-color: #f5f5f5;
-  color: #e94560;
+  background-color: var(--light-bg);
+  color: var(--secondary-color);
   border-radius: 50%;
   cursor: pointer;
   
   &:hover {
-    background-color: #e94560;
+    background-color: var(--secondary-color);
     color: white;
   }
   
   @media (max-width: 768px) {
-    grid-column: 4;
+    grid-column: 3;
     grid-row: 1;
+  }
+  
+  @media (max-width: 576px) {
+    width: 32px;
+    height: 32px;
   }
 `;
 
@@ -203,92 +265,97 @@ const ShopNowButton = styled(Link)`
 `;
 
 const OrderSummary = styled.div`
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
   padding: 1.5rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--box-shadow);
   position: sticky;
-  top: 2rem;
+  top: 100px;
+  height: fit-content;
+  
+  @media (max-width: 768px) {
+    position: static;
+    margin-top: 1rem;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 1.25rem;
+  }
 `;
 
 const SummaryTitle = styled.h2`
-  font-size: 1.5rem;
   margin-bottom: 1.5rem;
-  color: #1a1a2e;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #ddd;
+  font-size: 1.3rem;
+  
+  @media (max-width: 576px) {
+    font-size: 1.2rem;
+    margin-bottom: 1.25rem;
+  }
 `;
 
-const SummaryItem = styled.div`
+const SummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.8rem;
-`;
-
-const SummaryLabel = styled.span`
-  color: #555;
-`;
-
-const SummaryValue = styled.span`
-  font-weight: bold;
-`;
-
-const SummaryTotal = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding-top: 1rem;
-  margin-top: 1rem;
-  border-top: 1px solid #ddd;
-  font-size: 1.2rem;
-`;
-
-const TotalLabel = styled.span`
-  font-weight: bold;
-  color: #1a1a2e;
-`;
-
-const TotalValue = styled.span`
-  font-weight: bold;
-  color: #e94560;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+  
+  &:last-of-type {
+    margin-bottom: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
 `;
 
 const CheckoutButton = styled.button`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
   width: 100%;
-  background-color: #e94560;
+  background-color: var(--secondary-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   padding: 1rem;
   margin-top: 1.5rem;
   font-weight: bold;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
   
   &:hover {
-    background-color: #d3405c;
+    background-color: var(--primary-color);
   }
   
   &:disabled {
-    background-color: #ccc;
+    background-color: var(--border-color);
     cursor: not-allowed;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 0.875rem;
   }
 `;
 
 const ClearCartButton = styled.button`
   width: 100%;
   background-color: transparent;
-  color: #555;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0.8rem;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
   margin-top: 1rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
   
   &:hover {
-    background-color: #f5f5f5;
+    background-color: var(--light-bg);
+    color: var(--danger-color);
   }
 `;
 
@@ -452,24 +519,22 @@ const CartPage = () => {
         <OrderSummary>
           <SummaryTitle>{t('order_summary')}</SummaryTitle>
           
-          <SummaryItem>
-            <SummaryLabel>{t('subtotal')}</SummaryLabel>
-            <SummaryValue>{subtotal.toFixed(3)} DT</SummaryValue>
-          </SummaryItem>
+          <SummaryRow>
+            <span>{t('subtotal')}</span>
+            <span>{subtotal.toFixed(3)} DT</span>
+          </SummaryRow>
           
-          {/* Remove tax item */}
-          
-          <SummaryItem>
-            <SummaryLabel>{t('shipping')}</SummaryLabel>
-            <SummaryValue>
+          <SummaryRow>
+            <span>{t('shipping')}</span>
+            <span>
               {shipping === 0 ? t('free') : `${shipping.toFixed(3)} DT`}
-            </SummaryValue>
-          </SummaryItem>
+            </span>
+          </SummaryRow>
           
-          <SummaryTotal>
-            <TotalLabel>{t('total')}</TotalLabel>
-            <TotalValue>{total.toFixed(3)} DT</TotalValue>
-          </SummaryTotal>
+          <SummaryRow>
+            <span>{t('total')}</span>
+            <span>{total.toFixed(3)} DT</span>
+          </SummaryRow>
           
           <CheckoutButton onClick={handleCheckout}>
             {t('checkout')} <span><FaIcons.FaArrowRight /></span>

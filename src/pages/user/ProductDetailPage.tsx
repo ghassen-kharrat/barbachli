@@ -18,6 +18,10 @@ const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  
+  @media (max-width: 576px) {
+    padding: 0 1rem;
+  }
 `;
 
 const Breadcrumb = styled.div`
@@ -27,6 +31,12 @@ const Breadcrumb = styled.div`
   margin-bottom: 2rem;
   font-size: 0.9rem;
   color: var(--light-text);
+  flex-wrap: wrap;
+  
+  @media (max-width: 576px) {
+    margin-bottom: 1.5rem;
+    font-size: 0.8rem;
+  }
 `;
 
 const BreadcrumbSeparator = styled.span`
@@ -72,6 +82,10 @@ const ProductContainer = styled.div`
   @media (max-width: 992px) {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+  
+  @media (max-width: 576px) {
+    gap: 1.5rem;
   }
 `;
 
@@ -126,6 +140,10 @@ const ThumbnailsContainer = styled.div`
   gap: 0.8rem;
   margin-top: 1rem;
   flex-wrap: wrap;
+  
+  @media (max-width: 576px) {
+    gap: 0.5rem;
+  }
 `;
 
 const ThumbnailWrapper = styled.div<{ $active: boolean }>`
@@ -140,6 +158,11 @@ const ThumbnailWrapper = styled.div<{ $active: boolean }>`
   &:hover {
     transform: translateY(-3px);
     box-shadow: var(--box-shadow);
+  }
+  
+  @media (max-width: 576px) {
+    width: 60px;
+    height: 60px;
   }
 `;
 
@@ -176,6 +199,10 @@ const ProductName = styled.h1`
   @media (max-width: 768px) {
     font-size: 1.5rem;
   }
+  
+  @media (max-width: 576px) {
+    font-size: 1.35rem;
+  }
 `;
 
 const PriceContainer = styled.div`
@@ -183,18 +210,27 @@ const PriceContainer = styled.div`
   align-items: center;
   gap: 1rem;
   margin-bottom: 0.5rem;
+  flex-wrap: wrap;
 `;
 
 const Price = styled.span`
   font-size: 1.8rem;
   font-weight: bold;
   color: var(--secondary-color);
+  
+  @media (max-width: 576px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const DiscountPrice = styled.span`
   text-decoration: line-through;
   color: var(--light-text);
   font-size: 1.2rem;
+  
+  @media (max-width: 576px) {
+    font-size: 1rem;
+  }
 `;
 
 const SaveAmount = styled.span`
@@ -261,9 +297,15 @@ const StockStatus = styled.div<{ $inStock: boolean }>`
   }
 `;
 
-const Description = styled.div`
-  line-height: 1.7;
+const ProductDescription = styled.div`
+  margin-top: 1rem;
   color: var(--text-color);
+  line-height: 1.7;
+  
+  @media (max-width: 576px) {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
 `;
 
 const KeyFeatures = styled.ul`
@@ -297,9 +339,15 @@ const QuantitySelector = styled.div`
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 576px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
 `;
 
-const QuantityLabel = styled.label`
+const QuantityLabel = styled.span`
   font-weight: 500;
 `;
 
@@ -309,101 +357,105 @@ const QuantityControls = styled.div`
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   overflow: hidden;
+  
+  @media (max-width: 576px) {
+    width: 100%;
+  }
 `;
 
 const QuantityButton = styled.button`
   background-color: var(--light-bg);
   border: none;
-  padding: 0.5rem 0.8rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
   transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   
   &:hover {
     background-color: var(--border-color);
   }
   
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  @media (max-width: 576px) {
+    padding: 0.75rem 1rem;
   }
 `;
 
 const QuantityInput = styled.input`
   width: 50px;
-  padding: 0.5rem;
   border: none;
-  border-left: 1px solid var(--border-color);
-  border-right: 1px solid var(--border-color);
   text-align: center;
   font-weight: 500;
-  background-color: var(--card-bg);
-  color: var(--text-color);
+  padding: 0.5rem 0;
   
-  &:focus {
-    outline: none;
-  }
-  
-  /* Hide number input arrows */
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
-  -moz-appearance: textfield;
+  
+  @media (max-width: 576px) {
+    flex: 1;
+    padding: 0.75rem 0;
+  }
 `;
 
-const ButtonsContainer = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+const ActionButtons = styled.div`
+  display: flex;
   gap: 1rem;
+  margin-top: 1.5rem;
   
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 576px) {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
   }
 `;
 
 const AddToCartButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  background-color: var(--accent-color);
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: var(--border-radius);
-  padding: 0.9rem 1.5rem;
+  padding: 1rem 2rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  
-  &:hover:not(:disabled) {
-    background-color: var(--primary-color);
-  }
-  
-  &:disabled {
-    background-color: var(--border-color);
-    cursor: not-allowed;
-  }
-`;
-
-const WishlistButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--card-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+  flex: 1;
+  
+  &:hover {
+    background-color: var(--secondary-color);
+  }
+  
+  @media (max-width: 576px) {
+    width: 100%;
+    padding: 0.875rem;
+  }
+`;
+
+const BuyNowButton = styled.button`
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
   border-radius: var(--border-radius);
-  padding: 0.9rem;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   cursor: pointer;
   transition: var(--transition);
   
   &:hover {
-    background-color: var(--light-bg);
-    color: var(--secondary-color);
+    background-color: var(--primary-color);
+  }
+  
+  @media (max-width: 576px) {
+    width: 100%;
+    padding: 0.875rem;
   }
 `;
 
@@ -496,34 +548,46 @@ const AdditionalInfo = styled.div`
 `;
 
 const TabsContainer = styled.div`
+  margin-top: 3rem;
+  
+  @media (max-width: 576px) {
+    margin-top: 2rem;
+  }
+`;
+
+const TabsHeader = styled.div`
   display: flex;
   border-bottom: 1px solid var(--border-color);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   
-  @media (max-width: 768px) {
-    padding-bottom: 1px;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  @media (max-width: 576px) {
+    margin-bottom: 1.5rem;
   }
 `;
 
 const TabButton = styled.button<{ $active: boolean }>`
   padding: 1rem 1.5rem;
-  background-color: transparent;
+  background: none;
   border: none;
-  border-bottom: 3px solid ${({ $active }) => $active ? 'var(--accent-color)' : 'transparent'};
-  color: ${({ $active }) => $active ? 'var(--primary-color)' : 'var(--light-text)'};
-  font-weight: ${({ $active }) => $active ? '600' : '500'};
+  border-bottom: 2px solid ${({ $active }) => $active ? 'var(--secondary-color)' : 'transparent'};
+  color: ${({ $active }) => $active ? 'var(--secondary-color)' : 'var(--text-color)'};
+  font-weight: ${({ $active }) => $active ? '600' : '400'};
   cursor: pointer;
-  white-space: nowrap;
   transition: var(--transition);
+  white-space: nowrap;
   
   &:hover {
-    color: var(--primary-color);
+    color: var(--secondary-color);
   }
   
-  @media (max-width: 768px) {
-    padding: 0.8rem 1.2rem;
+  @media (max-width: 576px) {
+    padding: 0.75rem 1.25rem;
   }
 `;
 
@@ -636,38 +700,6 @@ const ReviewFormTitle = styled.h3`
 
 const TabsSection = styled.div`
   margin-top: 3rem;
-`;
-
-const TabsHeader = styled.div`
-  display: flex;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 1.5rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  
-  @media (max-width: 768px) {
-    padding-bottom: 1px;
-  }
-`;
-
-const Tab = styled.button<{ $active: boolean }>`
-  padding: 1rem 1.5rem;
-  background-color: transparent;
-  border: none;
-  border-bottom: 3px solid ${({ $active }) => $active ? 'var(--accent-color)' : 'transparent'};
-  color: ${({ $active }) => $active ? 'var(--primary-color)' : 'var(--light-text)'};
-  font-weight: ${({ $active }) => $active ? '600' : '500'};
-  cursor: pointer;
-  white-space: nowrap;
-  transition: var(--transition);
-  
-  &:hover {
-    color: var(--primary-color);
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0.8rem 1.2rem;
-  }
 `;
 
 const ReviewsSection = styled.section`
@@ -921,17 +953,9 @@ const ProductDetailPage = () => {
     console.log('Debug - Force log reviewsData:', reviewsData);
     console.log('Debug - Force log reviewsData?.data:', reviewsData?.data);
     console.log('Debug - Force log reviewsData?.total:', reviewsData?.total);
-    console.log('Debug - Force log reviewsData?.stats:', reviewsData?.stats);
     
     // Double check ProductID being used for the API call
     console.log('Debug - ProductID for reviews API call:', productId);
-    
-    // Check if reviews are available
-    if (reviewsData && reviewsData.data && reviewsData.data.length > 0) {
-      console.log('Debug - Reviews found:', reviewsData.data.length);
-    } else {
-      console.log('Debug - No reviews found or reviewsData is not properly structured');
-    }
   }, [reviewsData, productId]);
   
   const createReview = useCreateReview();
@@ -997,17 +1021,6 @@ const ProductDetailPage = () => {
     const discountPrice = typeof product.discountPrice === 'string' ? parseFloat(product.discountPrice) : product.discountPrice;
     return (productPrice - discountPrice).toFixed(2);
   };
-  
-  // Add check for reviewsData - is it actually coming in?
-  useEffect(() => {
-    // Force console to always show reviewsData, even if it appears to be falsy
-    console.log('Debug - Force log reviewsData:', reviewsData);
-    console.log('Debug - Force log reviewsData?.data:', reviewsData?.data);
-    console.log('Debug - Force log reviewsData?.total:', reviewsData?.total);
-    
-    // Double check ProductID being used for the API call
-    console.log('Debug - ProductID for reviews API call:', productId);
-  }, [reviewsData, productId]);
   
   const handleAddToCart = () => {
     if (!isAuthenticated) {
@@ -1237,20 +1250,29 @@ const ProductDetailPage = () => {
                 </QuantityControls>
               </QuantitySelector>
               
-                <AddToCartButton 
-                  onClick={handleAddToCart}
-                  disabled={product.stock === 0 || addToCartMutation.isPending}
-                >
-                {addToCartMutation.isPending ? (
-                  <>
-                    <FaIcons.FaSpinner /> {t('adding')}...
-                  </>
-                  ) : (
+                <ActionButtons>
+                  <AddToCartButton 
+                    onClick={handleAddToCart}
+                    disabled={product.stock === 0 || addToCartMutation.isPending}
+                  >
+                  {addToCartMutation.isPending ? (
                     <>
-                    <FaIcons.FaShoppingCart /> {t('add_to_cart')}
+                      <FaIcons.FaSpinner /> {t('adding')}...
                     </>
-                  )}
-                </AddToCartButton>
+                    ) : (
+                      <>
+                      <FaIcons.FaShoppingCart /> {t('add_to_cart')}
+                      </>
+                    )}
+                  </AddToCartButton>
+                  
+                  <BuyNowButton 
+                    onClick={handleAddToCart}
+                    disabled={product.stock === 0 || addToCartMutation.isPending}
+                  >
+                    {t('buy_now')}
+                  </BuyNowButton>
+                </ActionButtons>
               
               {addToCartSuccess && (
                 <SuccessMessage>
@@ -1297,25 +1319,25 @@ const ProductDetailPage = () => {
         
         <TabsSection>
           <TabsHeader>
-            <Tab 
+            <TabButton 
               $active={activeTab === 'description'} 
               onClick={() => setActiveTab('description')}
             >
               {t('description')}
-            </Tab>
-            <Tab 
+            </TabButton>
+            <TabButton 
               $active={activeTab === 'reviews'} 
               onClick={() => setActiveTab('reviews')}
             >
               {t('reviews')} ({reviewsTotal})
-            </Tab>
+            </TabButton>
           </TabsHeader>
           
           <TabContent>
             {activeTab === 'description' ? (
-              <Description>
+              <ProductDescription>
                 {product.description}
-              </Description>
+              </ProductDescription>
             ) : (
               <ReviewsSection ref={reviewsSectionRef}>
                 <ReviewsHeader>

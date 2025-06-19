@@ -21,6 +21,10 @@ const Header = styled.header`
   z-index: 1000;
   box-shadow: var(--box-shadow);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  
+  @media (max-width: 576px) {
+    padding: 0.75rem 0;
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -30,6 +34,10 @@ const HeaderContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  
+  @media (max-width: 576px) {
+    padding: 0 1rem;
+  }
 `;
 
 const Logo = styled(Link)`
@@ -44,6 +52,42 @@ const Logo = styled(Link)`
   &:hover {
     color: white;
     opacity: 0.9;
+  }
+  
+  @media (max-width: 576px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const LogoImage = styled.img`
+  height: 50px;
+  
+  @media (max-width: 576px) {
+    height: 40px;
+  }
+  
+  @media (max-width: 480px) {
+    height: 36px;
+  }
+`;
+
+const LogoText = styled.span`
+  font-size: 0.9rem;
+  margin-top: 3px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #3498db, #e74c3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  @media (max-width: 576px) {
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
   }
 `;
 
@@ -63,6 +107,7 @@ const Nav = styled.nav<{ $isOpen: boolean }>`
     transition: left 0.3s ease;
     z-index: 1001;
     box-shadow: ${({ $isOpen }) => ($isOpen ? 'var(--box-shadow)' : 'none')};
+    overflow-y: auto; /* Allow scrolling on mobile menu */
   }
 `;
 
@@ -74,6 +119,7 @@ const MobileMenuButton = styled.button`
   border: none;
   cursor: pointer;
   z-index: 1002;
+  padding: 0.5rem;
   
   @media (max-width: 992px) {
     display: block;
@@ -109,6 +155,7 @@ const NavLink = styled(Link)`
     margin-bottom: 1rem;
     display: block;
     width: 100%;
+    padding: 0.75rem 0.5rem;
     
     &.active:after {
       display: none;
@@ -140,6 +187,10 @@ const SearchBar = styled.div`
   width: 300px;
   transition: width 0.3s ease;
   
+  @media (max-width: 1200px) {
+    width: 250px;
+  }
+  
   @media (max-width: 992px) {
     display: none;
   }
@@ -154,6 +205,30 @@ const MobileSearch = styled.div`
     display: flex;
     justify-content: center;
     margin-top: 1rem;
+  }
+  
+  form {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    
+    &:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+    
+    @media (max-width: 576px) {
+      padding: 0.6rem 0.75rem;
+    }
   }
 `;
 
@@ -178,6 +253,12 @@ const SearchInput = styled.input`
   background-color: var(--card-bg);
   color: var(--text-color);
   border-radius: var(--border-radius);
+  
+  @media (max-width: 992px) {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+  }
 `;
 
 const SearchButton = styled.button`
@@ -185,12 +266,35 @@ const SearchButton = styled.button`
   border: none;
   cursor: pointer;
   color: var(--primary-color);
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  @media (max-width: 992px) {
+    background-color: var(--secondary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 0.5rem;
+  }
 `;
 
 const Icons = styled.div`
   display: flex;
   gap: 1.5rem;
   align-items: center;
+  
+  @media (max-width: 576px) {
+    gap: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.75rem;
+  }
 `;
 
 const IconLink = styled(Link)`
@@ -205,6 +309,16 @@ const IconLink = styled(Link)`
   &:hover {
     color: var(--secondary-color);
     transform: translateY(-2px);
+  }
+  
+  @media (max-width: 576px) {
+    font-size: 1.1rem;
+  }
+  
+  span {
+    @media (max-width: 480px) {
+      display: none;
+    }
   }
 `;
 
@@ -222,6 +336,14 @@ const CartCount = styled.span`
   justify-content: center;
   font-size: 0.7rem;
   font-weight: bold;
+  
+  @media (max-width: 480px) {
+    width: 18px;
+    height: 18px;
+    top: -6px;
+    right: -6px;
+    font-size: 0.65rem;
+  }
 `;
 
 const LogoutButton = styled.button`
@@ -238,27 +360,49 @@ const LogoutButton = styled.button`
     color: var(--secondary-color);
     transform: translateY(-2px);
   }
+  
+  @media (max-width: 576px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const Main = styled.main`
   min-height: calc(100vh - 60px - 200px); // Adjust for header and footer
   padding: 2rem 0;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem 0;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 1rem 0;
+    min-height: calc(100vh - 60px - 150px);
+  }
 `;
 
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  
+  @media (max-width: 576px) {
+    padding: 0 1rem;
+  }
 `;
 
 const ContentWrapper = styled.div`
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 1.5rem;
-  align-items: flex-start;
+  grid-template-columns: 250px 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: 220px 1fr;
+    gap: 1.5rem;
+  }
   
   @media (max-width: 992px) {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 `;
 
@@ -279,16 +423,19 @@ const Footer = styled.footer`
   background-color: var(--footer-bg);
   color: white;
   padding: 3rem 0 1.5rem;
-  transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 2rem 0 1rem;
+  }
 `;
 
 const FooterContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 1.5rem;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
-  padding: 0 1.5rem;
   
   @media (max-width: 992px) {
     grid-template-columns: repeat(2, 1fr);
@@ -296,11 +443,16 @@ const FooterContent = styled.div`
   
   @media (max-width: 576px) {
     grid-template-columns: 1fr;
+    padding: 0 1rem;
   }
 `;
 
 const FooterColumn = styled.div`
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 576px) {
+    margin-bottom: 2rem;
+  }
 `;
 
 const FooterTitle = styled.h4`
@@ -318,6 +470,11 @@ const FooterTitle = styled.h4`
     width: 50px;
     height: 2px;
     background-color: var(--secondary-color);
+  }
+  
+  @media (max-width: 576px) {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
   }
 `;
 
@@ -341,12 +498,24 @@ const FooterLink = styled.li`
       transform: translateX(5px);
     }
   }
+  
+  @media (max-width: 576px) {
+    margin-bottom: 0.6rem;
+    
+    a {
+      font-size: 0.95rem;
+    }
+  }
 `;
 
 const SocialIcons = styled.div`
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
+  
+  @media (max-width: 576px) {
+    gap: 0.75rem;
+  }
 `;
 
 const SocialIconLink = styled.a`
@@ -364,6 +533,12 @@ const SocialIconLink = styled.a`
     background-color: var(--secondary-color);
     transform: translateY(-3px);
   }
+  
+  @media (max-width: 576px) {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
 `;
 
 const Copyright = styled.div`
@@ -372,6 +547,12 @@ const Copyright = styled.div`
   padding-top: 1.5rem;
   color: var(--light-text);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  @media (max-width: 576px) {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const BackToTop = styled.button`
@@ -403,6 +584,40 @@ const BackToTop = styled.button`
     background-color: var(--accent-color);
     transform: translateY(-3px);
   }
+  
+  @media (max-width: 576px) {
+    width: 36px;
+    height: 36px;
+    bottom: 15px;
+    right: 15px;
+    font-size: 0.9rem;
+  }
+`;
+
+const ContactItem = styled.p`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.7rem;
+  color: var(--light-text);
+  
+  @media (max-width: 576px) {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+`;
+
+const MobileOverlay = styled.div<{ $isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: ${({ $isOpen }) => ($isOpen ? '1' : '0')};
+  visibility: ${({ $isOpen }) => ($isOpen ? 'visible' : 'hidden')};
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 `;
 
 interface UserLayoutProps {
@@ -435,6 +650,15 @@ const UserLayout = ({ children }: UserLayoutProps) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Debug for user and authentication state
+  useEffect(() => {
+    if (user) {
+      console.log('UserLayout - User state:', user.email, 'Role:', user.role, 'isAuthenticated:', isAuthenticated);
+    } else {
+      console.log('UserLayout - User state: Not logged in, isAuthenticated:', isAuthenticated);
+    }
+  }, [user, isAuthenticated]);
   
   const handleLogout = () => {
     logout();
@@ -477,17 +701,8 @@ const UserLayout = ({ children }: UserLayoutProps) => {
             </MobileMenuButton>
             <Logo to="/">
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <img src="/logo barbachli.png" alt="Barbachli" style={{ height: '50px' }} />
-                <span style={{ 
-                  fontSize: '0.9rem', 
-                  marginTop: '3px', 
-                  fontWeight: '600',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase',
-                  background: 'linear-gradient(90deg, #3498db, #e74c3c)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}>Barbachli</span>
+                <LogoImage src="/logo barbachli.png" alt="Barbachli" />
+                <LogoText>Barbachli</LogoText>
               </div>
             </Logo>
           </div>
@@ -526,7 +741,7 @@ const UserLayout = ({ children }: UserLayoutProps) => {
             </MobileThemeToggle>
             
             <MobileSearch>
-              <form onSubmit={handleSearch} style={{ width: '100%', display: 'flex' }}>
+              <form onSubmit={handleSearch}>
                 <SearchInput 
                   type="text" 
                   placeholder={t('search_product')}
@@ -658,10 +873,16 @@ const UserLayout = ({ children }: UserLayoutProps) => {
           
           <FooterColumn>
             <FooterTitle>{t('contact')}</FooterTitle>
-            <div style={{ color: 'var(--light-text)', marginBottom: '0.5rem' }}>
-              <p><FaIcons.FaMapMarkerAlt style={{ marginRight: language === 'ar' ? '0' : '10px', marginLeft: language === 'ar' ? '10px' : '0' }} /> 123 Rue du Commerce, 75001 Paris</p>
-              <p><FaIcons.FaPhone style={{ marginRight: language === 'ar' ? '0' : '10px', marginLeft: language === 'ar' ? '10px' : '0' }} /> +33 1 23 45 67 89</p>
-              <p><FaIcons.FaEnvelope style={{ marginRight: language === 'ar' ? '0' : '10px', marginLeft: language === 'ar' ? '10px' : '0' }} /> contact@e-shop.com</p>
+            <div>
+              <ContactItem>
+                <FaIcons.FaMapMarkerAlt /> 123 Rue du Commerce, 75001 Paris
+              </ContactItem>
+              <ContactItem>
+                <FaIcons.FaPhone /> +33 1 23 45 67 89
+              </ContactItem>
+              <ContactItem>
+                <FaIcons.FaEnvelope /> contact@e-shop.com
+              </ContactItem>
             </div>
           </FooterColumn>
         </FooterContent>
@@ -678,6 +899,10 @@ const UserLayout = ({ children }: UserLayoutProps) => {
       >
         <FaIcons.FaArrowUp />
       </BackToTop>
+      
+      <MobileOverlay $isOpen={mobileMenuOpen} onClick={() => setMobileMenuOpen(false)}>
+        {/* Mobile menu overlay content */}
+      </MobileOverlay>
     </>
   );
 };

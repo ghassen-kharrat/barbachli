@@ -22,6 +22,13 @@ const SectionHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 2rem;
+  
+  @media (max-width: 576px) {
+    margin-bottom: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -43,6 +50,16 @@ const SectionTitle = styled.h2`
   @media (max-width: 768px) {
     font-size: 1.5rem;
   }
+  
+  @media (max-width: 576px) {
+    font-size: 1.35rem;
+    
+    &:after {
+      bottom: -6px;
+      width: 50px;
+      height: 3px;
+    }
+  }
 `;
 
 const SeeAllLink = styled(Link)`
@@ -62,8 +79,13 @@ const ProductsGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
   
-  @media (max-width: 576px) {
+  @media (max-width: 768px) {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 1rem;
   }
 `;
@@ -79,14 +101,12 @@ const CategoriesGrid = styled.div`
   
   @media (max-width: 992px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
   }
   
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  @media (max-width: 480px) {
+  @media (max-width: 576px) {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 `;
 
@@ -126,6 +146,16 @@ const CategoryCard = styled(Link)<{ $bgColor: string }>`
       transform: scale(1.1);
     }
   }
+  
+  @media (max-width: 768px) {
+    min-height: 160px;
+    padding: 1.5rem;
+  }
+  
+  @media (max-width: 576px) {
+    min-height: 140px;
+    padding: 1.25rem;
+  }
 `;
 
 const CategoryIcon = styled.div`
@@ -151,6 +181,16 @@ const NewsletterSection = styled.section`
   margin-bottom: 4rem;
   text-align: center;
   color: white;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 2rem 1.25rem;
+    margin-bottom: 2.5rem;
+  }
 `;
 
 const NewsletterContent = styled.div`
@@ -165,12 +205,22 @@ const NewsletterTitle = styled.h2`
   @media (max-width: 768px) {
     font-size: 2rem;
   }
+  
+  @media (max-width: 576px) {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
 `;
 
 const NewsletterSubtitle = styled.p`
   font-size: 1.1rem;
   margin-bottom: 2rem;
   opacity: 0.9;
+  
+  @media (max-width: 576px) {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const NewsletterForm = styled.form`
@@ -179,6 +229,10 @@ const NewsletterForm = styled.form`
   gap: 1rem;
   justify-content: center;
   margin-bottom: 1rem;
+  
+  @media (max-width: 576px) {
+    flex-direction: column;
+  }
 `;
 
 const NewsletterInput = styled.input`
@@ -192,6 +246,12 @@ const NewsletterInput = styled.input`
   &:focus {
     outline: none;
   }
+  
+  @media (max-width: 576px) {
+    min-width: 0;
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+  }
 `;
 
 const NewsletterButton = styled.button`
@@ -202,11 +262,16 @@ const NewsletterButton = styled.button`
   padding: 1rem 2rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   
   &:hover {
-    background-color: #d7394c;
-    transform: translateY(-3px);
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 576px) {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
   }
 `;
 

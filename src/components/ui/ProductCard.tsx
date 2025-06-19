@@ -21,6 +21,12 @@ const Card = styled.div`
     transform: translateY(-8px);
     box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
   }
+  
+  @media (max-width: 576px) {
+    &:hover {
+      transform: translateY(-4px);
+    }
+  }
 `;
 
 const ImageContainer = styled.div`
@@ -42,6 +48,14 @@ const ImageContainer = styled.div`
   
   ${Card}:hover &::after {
     opacity: 1;
+  }
+  
+  @media (max-width: 768px) {
+    height: 180px;
+  }
+  
+  @media (max-width: 576px) {
+    height: 160px;
   }
 `;
 
@@ -100,6 +114,13 @@ const WishlistButton = styled.button`
     opacity: 1;
     transform: translateY(0);
   }
+  
+  @media (max-width: 768px) {
+    opacity: 1;
+    transform: none;
+    width: 30px;
+    height: 30px;
+  }
 `;
 
 const QuickView = styled.button`
@@ -125,6 +146,15 @@ const QuickView = styled.button`
   &:hover {
     background-color: var(--secondary-color);
   }
+  
+  @media (max-width: 768px) {
+    padding: 6px 0;
+    font-size: 0.85rem;
+  }
+  
+  @media (max-width: 576px) {
+    display: none;
+  }
 `;
 
 const Content = styled.div`
@@ -132,6 +162,10 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 const Category = styled.span`
@@ -157,6 +191,18 @@ const Title = styled.h3`
     &:hover {
       color: var(--secondary-color);
     }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+    margin: 0 0 0.25rem;
+    
+    /* Limit to 2 lines with ellipsis */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 
@@ -232,15 +278,20 @@ const ActionContainer = styled.div`
   padding-top: 1rem;
 `;
 
+const Actions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+`;
+
 const AddToCartButton = styled.button`
-  flex: 1;
-  background-color: var(--accent-color);
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 0.75rem;
-  cursor: pointer;
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1.25rem;
   font-weight: 600;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -251,9 +302,15 @@ const AddToCartButton = styled.button`
     background-color: var(--secondary-color);
   }
   
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+  @media (max-width: 768px) {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 576px) {
+    flex: 1;
+    padding: 0.6rem 0;
+    font-size: 0.85rem;
   }
 `;
 
@@ -376,7 +433,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {inStock ? t('in_stock') : t('out_of_stock')}
         </Stock>
         
-        <ActionContainer>
+        <Actions>
           <AddToCartButton 
             onClick={handleAddToCart}
             disabled={!inStock || isAddingToCart}
@@ -395,7 +452,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               </>
             )}
           </AddToCartButton>
-        </ActionContainer>
+        </Actions>
       </Content>
     </Card>
   );

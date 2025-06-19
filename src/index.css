@@ -30,6 +30,19 @@
   --subcategory-bg: rgba(0, 0, 0, 0.03);
   --text-muted: #999999;
   --danger-color: #f44336;
+  
+  /* Responsive breakpoints */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  
+  /* Container widths */
+  --container-sm: 540px;
+  --container-md: 720px;
+  --container-lg: 960px;
+  --container-xl: 1140px;
 }
 
 [data-theme="dark"] {
@@ -97,15 +110,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: 2.25rem;
+  font-size: 2rem;
 }
 
 h2 {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
 }
 
 h3 {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
+}
+
+h4 {
+  font-size: 1.2rem;
 }
 
 p {
@@ -161,9 +178,11 @@ button {
 
 /* Utility classes */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  width: 100%;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .section {
@@ -230,21 +249,45 @@ button {
   }
 }
 
-@media (max-width: 768px) {
+@media (min-width: 576px) {
+  .container {
+    max-width: var(--container-sm);
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: var(--container-md);
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: var(--container-lg);
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: var(--container-xl);
+  }
+}
+
+@media (min-width: 768px) {
   h1 {
-    font-size: 1.8rem;
+    font-size: 2.25rem;
   }
   
   h2 {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   
   h3 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
   
-  .section {
-    padding: 2rem 0;
+  h4 {
+    font-size: 1.3rem;
   }
 }
 
@@ -324,3 +367,125 @@ html[dir="rtl"] body {
 
 /* Add Tajawal font for Arabic */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap');
+
+/* Enhanced responsive grid system */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -0.5rem;
+  margin-left: -0.5rem;
+}
+
+.col {
+  position: relative;
+  width: 100%;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+/* Responsive columns */
+.col-12 { flex: 0 0 100%; max-width: 100%; }
+.col-6 { flex: 0 0 50%; max-width: 50%; }
+.col-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+.col-3 { flex: 0 0 25%; max-width: 25%; }
+
+@media (min-width: 576px) {
+  .col-sm-12 { flex: 0 0 100%; max-width: 100%; }
+  .col-sm-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-sm-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-sm-3 { flex: 0 0 25%; max-width: 25%; }
+}
+
+@media (min-width: 768px) {
+  .col-md-12 { flex: 0 0 100%; max-width: 100%; }
+  .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+}
+
+@media (min-width: 992px) {
+  .col-lg-12 { flex: 0 0 100%; max-width: 100%; }
+  .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+}
+
+/* Responsive spacing utilities */
+.p-0 { padding: 0 !important; }
+.p-1 { padding: 0.25rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 1rem !important; }
+.p-4 { padding: 1.5rem !important; }
+.p-5 { padding: 3rem !important; }
+
+.m-0 { margin: 0 !important; }
+.m-1 { margin: 0.25rem !important; }
+.m-2 { margin: 0.5rem !important; }
+.m-3 { margin: 1rem !important; }
+.m-4 { margin: 1.5rem !important; }
+.m-5 { margin: 3rem !important; }
+
+/* Responsive display utilities */
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+
+@media (min-width: 576px) {
+  .d-sm-none { display: none !important; }
+  .d-sm-block { display: block !important; }
+  .d-sm-flex { display: flex !important; }
+}
+
+@media (min-width: 768px) {
+  .d-md-none { display: none !important; }
+  .d-md-block { display: block !important; }
+  .d-md-flex { display: flex !important; }
+}
+
+@media (min-width: 992px) {
+  .d-lg-none { display: none !important; }
+  .d-lg-block { display: block !important; }
+  .d-lg-flex { display: flex !important; }
+}
+
+/* Enhanced mobile styles */
+@media (max-width: 576px) {
+  .section {
+    padding: 1.5rem 0;
+  }
+  
+  .card {
+    padding: 0.75rem;
+  }
+  
+  body {
+    font-size: 0.95rem;
+  }
+  
+  button, input, select, textarea {
+    font-size: 0.95rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (max-width: 992px) {
+  button, 
+  [role="button"],
+  .btn,
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  input, select, textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  a, button {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+}

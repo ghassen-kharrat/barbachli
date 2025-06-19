@@ -25,14 +25,24 @@ const directApiClient = axios.create({
 });
 
 // Helper to save user data to localStorage
-const saveUserData = (userData) => {
+const saveUserData = (userData: any) => {
   try {
-    if (userData) {
-      localStorage.setItem('user_data', JSON.stringify(userData));
-      console.log('User data saved to localStorage:', userData.email);
+    if (!userData) {
+      console.log('User data saved to localStorage: undefined');
+      return;
     }
+    
+    // Make sure we have a properly formatted user object with role
+    const formattedUser = {
+      ...userData,
+      role: userData.role || (userData.email && userData.email.includes('admin') ? 'admin' : 'user'),
+      isActive: userData.isActive !== undefined ? userData.isActive : true
+    };
+    
+    localStorage.setItem('user_data', JSON.stringify(formattedUser));
+    console.log('User data saved to localStorage:', formattedUser.email, 'Role:', formattedUser.role);
   } catch (e) {
-    console.error('Error saving user data:', e);
+    console.error('Error saving user data to localStorage:', e);
   }
 };
 

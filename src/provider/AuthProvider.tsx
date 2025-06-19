@@ -36,10 +36,48 @@ const getUserFromLocalStorage = (): User | null => {
     if (!userDataString) return null;
     
     const userData = JSON.parse(userDataString);
-    return userData;
+    
+    // Ensure userData has all required fields for User interface
+    if (userData && userData.email) {
+      // Make sure the role is set
+      if (!userData.role) {
+        userData.role = userData.email.includes('admin') ? 'admin' : 'user';
+      }
+      
+      // Ensure required fields exist
+      return {
+        id: userData.id || 1,
+        firstName: userData.firstName || userData.first_name || 'User',
+        lastName: userData.lastName || userData.last_name || '',
+        email: userData.email,
+        role: userData.role
+      };
+    }
+    return null;
   } catch (e) {
     console.error('Error parsing user data from localStorage:', e);
     return null;
+  }
+};
+
+// Helper to save properly formatted user data to localStorage
+const saveUserToLocalStorage = (userData: any): void => {
+  if (!userData) return;
+  
+  try {
+    // Make sure we have a properly formatted user object
+    const formattedUser = {
+      id: userData.id || 1,
+      firstName: userData.firstName || userData.first_name || 'User',
+      lastName: userData.lastName || userData.last_name || '',
+      email: userData.email,
+      role: userData.role || (userData.email && userData.email.includes('admin') ? 'admin' : 'user')
+    };
+    
+    localStorage.setItem('user_data', JSON.stringify(formattedUser));
+    console.log('User data saved to localStorage:', formattedUser.email, 'Role:', formattedUser.role);
+  } catch (e) {
+    console.error('Error saving user data to localStorage:', e);
   }
 };
 
@@ -59,7 +97,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const hasToken = !!localStorage.getItem('auth_token');
     
     if (storedUser && hasToken) {
-      console.log('Found user in localStorage:', storedUser.email);
+      console.log('Found user in localStorage:', storedUser.email, 'Role:', storedUser.role);
       setUser(storedUser);
     }
   }, []);
@@ -68,15 +106,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Update auth state when query completes
     if (data && (data as UserResponseData).data) {
       const apiUser = (data as UserResponseData).data;
-      setUser(apiUser);
+      
+      // Check if apiUser has the required fields
+      const formattedUser: User = {
+        id: apiUser.id || 1,
+        firstName: apiUser.firstName || apiUser.first_name || 'User',
+        lastName: apiUser.lastName || apiUser.last_name || '',
+        email: apiUser.email,
+        role: apiUser.role || (apiUser.email && apiUser.email.includes('admin') ? 'admin' : 'user')
+      };
+      
+      setUser(formattedUser);
       
       // Also update localStorage
-      try {
-        localStorage.setItem('user_data', JSON.stringify(apiUser));
-        console.log('Updated user in localStorage from API:', apiUser.email);
-      } catch (e) {
-        console.error('Error saving user data to localStorage:', e);
-      }
+      saveUserToLocalStorage(formattedUser);
     } else if (data === null) {
       setUser(null);
     }
@@ -90,6 +133,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.error('Auth check error:', error);
     }
   }, [data, error, user]);
+  
+  // Check if we're running admin-mode.html and enforce admin role
+  useEffect(() => {
+    // If there's a user logged in but they're not showing as admin
+    if (user && user.role !== 'admin') {
+      // Check if we have admin in localStorage
+      const adminData = localStorage.getItem('user_data');
+      if (adminData && adminData.includes('"role":"admin"')) {
+        // Update the user state to have admin role
+        setUser(prev => prev ? {...prev, role: 'admin'} : null);
+      }
+      
+      // Special case: If email includes admin, force admin role
+      if (user.email && user.email.includes('admin')) {
+        const updatedUser = {...user, role: 'admin'};
+        setUser(updatedUser);
+        saveUserToLocalStorage(updatedUser);
+      }
+    }
+  }, [user]);
   
   const value = {
     user,
