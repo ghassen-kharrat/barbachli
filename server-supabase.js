@@ -41,10 +41,35 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 console.log(`Supabase client initialized with URL: ${supabaseUrl}`);
 
-// Test Supabase connection
+// Helper function for retrying Supabase operations
+async function withRetry(operation, maxRetries = 3, delay = 1000) {
+  let lastError;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+      lastError = error;
+      
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      // Exponential backoff
+      delay *= 2;
+    }
+  }
+  
+  throw lastError;
+}
+
+// Test Supabase connection with retry
 (async () => {
   try {
-    const { data, error } = await supabase.from('products').select('count');
+    const { data, error } = await withRetry(() => 
+      supabase.from('products').select('count')
+    );
+    
     if (error) {
       console.error('❌ Supabase connection error:', error);
     } else {
@@ -52,10 +77,13 @@ console.log(`Supabase client initialized with URL: ${supabaseUrl}`);
     }
   } catch (err) {
     console.error('Error testing Supabase connection:', err);
+    
+    // Continue running the server even if Supabase is not available
+    console.log('Server will continue running and retry connections as needed');
   }
 })();
 
-// Auth middleware to extract user from token
+// Auth middleware to extract user from token with retry
 const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -67,34 +95,43 @@ const authMiddleware = async (req, res, next) => {
     
     const token = authHeader.split(' ')[1];
     
-    // Verify token with Supabase
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    
-    if (error || !user) {
+    try {
+      // Verify token with Supabase using retry
+      const { data: { user }, error } = await withRetry(() => 
+        supabase.auth.getUser(token)
+      );
+      
+      if (error || !user) {
+        req.user = null;
+        return next();
+      }
+      
+      // Get user details from our users table with retry
+      const { data: userData, error: userError } = await withRetry(() =>
+        supabase
+          .from('users')
+          .select('id, email, first_name, last_name, role, is_active')
+          .eq('email', user.email)
+          .single()
+      );
+      
+      if (userError || !userData) {
+        req.user = null;
+        return next();
+      }
+      
+      req.user = {
+        id: userData.id,
+        email: userData.email,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        role: userData.role,
+        isActive: userData.is_active
+      };
+    } catch (error) {
+      console.error('Auth verification error:', error);
       req.user = null;
-      return next();
     }
-    
-    // Get user details from our users table
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id, email, first_name, last_name, role, is_active')
-      .eq('email', user.email)
-      .single();
-    
-    if (userError || !userData) {
-      req.user = null;
-      return next();
-    }
-    
-    req.user = {
-      id: userData.id,
-      email: userData.email,
-      firstName: userData.first_name,
-      lastName: userData.last_name,
-      role: userData.role,
-      isActive: userData.is_active
-    };
     
     next();
   } catch (error) {
@@ -180,26 +217,26 @@ app.get('/api/products', async (req, res) => {
       .order(sortBy, { ascending: sortDirection === 'asc' })
       .range(offset, offset + limitNum - 1);
     
-    // Execute query
-    const { data, error, count } = await query;
+    // Execute query with retry
+    const { data, error, count } = await withRetry(() => query);
     
     if (error) {
       throw error;
     }
     
-    // Format response
-    const formattedProducts = data.map(product => ({
+    // Format response - handle potential null values
+    const formattedProducts = (data || []).map(product => ({
       ...product,
       images: product.product_images?.map(img => img.image_url) || []
     }));
     
-    const totalPages = Math.ceil(count / limitNum);
+    const totalPages = Math.ceil((count || 0) / limitNum);
     
     return res.json({
       status: 'success',
       data: formattedProducts,
       pagination: {
-        total: count,
+        total: count || 0,
         count: formattedProducts.length,
         page: pageNum,
         pages: totalPages
@@ -207,9 +244,20 @@ app.get('/api/products', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching products:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la récupération des produits'
+    // Return empty array instead of error to prevent UI issues
+    return res.json({
+      status: 'success',
+      data: [],
+      pagination: {
+        total: 0,
+        count: 0,
+        page: 1,
+        pages: 0
+      },
+      error: {
+        message: 'Erreur lors de la récupération des produits',
+        details: error.message
+      }
     });
   }
 });
@@ -219,25 +267,20 @@ app.get('/api/products/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Get product with images
-    const { data: product, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        product_images(image_url)
-      `)
-      .eq('id', id)
-      .single();
+    // Get product with images using retry
+    const { data: product, error } = await withRetry(() => 
+      supabase
+        .from('products')
+        .select(`
+          *,
+          product_images(image_url)
+        `)
+        .eq('id', id)
+        .single()
+    );
     
     if (error) {
       throw error;
-    }
-    
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: 'Produit non trouvé'
-      });
     }
     
     // Format response
@@ -251,42 +294,44 @@ app.get('/api/products/:id', async (req, res) => {
       data: formattedProduct
     });
   } catch (error) {
-    console.error('Error fetching product:', error);
-    return res.status(500).json({
+    console.error(`Error fetching product ${req.params.id}:`, error);
+    return res.status(404).json({
       success: false,
-      message: 'Erreur lors de la récupération du produit'
+      message: 'Produit non trouvé'
     });
   }
 });
 
 // CATEGORIES ENDPOINTS
 
-// Get all categories
+// Get all categories with retry
 app.get('/api/categories', async (req, res) => {
   try {
     const { hierarchical } = req.query;
     
-    // Get all categories
-    const { data: categories, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('display_order', { ascending: true });
+    // Get all categories with retry
+    const { data: categories, error } = await withRetry(() =>
+      supabase
+        .from('categories')
+        .select('*')
+        .order('display_order', { ascending: true })
+    );
     
     if (error) {
       throw error;
     }
     
-    // Format for frontend
-    let formattedCategories = categories.map(cat => ({
+    // Format for frontend - handle potential null values
+    let formattedCategories = (categories || []).map(cat => ({
       id: cat.id,
-      name: cat.name,
-      slug: cat.slug,
-      description: cat.description,
+      name: cat.name || '',
+      slug: cat.slug || '',
+      description: cat.description || '',
       parent_id: cat.parent_id,
-      icon: cat.icon,
-      displayOrder: cat.display_order,
-      isActive: cat.is_active,
-      createdAt: cat.created_at
+      icon: cat.icon || '',
+      displayOrder: cat.display_order || 0,
+      isActive: cat.is_active !== false,
+      createdAt: cat.created_at || new Date().toISOString()
     }));
     
     // Build hierarchical structure if requested
@@ -308,9 +353,14 @@ app.get('/api/categories', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching categories:', error);
-    return res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors de la récupération des catégories'
+    // Return empty array instead of error to prevent UI issues
+    return res.json({
+      success: false,
+      data: [],
+      error: {
+        message: 'Erreur lors de la récupération des catégories',
+        details: error.message
+      }
     });
   }
 });
