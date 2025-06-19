@@ -650,15 +650,6 @@ const UserLayout = ({ children }: UserLayoutProps) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Debug for user and authentication state
-  useEffect(() => {
-    if (user) {
-      console.log('UserLayout - User state:', user.email, 'Role:', user.role, 'isAuthenticated:', isAuthenticated);
-    } else {
-      console.log('UserLayout - User state: Not logged in, isAuthenticated:', isAuthenticated);
-    }
-  }, [user, isAuthenticated]);
   
   const handleLogout = () => {
     logout();
