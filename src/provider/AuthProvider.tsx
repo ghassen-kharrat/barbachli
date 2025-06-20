@@ -80,13 +80,24 @@ const saveUserToLocalStorage = (userData: any): void => {
   }
 };
 
+// Create a default guest user
+const createGuestUser = (): User => {
+  return {
+    id: 0,
+    firstName: 'Guest',
+    lastName: 'User',
+    email: 'guest@example.com',
+    role: 'user'
+  };
+};
+
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  // Initialize user from localStorage first
-  const [user, setUser] = useState<User | null>(getUserFromLocalStorage());
+  // Initialize user from localStorage first or use guest user
+  const [user, setUser] = useState<User | null>(getUserFromLocalStorage() || createGuestUser());
   const { data, isLoading, error } = useAuthCheck();
   
   // On component mount, check if we have token and user_data in localStorage
@@ -97,6 +108,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     if (storedUser && hasToken) {
       setUser(storedUser);
+    } else {
+      // Set a guest user if no authenticated user
+      setUser(createGuestUser());
     }
   }, []);
   
@@ -119,18 +133,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Also update localStorage
       saveUserToLocalStorage(formattedUser);
     } else if (data === null) {
-      setUser(null);
+      // Use guest user instead of null
+      setUser(createGuestUser());
     }
     
-    // Show error toast if auth check fails
+    // Don't show error toasts for auth check failures
     if (error) {
-      // Don't show toast on initial load failure
-      if (user) {
-        toast.error('Problème de connexion. Veuillez vous reconnecter.');
-      }
       console.error('Auth check error:', error);
     }
-  }, [data, error, user]);
+  }, [data, error]);
   
   // Check if we're running admin-mode.html and enforce admin role
   useEffect(() => {
@@ -152,9 +163,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [user]);
   
+  // Consider all users (including guest) as authenticated for regular site features
+  // Only admin authentication is strictly enforced
   const value = {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated: true, // Always true to allow access to all features
     isLoading,
     error
   };

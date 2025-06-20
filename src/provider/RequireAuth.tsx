@@ -54,17 +54,20 @@ const RequireAuth = ({ children, requiredRole }: RequireAuthProps) => {
     );
   }
   
-  // If not authenticated, redirect to login
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  // Only require authentication for admin routes
+  if (requiredRole === 'admin') {
+    // If not authenticated, redirect to login
+    if (!isAuthenticated) {
+      return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+    
+    // If user doesn't have admin role, redirect to homepage
+    if (user?.role !== 'admin') {
+      return <Navigate to="/" replace />;
+    }
   }
   
-  // If role is required but user doesn't have it, redirect to homepage
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/" replace />;
-  }
-  
-  // User is authenticated and has required role
+  // For regular user routes or if admin check passes, render children
   return <>{children}</>;
 };
 

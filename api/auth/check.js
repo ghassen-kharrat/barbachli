@@ -21,13 +21,20 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // If no authorization header is present, return 401
+  // If no authorization header is present, return a default guest user
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    console.log('No authorization header provided');
-    return res.status(401).json({
-      status: 'error',
-      message: 'No authorization token provided'
+    console.log('No authorization header provided - returning guest user');
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        id: 0,
+        firstName: 'Guest',
+        lastName: 'User',
+        email: 'guest@example.com',
+        role: 'user',
+        token: 'guest-token'
+      }
     });
   }
 
