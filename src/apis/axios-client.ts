@@ -135,10 +135,16 @@ axiosClient.interceptors.response.use(
       });
     }
     
-    // Don't redirect on 401 errors anymore since we allow browsing without authentication
+    // Handle authentication errors (401)
     if (error.response && error.response.status === 401) {
-      // Just log the error
-      console.log('Authentication error, but continuing as guest user');
+      // Clear token
+      localStorage.removeItem('auth_token');
+      
+      // Only redirect if not already on login page
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login' && currentPath !== '/register') {
+        window.location.href = '/login';
+      }
     }
     
     return Promise.reject(error);

@@ -61,11 +61,27 @@ const ThemedApp = () => {
             <Route path="/products/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             
-            {/* User routes - no authentication required */}
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/orders/:id" element={<OrderDetailPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            {/* Protected user routes */}
+            <Route path="/checkout" element={
+              <RequireAuth>
+                <CheckoutPage />
+              </RequireAuth>
+            } />
+            <Route path="/orders" element={
+              <RequireAuth>
+                <OrdersPage />
+              </RequireAuth>
+            } />
+            <Route path="/orders/:id" element={
+              <RequireAuth>
+                <OrderDetailPage />
+              </RequireAuth>
+            } />
+            <Route path="/profile" element={
+              <RequireAuth>
+                <ProfilePage />
+              </RequireAuth>
+            } />
             
             {/* Admin routes */}
             <Route path="/admin" element={

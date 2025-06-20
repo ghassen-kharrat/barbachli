@@ -21,27 +21,20 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // If no authorization header is present, return a default guest user
+  // If no authorization header is present, return 401
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    console.log('No authorization header provided - returning guest user');
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        id: 0,
-        firstName: 'Guest',
-        lastName: 'User',
-        email: 'guest@example.com',
-        role: 'user',
-        token: 'guest-token'
-      }
+    console.log('No authorization header provided');
+    return res.status(401).json({
+      status: 'error',
+      message: 'No authorization token provided'
     });
   }
 
   try {
     console.log('Forwarding auth check request to backend...');
     
-    // Always use a direct backend URL
+    // Always use Supabase backend URL
     const backendBaseUrl = 'https://barbachli-auth.onrender.com';
     const url = `${backendBaseUrl}/api/auth/check`;
     
@@ -67,25 +60,11 @@ module.exports = async (req, res) => {
     } catch (requestError) {
       console.error('Error during request to backend:', requestError.message);
       
-      // If the backend is slow or returns a 5xx error, we'll use mockData for testing
-      if (requestError.code === 'ECONNABORTED' || 
-          (requestError.response && requestError.response.status >= 500)) {
-        console.log('Backend unavailable or error, using mock data for testing');
-        
-        // Extract token from authorization header
-        const token = authHeader.replace('Bearer ', '');
-        
-        // Return mock user data for testing
-        return res.status(200).json({
-          status: 'success',
-          data: {
-            id: 1,
-            firstName: 'Test',
-            lastName: 'User',
-            email: 'user@example.com',
-            role: 'user',
-            token: token
-          }
+      // For auth errors, return 401
+      if (requestError.response && requestError.response.status === 401) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Authentication failed'
         });
       }
       

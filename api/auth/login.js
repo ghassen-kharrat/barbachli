@@ -72,7 +72,7 @@ module.exports = async (req, res) => {
   try {
     console.log('Forwarding login request to backend...');
     
-    // Always use a direct backend URL
+    // Always use Supabase backend URL
     const backendBaseUrl = 'https://barbachli-auth.onrender.com';
     const url = `${backendBaseUrl}/api/auth/login`;
     
@@ -103,20 +103,7 @@ module.exports = async (req, res) => {
     } catch (requestError) {
       console.error('Error during request to backend:', requestError.message);
       
-      // Check for test account
-      if (req.body.email === 'test@example.com') {
-        console.log('Test account detected, returning mock success response');
-        return res.status(200).json(mockData.testLoginSuccess);
-      }
-      
-      // If the backend is slow or returns a 5xx error, we'll use mockData for testing
-      if (requestError.code === 'ECONNABORTED' || 
-          (requestError.response && requestError.response.status >= 500)) {
-        console.log('Backend unavailable or error, using mock data for testing');
-        return res.status(200).json(mockData.loginSuccess);
-      }
-      
-      // For other errors, return the error response
+      // For auth errors, return the error from the backend
       if (requestError.response) {
         return res.status(requestError.response.status).json({
           status: 'error',
